@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+
+<body >
+
+<style>
+
+.threequarter, .quarter {
+	float: left;
+}
+
+.quarter {
+	width: 20%
+}
+
+.threequarter {
+	width: 80%;
+}
+
+#customers {
+	font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+	border-collapse: collapse;
+	margin-left: 40px;
+	width: 100%;
+}
+
+#customers td, #customers th {
+	border: 1px solid #ddd;
+	padding: 8px;
+}
+
+#customers tr:nth-child(even) {
+	background-color: #f2f2f2;
+}
+
+.alnright {
+	text-align: right;
+}
+
+.alnleft {
+	text-align: left;
+}
+
+h.a {
+	font: 15px arial, sans-serif;
+}
+
+h.b {
+	font: bold 15px arial;
+}
+
+#customers th {
+	padding-top: 12px;
+	padding-bottom: 12px;
+	text-align: left;
+	background-color: #4CAF50;
+	color: white;
+}
+</style>
+
+	<div>
+
+		<div class="quarter">
+			<div data-location="appimage"></div>
+
+			<p>
+			<div data-location="appselectdevice"></div>
+			</p>
+			<h3>
+				<div data-location="appinstall"></div>
+			</h3>
+		</div>
+
+		<div class="threequarter">
+			<table id="customers">
+				<tr>
+					<th><div data-location="appname"></div></th>
+				</tr>
+				<tr>
+					<td class='alnleft'><h class="b">Description</h></td>
+				</tr>
+				<tr>
+					<td><div data-location="appdesc"></div></td>
+				</tr>
+
+				<tr>
+					<td class='alnleft'><h class="b">Owner</h></td>
+				</tr>
+				<tr>
+					<td><div data-location="appowner"></div></td>
+				</tr>
+
+				<tr>
+					<td class='alnleft'><h class="b">Version</h></td>
+				</tr>
+				<tr>
+					<td><div data-location="appversion"></div></td>
+				</tr>
+
+				<tr>
+					<td class='alnleft'><h class="b">Publised Date</h></td>
+				</tr>
+				<tr>
+					<td><div data-location="apppublishdate"></div></td>
+				</tr>
+				<tr>
+					<td class='alnleft'><h class="b">Download Count</h></td>
+				</tr>
+				<tr>
+					<td><div data-location="appcount"></div></td>
+				</tr>
+
+			</table>
+		</div>
+
+	</div>
+</body>
+</html>
