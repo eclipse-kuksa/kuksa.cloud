@@ -28,3 +28,5 @@ username : admin
 passwd : admin
 
 This can be configured/disabled by data.sql file 
+
+The property hawkbit.host in application.properties is set to localhost in the repository. It should be changed to the IP address of Hawkbit Update Server used.
