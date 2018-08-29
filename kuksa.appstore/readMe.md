@@ -29,7 +29,7 @@ Just run `AppStoreApplication.java` class.Spring boot has an embedded Tomcat ins
 * App instances in Kuksa App Store associate to the distributions provisioned in Hawkbit and must be synchronized
 
 ## Kuksa App Store Architecture
-/imgs/kuksa-appstore-architecture.png
+./imgs/kuksa-appstore-architecture.png
 
 ## Clone and build App Store
 
