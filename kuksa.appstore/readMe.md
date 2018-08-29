@@ -14,19 +14,19 @@
 Just run `AppStoreApplication.java` class.Spring boot has an embedded Tomcat instance. Spring boot uses **Tomcat7** by default, if you change Tomcat version, you have to define these configuration in **pom.xml**. But you have a few options to have embedded web server deployment instead of Tomcat like Jetty(HTTP (Web) server and Java Servlet container) or Java EE Application Server. You have to configure these replacements from default to new ones in **pom.xml**
 
 ## Key Features for this version
-•	Vaadin UI based Spring Boot application
-•	Used H2 as DBMS
-•	Supported Kuksa App Store account types are system admin and regular user
-•	Kuksa App Store user accounts are unique and must be same as vehicle platform and cloud user accounts
-•	User and app CRUD operations by system admin account
-•	Device centric app installation by system admin and regular users
-•	Listing of all apps or owned/installed apps by system admin and regular users
-•	REST API for 3rd parties such as insurance companies, car rentals, OEM producers, public authorities etc.
-•	Vaadin is the default UI, however it is possible to integrate app store backend services with other UI technologies
-•	Feign HTTP client to communicate with Hawkbit
-•	Description field of target instances in Hawkbit must include vehicle platform user accounts 
-•	Software artifacts are uploaded to Hawkbit repository
-•	App instances in Kuksa App Store associate to the distributions provisioned in Hawkbit and must be synchronized
+>Vaadin UI based Spring Boot application
+>Used H2 as DBMS
+>Supported Kuksa App Store account types are system admin and regular user
+>Kuksa App Store user accounts are unique and must be same as vehicle platform and cloud user accounts
+>User and app CRUD operations by system admin account
+>Device centric app installation by system admin and regular users
+>Listing of all apps or owned/installed apps by system admin and regular users
+>REST API for 3rd parties such as insurance companies, car rentals, OEM producers, public authorities etc.
+>Vaadin is the default UI, however it is possible to integrate app store backend services with other UI technologies
+>Feign HTTP client to communicate with Hawkbit
+>Description field of target instances in Hawkbit must include vehicle platform user accounts 
+>Software artifacts are uploaded to Hawkbit repository
+>App instances in Kuksa App Store associate to the distributions provisioned in Hawkbit and must be synchronized
 
 
 ## Clone and build App Store
