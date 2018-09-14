@@ -21,7 +21,7 @@ import org.junit.Test;
 import java.io.IOException;
 import java.util.Map;
 
-public class HonoClientTest {
+public class HonoConnectorTest {
 
     @Test
     public void testJSONParsing() throws IOException {
