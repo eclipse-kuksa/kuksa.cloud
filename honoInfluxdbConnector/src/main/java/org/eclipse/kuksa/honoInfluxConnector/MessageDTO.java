@@ -9,6 +9,7 @@
  * 
  *  Contributors:
  *      Johannes Kristan (Bosch Software Innovations GmbH) - initial API and functionality
+ *      Leon Graser (Bosch Software Innovations GmbH)
  * *****************************************************************************
  */
 
@@ -17,10 +18,12 @@ package org.eclipse.kuksa.honoInfluxConnector;
 import java.util.Map;
 
 public class MessageDTO {
-    private String deviceID;
-    private Map<String, Object> entries;
 
-    public MessageDTO(String deviceID, Map<String, Object> entries) {
+    private final String deviceID;
+
+    private final Map<String, Object> entries;
+
+    MessageDTO(String deviceID, Map<String, Object> entries) {
         this.deviceID = deviceID;
         this.entries = entries;
     }
