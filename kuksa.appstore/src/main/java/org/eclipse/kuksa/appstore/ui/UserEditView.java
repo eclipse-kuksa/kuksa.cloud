@@ -20,25 +20,22 @@ import org.eclipse.kuksa.appstore.ui.component.NavHeader;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.StringUtils;
 
-import com.vaadin.data.ValueProvider;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.server.FontAwesome;
+import com.vaadin.server.Page;
+import com.vaadin.server.ThemeResource;
 import com.vaadin.server.VaadinSession;
 import com.vaadin.spring.annotation.SpringView;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.CustomComponent;
 import com.vaadin.ui.Grid;
 import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.JavaScript;
-import com.vaadin.ui.JavaScriptFunction;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.PopupView;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.renderers.HtmlRenderer;
-
-import elemental.json.JsonArray;
+import com.vaadin.ui.renderers.ImageRenderer;
 
 @SpringView(name = UserEditView.VIEW_NAME)
 public class UserEditView extends CustomComponent implements View {
@@ -85,41 +82,11 @@ public class UserEditView extends CustomComponent implements View {
 		grid.setHeight(500, Unit.PIXELS);
 		grid.setWidth("100%");
 		grid.setColumns("id", "userName", "password", "adminuser");
-
-		JavaScript.getCurrent().addFunction("executeOnServer", new JavaScriptFunction() {
-			@Override
-			public void call(JsonArray jsonArray) {
-				// read parameters from jsonArray
-				User item = userManagerService.findById(jsonArray.get(0).toJson().replaceAll("\"", "").toString());
-
-				grid.select(item);
-
-				popup.setPopupVisible(true);
-			}
-		});
-		ValueProvider<User, String> vp = new ValueProvider() {
-			@Override
-			public Object apply(Object o) {
-				User bean = (User) o;
-				// getIcon() returns the FontAwesome HTML. Feel free to add parameters to the
-				// call
-				String s = "<html>\r\n" + "  <head>\r\n"
-						+ "    <link rel=\"stylesheet\" href=\"https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css\">\r\n"
-						+ "        \r\n" + "  </head>\r\n" + "  <body  > <div onclick=\"executeOnServer('"
-						+ bean.getId() + "');\">\r\n" + "    \r\n"
-						+ "    <span class=\"glyphicon glyphicon-pencil\"  ></span>  <span> Edit</span> </div>  </body>\r\n"
-						+ "</html>\r\n" + "";
-				return s;
-			}
-		};
-		grid.addColumn(vp, new HtmlRenderer()).setCaption("Edit").setMinimumWidth(100);
-
-		// Connect selected Student to editor or hide if none is selected
+		addIconColumn();
+		
 		grid.asSingleSelect().addValueChangeListener(e -> {
 			userEditor.editStudent(e.getValue());
 		});
-
-		// Instantiate and edit new Student the new button is clicked
 
 		addNewBtn.addClickListener(e -> {
 			popup.setPopupVisible(true);
@@ -140,12 +107,16 @@ public class UserEditView extends CustomComponent implements View {
 			System.out.println(userEditor.user.getId());
 			listUsers(null);
 			userEditor.setVisible(false);
+			new Notification("Succes Updating", "The User has been updated.", Notification.Type.TRAY_NOTIFICATION)
+					.show(Page.getCurrent());
 		});
 
 		userEditor.delete.addClickListener(e -> {
 			userManagerService.deleteUser(userEditor.user);
 			listUsers(null);
 			userEditor.setVisible(false);
+			new Notification("Succes Deleting", "The User has been deleted.", Notification.Type.TRAY_NOTIFICATION)
+					.show(Page.getCurrent());
 		});
 
 		userEditor.cancel.addClickListener(e -> {
@@ -160,10 +131,32 @@ public class UserEditView extends CustomComponent implements View {
 			userEditor.setVisible(false);
 			listUsers(event.getValue());
 		});
-		
+
 		setCompositionRoot(mainLayout);
 	}
+	private void addIconColumn() {
+        ImageRenderer<User> renderer = new ImageRenderer<>();
+        renderer.addClickListener(e -> iconClicked(e.getItem()));
 
+        Grid.Column<User, ThemeResource> iconColumn =
+                grid.addColumn(i -> new ThemeResource("img/edit.png"), renderer);
+        iconColumn.setCaption("Edit");
+        iconColumn.setMaximumWidth(70);
+        grid.addItemClickListener(e -> {
+            if (e.getColumn().equals(iconColumn)) {
+                iconClicked(e.getItem());
+            }
+        });
+    }
+
+    private void iconClicked(User user) {
+    	
+		User item = userManagerService.findById(user.getId().toString());
+
+		grid.select(item);
+
+		popup.setPopupVisible(true);
+    }
 	@PostConstruct
 	public void init() {
 		listUsers(null);

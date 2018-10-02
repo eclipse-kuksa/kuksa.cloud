@@ -25,11 +25,11 @@ import org.eclipse.kuksa.appstore.utils.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.StringUtils;
 
-import com.vaadin.data.ValueProvider;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.server.FileResource;
 import com.vaadin.server.FontAwesome;
+import com.vaadin.server.Page;
 import com.vaadin.server.ThemeResource;
 import com.vaadin.server.VaadinSession;
 import com.vaadin.spring.annotation.SpringView;
@@ -37,14 +37,12 @@ import com.vaadin.ui.Button;
 import com.vaadin.ui.CustomComponent;
 import com.vaadin.ui.Grid;
 import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.JavaScript;
-import com.vaadin.ui.JavaScriptFunction;
+import com.vaadin.ui.Notification;
 import com.vaadin.ui.PopupView;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.renderers.HtmlRenderer;
+import com.vaadin.ui.renderers.ImageRenderer;
 
-import elemental.json.JsonArray;
 
 @SpringView(name = AppEditView.VIEW_NAME)
 public class AppEditView extends CustomComponent implements View {
@@ -97,35 +95,7 @@ public class AppEditView extends CustomComponent implements View {
 		grid.getColumn("description").setMaximumWidth(700);
 		grid.getColumn("version").setMaximumWidth(150);
 		grid.getColumn("owner").setMaximumWidth(200);
-
-		JavaScript.getCurrent().addFunction("executeOnServer", new JavaScriptFunction() {
-			@Override
-			public void call(JsonArray jsonArray) {
-				
-				App item = appManagerService
-						.findById(Long.parseLong(jsonArray.get(0).toJson().replaceAll("\"", "").toString()));
-
-				grid.select(item);
-
-				popup.setPopupVisible(true);
-			}
-		});
-		ValueProvider<App, String> vp = new ValueProvider() {
-			@Override
-			public Object apply(Object o) {
-				App bean = (App) o;
-				
-				String s = "<html>\r\n" + "  <head>\r\n"
-						+ "    <link rel=\"stylesheet\" href=\"https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css\">\r\n"
-						+ "        \r\n" + "  </head>\r\n" + "  <body  > <div onclick=\"executeOnServer('"
-						+ bean.getId() + "');\">\r\n" + "    \r\n"
-						+ "    <span class=\"glyphicon glyphicon-pencil\"  ></span>  <span> Edit</span> </div>  </body>\r\n"
-						+ "</html>\r\n" + "";
-				return s;
-			}
-		};
-		grid.addColumn(vp, new HtmlRenderer()).setCaption("Edit").setMinimumWidth(100);
-
+		addIconColumn();
 		
 		grid.asSingleSelect().addValueChangeListener(e -> {
 			editor.editStudent(e.getValue());
@@ -133,7 +103,7 @@ public class AppEditView extends CustomComponent implements View {
 			editor.appimage.setVisible(true);
 			try {
 				new File(Utils.getImageFolderPath()).mkdirs();
-				File new_file = new File(Utils.getImageFilePath()+ e.getValue().getId() + ".png");
+				File new_file = new File(Utils.getImageFilePath() + e.getValue().getId() + ".png");
 
 				if (new_file.exists()) {
 					editor.appimage.setSource(new FileResource(new_file));
@@ -147,19 +117,21 @@ public class AppEditView extends CustomComponent implements View {
 			}
 
 		});
-		
+
 		addNewBtn.addClickListener(e -> {
 			popup.setPopupVisible(true);
 			editor.editStudent(new App(null, "", "", "", "", "", 0, null));
 		});
 
 		editor.save.addClickListener(e -> {
-			editor.app.setHawkbitname(editor.app.getName().replace(" ", "_"));			
+			editor.app.setHawkbitname(editor.app.getName().replace(" ", "_"));
 			editor.app.setPublishdate(new Timestamp(new Date().getTime()));
 			appManagerService.updateApp(editor.app);
 			System.out.println(editor.app.getId());
 			listApps(null);
 			editor.setVisible(false);
+			new Notification("Succes Updating", "The App has been updated.", Notification.Type.TRAY_NOTIFICATION)
+					.show(Page.getCurrent());
 		});
 
 		editor.delete.addClickListener(e -> {
@@ -167,6 +139,8 @@ public class AppEditView extends CustomComponent implements View {
 			appManagerService.deleteApp(editor.app);
 			listApps(null);
 			editor.setVisible(false);
+			new Notification("Succes Deleting", "The App has been deleted.", Notification.Type.TRAY_NOTIFICATION)
+					.show(Page.getCurrent());
 		});
 
 		editor.cancel.addClickListener(e -> {
@@ -184,7 +158,29 @@ public class AppEditView extends CustomComponent implements View {
 		setCompositionRoot(mainLayout);
 
 	}
+	private void addIconColumn() {
+        ImageRenderer<App> renderer = new ImageRenderer<>();
+        renderer.addClickListener(e -> iconClicked(e.getItem()));
 
+        Grid.Column<App, ThemeResource> iconColumn =
+                grid.addColumn(i -> new ThemeResource("img/edit.png"), renderer);
+        iconColumn.setCaption("Edit");
+        iconColumn.setMaximumWidth(70);
+        grid.addItemClickListener(e -> {
+            if (e.getColumn().equals(iconColumn)) {
+                iconClicked(e.getItem());
+            }
+        });
+    }
+
+    private void iconClicked(App app) {
+    	
+        App item = appManagerService
+				.findById(app.getId());
+		grid.select(item);
+		popup.setPopupVisible(true);
+        
+    }
 	@PostConstruct
 	public void init() {
 		listApps(null);
