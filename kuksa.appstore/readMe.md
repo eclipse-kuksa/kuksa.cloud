@@ -72,4 +72,4 @@ Just run `AppStoreApplication.java` class.Spring boot has an embedded Tomcat ins
 
 - It can be accessed to the Swagger UI of Kuksa App Store API by following link;
 
-> http://localhost:8082/swagger-ui.html#/
+> http://{appstore-ip}:8082/swagger-ui.html#/
