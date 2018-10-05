@@ -41,8 +41,14 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.Authorization;
+
 @RestController
 @RequestMapping("/api/1.0")
+@Api(value = "/api/1.0", description = "User API Rest Controller", tags = "User API", consumes = "application/json")
 public class UserController {
 	private final Logger LOG = LoggerFactory.getLogger(this.getClass());
 	@Autowired
@@ -51,7 +57,9 @@ public class UserController {
 	AppService appService;
 	@Autowired
 	UsersAppsService installedAppsService;
-
+	
+	@ApiOperation(notes = "This process is used to get an user with Id of an user. Id parameter should given in get operation.", value = "Getting an User", nickname = "getUserbyId", produces = "application/json", authorizations = @Authorization(value = "api_key"))
+    @ApiImplicitParam(name = "Authorization", value = "Token Format: 'base64(username: password)'", required = true, dataType = "String", paramType = "Header", defaultValue = "Basic Token")	
 	@GetMapping(value = "/user/{userId}")
 	public ResponseEntity<?> getUserbyId(@PathVariable String userId) throws NotFoundException {
 
@@ -65,7 +73,9 @@ public class UserController {
 		}
 
 	}
-
+	
+	@ApiOperation(notes = "This process is used to create an user with User model. Id parameter should not implemented in post operation because of that it is already given by server.", value = "Create an User", nickname = "createUser", produces = "application/json", authorizations = @Authorization(value = "api_key"))
+    @ApiImplicitParam(name = "Authorization", value = "Token Format: 'base64(username: password)'", required = true, dataType = "String", paramType = "Header", defaultValue = "Basic Token")
 	@PostMapping("/user")
 	public ResponseEntity<?> createUser(@Valid @RequestBody User user)
 			throws AlreadyExistException, BadRequestException {
@@ -79,6 +89,8 @@ public class UserController {
 		}
 	}
 
+	@ApiOperation(notes = "This process is used to update an user with Id of an user. Id parameter should given in put operation.", value = "Updating an User", nickname = "updateUser", produces = "application/json", authorizations = @Authorization(value = "api_key"))
+    @ApiImplicitParam(name = "Authorization", value = "Token Format: 'base64(username: password)'", required = true, dataType = "String", paramType = "Header", defaultValue = "Basic Token")
 	@PutMapping("/user/{userId}")
 	public ResponseEntity<?> updateUser(@PathVariable String userId, @Valid @RequestBody User user)
 			throws AlreadyExistException, BadRequestException, NotFoundException {
@@ -92,7 +104,9 @@ public class UserController {
 			return new ResponseEntity<>(HttpStatus.BAD_REQUEST.getReasonPhrase(), HttpStatus.BAD_REQUEST);
 		}
 	}
-
+	
+	@ApiOperation(notes = "This process is used to delete an user with Id of an user. Id parameter should given in delete operation.", value = "Deleting an User", nickname = "deleteUser", produces = "application/json", authorizations = @Authorization(value = "api_key"))
+    @ApiImplicitParam(name = "Authorization", value = "Token Format: 'base64(username: password)'", required = true, dataType = "String", paramType = "Header", defaultValue = "Basic Token")
 	@DeleteMapping("/user/{userId}")
 	public ResponseEntity<?> deleteUser(@PathVariable String userId) throws NotFoundException {
 		LOG.debug("[deleteUser]: Delete User request is received. userId: {}", userId);
@@ -102,6 +116,8 @@ public class UserController {
 		return new ResponseEntity<>(null, HttpStatus.OK);
 	}
 
+	@ApiOperation(notes = "This process is used to get all user.You can use Pageable that ensures that You can get a page you want.", value = "Getting all User", nickname = "getAllUser", produces = "application/json", authorizations = @Authorization(value = "api_key"))
+    @ApiImplicitParam(name = "Authorization", value = "Token Format: 'base64(username: password)'", required = true, dataType = "String", paramType = "Header", defaultValue = "Basic Token")
 	@GetMapping(value = "/users")
 	public ResponseEntity<?> getAllUser(Pageable pageable) throws NotFoundException {
 
@@ -111,7 +127,9 @@ public class UserController {
 		return new ResponseEntity<>(users, HttpStatus.OK);
 
 	}
-
+	
+	@ApiOperation(notes = "This process is used to validate a given user.", value = "Validating an User", nickname = "validationUser", produces = "application/json", authorizations = @Authorization(value = "api_key"))
+    @ApiImplicitParam(name = "Authorization", value = "Token Format: 'base64(username: password)'", required = true, dataType = "String", paramType = "Header", defaultValue = "Basic Token")
 	@PostMapping("/user/validation")
 	public ResponseEntity<?> validationUser(@RequestBody User user) throws NotFoundException, BadRequestException {
 
@@ -124,7 +142,9 @@ public class UserController {
 			throw new NotFoundException("User not found!");
 		}
 	}
-
+	
+	@ApiOperation(notes = "This process is used to get user's apps. UserId parameter should given in get operation.You can use Pageable that ensures that You can get a page you want.", value = "Getting User's Apps", nickname = "getUserApssbyUserId", produces = "application/json", authorizations = @Authorization(value = "api_key"))
+    @ApiImplicitParam(name = "Authorization", value = "Token Format: 'base64(username: password)'", required = true, dataType = "String", paramType = "Header", defaultValue = "Basic Token")
 	@GetMapping(value = "/user/{userId}/apps")
 	public ResponseEntity<?> getUserApssbyUserId(@PathVariable String userId, Pageable pageable)
 			throws NotFoundException {

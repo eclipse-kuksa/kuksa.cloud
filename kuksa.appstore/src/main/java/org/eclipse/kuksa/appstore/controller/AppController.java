@@ -36,13 +36,23 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
+import io.swagger.annotations.Authorization;
+
 @RestController
 @RequestMapping("/api/1.0")
+@Api(value = "/api/1.0", description = "App API Rest Controller", tags = "App API", consumes = "application/json")
 public class AppController {
 	private final Logger LOG = LoggerFactory.getLogger(this.getClass());
 	@Autowired
 	AppService appService;
 
+	@ApiOperation(notes = "This process is used to get an app with Id of an app. Id parameter should given in get operation.", value = "Getting an App", nickname = "getAppbyId", produces = "application/json", authorizations = @Authorization(value = "api_key"))
+    @ApiImplicitParam(name = "Authorization", value = "Token Format: 'base64(username: password)'", required = true, dataType = "String", paramType = "Header", defaultValue = "Basic Token")	
 	@GetMapping(value = "/apps/{appId}")
 	public ResponseEntity<?> getAppbyId(@PathVariable String appId) throws NotFoundException {
 
@@ -56,7 +66,8 @@ public class AppController {
 		}
 
 	}	
-
+	@ApiOperation(notes = "This process is used to create app with app model. Id parameter should not implemented in post operation because of that it is already given by server", value = "Creating an App", nickname = "createApp", produces = "application/json", authorizations = @Authorization(value = "api_key"))
+    @ApiImplicitParam(name = "Authorization", value = "Token Format: 'base64(username: password)'", required = true, dataType = "String", paramType = "Header", defaultValue = "Basic Token")
 	@PostMapping("/app")
 	public ResponseEntity<?> createApp(@Valid @RequestBody App app)
 			throws AlreadyExistException, BadRequestException {
@@ -69,7 +80,8 @@ public class AppController {
 			return new ResponseEntity<>(HttpStatus.BAD_REQUEST.getReasonPhrase(), HttpStatus.BAD_REQUEST);
 		}
 	}
-
+	@ApiOperation(notes = "This process is used to update an app with app model. Id parameter should given in put operation.", value = "Updating an App", nickname = "updateApp", produces = "application/json", authorizations = @Authorization(value = "api_key"))
+    @ApiImplicitParam(name = "Authorization", value = "Token Format: 'base64(username: password)'", required = true, dataType = "String", paramType = "Header", defaultValue = "Basic Token")
 	@PutMapping("/app/{appId}")
 	public ResponseEntity<?> updateApp(@PathVariable String appId, @Valid @RequestBody App app)
 			throws AlreadyExistException, BadRequestException, NotFoundException {
@@ -83,7 +95,8 @@ public class AppController {
 			return new ResponseEntity<>(HttpStatus.BAD_REQUEST.getReasonPhrase(), HttpStatus.BAD_REQUEST);
 		}
 	}
-
+	@ApiOperation(notes = "This process is used to delete an app with Id of an app. Id parameter should given in delete operation.", value = "Deleting an App", nickname = "deleteApp", produces = "application/json", authorizations = @Authorization(value = "api_key"))
+    @ApiImplicitParam(name = "Authorization", value = "Token Format: 'base64(username: password)'", required = true, dataType = "String", paramType = "Header", defaultValue = "Basic Token")
 	@DeleteMapping("/app/{appId}")
 	public ResponseEntity<?> deleteApp(@PathVariable String appId) throws NotFoundException {
 		LOG.debug("[deleteApp]: Delete App request is received. appId: {}", appId);
@@ -92,7 +105,8 @@ public class AppController {
 		LOG.debug("[deleteApp] Delete App is processed successfully. appId: {}", appId);
 		return new ResponseEntity<>(null, HttpStatus.OK);
 	}
-	
+	@ApiOperation(notes = "This process is used to get all app. You can use Pageable that ensures that You can get a page you want.", value = "Getting all App", nickname = "getAllApp", produces = "application/json", authorizations = @Authorization(value = "api_key"))
+    @ApiImplicitParam(name = "Authorization", value = "Token Format: 'base64(username: password)'", required = true, dataType = "String", paramType = "Header", defaultValue = "Basic Token")	
 	@GetMapping(value = "/apps")
 	public ResponseEntity<?> getAllApp(Pageable pageable) throws NotFoundException {
 

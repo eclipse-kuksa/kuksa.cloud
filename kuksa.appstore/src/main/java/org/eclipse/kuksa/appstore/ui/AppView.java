@@ -111,7 +111,7 @@ public class AppView extends CustomComponent implements View {
 		appslayout.addComponent(new Label(currentapp.getName()), "appname");
 		ComboBox<String> comboBox = new ComboBox<>("Select A Device");
 
-		List<String> listOfSongs = new ArrayList<>();
+		List<String> listOfTargets = new ArrayList<>();
 
 		String dis = VaadinSession.getCurrent().getAttribute("user").toString();
 		dis = "" + "*" + dis + "*";
@@ -120,10 +120,10 @@ public class AppView extends CustomComponent implements View {
 		List<TargetByData> deviceList = messageFeignClient.getTargetsByDes(dis, "name:ASC").getContent();
 
 		for (TargetByData targetByData : deviceList) {
-			listOfSongs.add(targetByData.getName());
+			listOfTargets.add(targetByData.getControllerId());
 		}
 
-		comboBox.setItems(listOfSongs);
+		comboBox.setItems(listOfTargets);
 		comboBox.setPlaceholder("No device selected");
 		comboBox.setEmptySelectionAllowed(false);
 		comboBox.addValueChangeListener(event -> {
