@@ -69,3 +69,7 @@ Just run `AppStoreApplication.java` class.Spring boot has an embedded Tomcat ins
 - The property hawkbit.host in application.properties is set to localhost in the repository. It should be changed to the IP address of Hawkbit Update Server used.
 
 - Default debug mode in application.properties is set to false.
+
+- It can be accessed to the Swagger UI of Kuksa App Store API by following link;
+
+> http://localhost:8082/swagger-ui.html#/
