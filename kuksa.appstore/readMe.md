@@ -51,7 +51,7 @@ Just run `AppStoreApplication.java` class.Spring boot has an embedded Tomcat ins
 - Create a database like appstore in MariaDB Server (In order to install MariaDB, please follow the instructions in the link: https://downloads.mariadb.org/mariadb/repositories) 
 
  
-- Update MariaDB DBMS server IP, port and credential properly in src\main\resources\application.properties file: 
+- Update MariaDB DBMS server IP, port and credential properly in src\main\resources\application.properties file and create "appstore" DB in mariaDB: 
 
 > spring.datasource.url=jdbc:mariadb://{mariaDB-server-ip}:3306/appstore    //default ip is localhost  
 > spring.datasource.username={mariaDB-server-user}          // default user name is admin  
