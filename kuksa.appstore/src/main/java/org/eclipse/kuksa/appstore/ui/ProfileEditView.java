@@ -101,7 +101,7 @@ public class ProfileEditView extends CustomComponent implements View {
 						Result<?> result = userService.updateUser(currentUser.getId().toString(), currentUser);
 					 if(result.isSuccess()) {
 						 new Notification("Succes Updating", "Your Password has been updated",
-									Notification.Type.HUMANIZED_MESSAGE).show(Page.getCurrent());
+									Notification.Type.TRAY_NOTIFICATION).show(Page.getCurrent());
 					 }
 					} catch (NotFoundException | BadRequestException | AlreadyExistException e) {
 						// TODO Auto-generated catch block

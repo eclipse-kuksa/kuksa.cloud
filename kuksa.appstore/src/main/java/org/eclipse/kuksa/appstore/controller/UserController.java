@@ -12,19 +12,15 @@
  ******************************************************************************/
 package org.eclipse.kuksa.appstore.controller;
 
-import java.util.List;
-
 import javax.validation.Valid;
 
 import org.eclipse.kuksa.appstore.exception.AlreadyExistException;
 import org.eclipse.kuksa.appstore.exception.BadRequestException;
 import org.eclipse.kuksa.appstore.exception.NotFoundException;
-import org.eclipse.kuksa.appstore.model.App;
 import org.eclipse.kuksa.appstore.model.Result;
 import org.eclipse.kuksa.appstore.model.User;
 import org.eclipse.kuksa.appstore.service.AppService;
 import org.eclipse.kuksa.appstore.service.UserService;
-import org.eclipse.kuksa.appstore.service.UsersAppsService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,11 +51,9 @@ public class UserController {
 	UserService userService;
 	@Autowired
 	AppService appService;
-	@Autowired
-	UsersAppsService installedAppsService;
-	
+
 	@ApiOperation(notes = "This process is used to get an user with Id of an user. Id parameter should given in get operation.", value = "Getting an User", nickname = "getUserbyId", produces = "application/json", authorizations = @Authorization(value = "api_key"))
-    @ApiImplicitParam(name = "Authorization", value = "Token Format: 'base64(username: password)'", required = true, dataType = "String", paramType = "Header", defaultValue = "Basic Token")	
+	@ApiImplicitParam(name = "Authorization", value = "Token Format: 'base64(username: password)'", required = true, dataType = "String", paramType = "Header", defaultValue = "Basic Token")
 	@GetMapping(value = "/user/{userId}")
 	public ResponseEntity<?> getUserbyId(@PathVariable String userId) throws NotFoundException {
 
@@ -73,13 +67,13 @@ public class UserController {
 		}
 
 	}
-	
+
 	@ApiOperation(notes = "This process is used to create an user with User model. Id parameter should not implemented in post operation because of that it is already given by server.", value = "Create an User", nickname = "createUser", produces = "application/json", authorizations = @Authorization(value = "api_key"))
-    @ApiImplicitParam(name = "Authorization", value = "Token Format: 'base64(username: password)'", required = true, dataType = "String", paramType = "Header", defaultValue = "Basic Token")
+	@ApiImplicitParam(name = "Authorization", value = "Token Format: 'base64(username: password)'", required = true, dataType = "String", paramType = "Header", defaultValue = "Basic Token")
 	@PostMapping("/user")
 	public ResponseEntity<?> createUser(@Valid @RequestBody User user)
 			throws AlreadyExistException, BadRequestException {
-		Result<?> response = userService.createUser(user.getUserName(), user.getPassword(), user.getAdminuser());
+		Result<?> response = userService.createUser(user.getUsername(), user.getPassword(), user.getAdminuser());
 		if (response.isSuccess()) {
 			LOG.debug("[createUser]: createUser request is processed successfully. user: {}", user);
 			return new ResponseEntity<>(response.getPayload(), HttpStatus.OK);
@@ -90,7 +84,7 @@ public class UserController {
 	}
 
 	@ApiOperation(notes = "This process is used to update an user with Id of an user. Id parameter should given in put operation.", value = "Updating an User", nickname = "updateUser", produces = "application/json", authorizations = @Authorization(value = "api_key"))
-    @ApiImplicitParam(name = "Authorization", value = "Token Format: 'base64(username: password)'", required = true, dataType = "String", paramType = "Header", defaultValue = "Basic Token")
+	@ApiImplicitParam(name = "Authorization", value = "Token Format: 'base64(username: password)'", required = true, dataType = "String", paramType = "Header", defaultValue = "Basic Token")
 	@PutMapping("/user/{userId}")
 	public ResponseEntity<?> updateUser(@PathVariable String userId, @Valid @RequestBody User user)
 			throws AlreadyExistException, BadRequestException, NotFoundException {
@@ -104,9 +98,9 @@ public class UserController {
 			return new ResponseEntity<>(HttpStatus.BAD_REQUEST.getReasonPhrase(), HttpStatus.BAD_REQUEST);
 		}
 	}
-	
+
 	@ApiOperation(notes = "This process is used to delete an user with Id of an user. Id parameter should given in delete operation.", value = "Deleting an User", nickname = "deleteUser", produces = "application/json", authorizations = @Authorization(value = "api_key"))
-    @ApiImplicitParam(name = "Authorization", value = "Token Format: 'base64(username: password)'", required = true, dataType = "String", paramType = "Header", defaultValue = "Basic Token")
+	@ApiImplicitParam(name = "Authorization", value = "Token Format: 'base64(username: password)'", required = true, dataType = "String", paramType = "Header", defaultValue = "Basic Token")
 	@DeleteMapping("/user/{userId}")
 	public ResponseEntity<?> deleteUser(@PathVariable String userId) throws NotFoundException {
 		LOG.debug("[deleteUser]: Delete User request is received. userId: {}", userId);
@@ -117,7 +111,7 @@ public class UserController {
 	}
 
 	@ApiOperation(notes = "This process is used to get all user.You can use Pageable that ensures that You can get a page you want.", value = "Getting all User", nickname = "getAllUser", produces = "application/json", authorizations = @Authorization(value = "api_key"))
-    @ApiImplicitParam(name = "Authorization", value = "Token Format: 'base64(username: password)'", required = true, dataType = "String", paramType = "Header", defaultValue = "Basic Token")
+	@ApiImplicitParam(name = "Authorization", value = "Token Format: 'base64(username: password)'", required = true, dataType = "String", paramType = "Header", defaultValue = "Basic Token")
 	@GetMapping(value = "/users")
 	public ResponseEntity<?> getAllUser(Pageable pageable) throws NotFoundException {
 
@@ -127,13 +121,13 @@ public class UserController {
 		return new ResponseEntity<>(users, HttpStatus.OK);
 
 	}
-	
+
 	@ApiOperation(notes = "This process is used to validate a given user.", value = "Validating an User", nickname = "validationUser", produces = "application/json", authorizations = @Authorization(value = "api_key"))
-    @ApiImplicitParam(name = "Authorization", value = "Token Format: 'base64(username: password)'", required = true, dataType = "String", paramType = "Header", defaultValue = "Basic Token")
+	@ApiImplicitParam(name = "Authorization", value = "Token Format: 'base64(username: password)'", required = true, dataType = "String", paramType = "Header", defaultValue = "Basic Token")
 	@PostMapping("/user/validation")
 	public ResponseEntity<?> validationUser(@RequestBody User user) throws NotFoundException, BadRequestException {
 
-		User currentUser = userService.findByUserNameAndPassword(user.getUserName(), user.getPassword());
+		User currentUser = userService.findByUserNameAndPassword(user.getUsername(), user.getPassword());
 		if (currentUser != null) {
 			LOG.debug("[validationUser]: validationUser request is processed successfully. user: {}", currentUser);
 			return new ResponseEntity<>(currentUser, HttpStatus.OK);
@@ -141,25 +135,6 @@ public class UserController {
 			LOG.debug("[validationUser]: validationUser request is received. user: {}", currentUser);
 			throw new NotFoundException("User not found!");
 		}
-	}
-	
-	@ApiOperation(notes = "This process is used to get user's apps. UserId parameter should given in get operation.You can use Pageable that ensures that You can get a page you want.", value = "Getting User's Apps", nickname = "getUserApssbyUserId", produces = "application/json", authorizations = @Authorization(value = "api_key"))
-    @ApiImplicitParam(name = "Authorization", value = "Token Format: 'base64(username: password)'", required = true, dataType = "String", paramType = "Header", defaultValue = "Basic Token")
-	@GetMapping(value = "/user/{userId}/apps")
-	public ResponseEntity<?> getUserApssbyUserId(@PathVariable String userId, Pageable pageable)
-			throws NotFoundException {
-
-		User user = userService.findById(userId);
-		if (user != null) {
-			LOG.debug("[getUserbyId]: getUserbyId request is processed successfully. Device: {}", userId);
-			List<Long> myappsid = installedAppsService.findAppidByUserid(user.getId());
-			Page<App> apps = appService.findByIdIn(myappsid, pageable);
-			return new ResponseEntity<>(apps, HttpStatus.OK);
-		} else {
-			LOG.debug("[getUserbyId]: getUserbyId request is received. Device: {}", userId);
-			throw new NotFoundException("User not found!");
-		}
-
 	}
 
 }
