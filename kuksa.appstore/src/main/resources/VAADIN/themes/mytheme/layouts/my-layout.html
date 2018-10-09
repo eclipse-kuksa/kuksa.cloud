@@ -1,29 +1,82 @@
-<!DOCTYPE html>
+
 <html>
+<!-- DW6 -->
+<head>
 
-<body >
-
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<title>Untitled Document</title>
+</head>
+<body>
 <style>
-
-.threequarter, .quarter {
+body{
+	font-family: Arial,sans-serif;
+	color: #333333;
+	line-height: 1.166;	
+	margin: 0px;
+	padding: 0px;
+}
+/***********************************************/
+/* Layout Divs                                 */
+/***********************************************/
+#pagecell1{
+	position:absolute;
+	left: 2%;
+	right: 2%;
+	width:95.6%;
+	
+	border-right: 1px solid #cccccc;
+	border-bottom: 1px solid #cccccc;	
+	border-left: 1px solid #ccd2d2;
+	border-top: 1px solid #cccccc;
+}
+#pageNav{
 	float: left;
+	width:320px;
+	padding: 0px;
+	font: small Verdana,sans-serif;
 }
-
-.quarter {
-	width: 20%
+#content{
+	padding: 10px 10px 10px 0px;
+	margin:0px 0px 0px 320px;	
+		
+	border-left: 1px solid #ccd2d2;
 }
-
-.threequarter {
-	width: 80%;
+/************** feature styles *****************/
+.feature{
+	padding: 0px 0px 10px 10px;
+	font-size: 80%;
+	min-height: 200px;
+	height: 200px;
+}
+html>body .feature {height: auto;}
+.feature h3{
+	font: bold 175% Arial,sans-serif;
+	color: #000000;
+	padding: 30px 0px 5px 0px;
+}
+/************** siteInfo styles ****************/
+#siteInfo{
+	clear: both;
+	border-top: 1px solid #cccccc;
+	font-size: small;
+	color: #cccccc;
+	padding: 10px 10px 10px 10px;
+	margin-top: -1px;
+}
+/**************** advert styles *****************/
+#advert{
+	padding: 10px;
+}
+#advert img{
+	display: block;
 }
 
 #customers {
 	font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
 	border-collapse: collapse;
-	margin-left: 40px;
 	width: 100%;
+	
 }
-
 #customers td, #customers th {
 	border: 1px solid #ddd;
 	padding: 8px;
@@ -56,23 +109,24 @@ h.b {
 	background-color: #4CAF50;
 	color: white;
 }
+/********************* end **********************/
+
 </style>
-
-	<div>
-
-		<div class="quarter">
-			<div data-location="appimage"></div>
-
-			<p>
-			<div data-location="appselectdevice"></div>
-			</p>
-			<h3>
-				<div data-location="appinstall"></div>
-			</h3>
-		</div>
-
-		<div class="threequarter">
-			<table id="customers">
+<div id="pagecell1"> 
+  
+  <div id="pageNav"> 
+    <div id="advert"> 
+      <div data-location="appimage"></div>
+      <br/>
+	  <div data-location="appselectdevice"></div>
+	  <br/>
+	  <div data-location="appinstall"></div>
+			
+    </div> 
+  </div> 
+  <div id="content"> 
+    <div class="feature"> 
+      <table id="customers">
 				<tr>
 					<th><div data-location="appname"></div></th>
 				</tr>
@@ -111,8 +165,11 @@ h.b {
 				</tr>
 
 			</table>
-		</div>
-
-	</div>
+    </div>     
+  </div> 
+   <div id="siteInfo"> 
+    Kuksa Appstore
+  </div> 
+</div> 
 </body>
 </html>

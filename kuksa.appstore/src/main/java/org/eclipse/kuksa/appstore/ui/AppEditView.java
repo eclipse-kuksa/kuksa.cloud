@@ -95,7 +95,7 @@ public class AppEditView extends CustomComponent implements View {
 		grid.getColumn("description").setMaximumWidth(700);
 		grid.getColumn("version").setMaximumWidth(150);
 		grid.getColumn("owner").setMaximumWidth(200);
-		addIconColumn();
+		addEditColumn("Edit");
 		
 		grid.asSingleSelect().addValueChangeListener(e -> {
 			editor.editStudent(e.getValue());
@@ -158,13 +158,13 @@ public class AppEditView extends CustomComponent implements View {
 		setCompositionRoot(mainLayout);
 
 	}
-	private void addIconColumn() {
+	private void addEditColumn(String caption) {
         ImageRenderer<App> renderer = new ImageRenderer<>();
         renderer.addClickListener(e -> iconClicked(e.getItem()));
 
         Grid.Column<App, ThemeResource> iconColumn =
                 grid.addColumn(i -> new ThemeResource("img/edit.png"), renderer);
-        iconColumn.setCaption("Edit");
+        iconColumn.setCaption(caption);
         iconColumn.setMaximumWidth(70);
         grid.addItemClickListener(e -> {
             if (e.getColumn().equals(iconColumn)) {

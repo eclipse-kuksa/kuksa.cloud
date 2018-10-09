@@ -127,11 +127,19 @@ public class AppService {
 
 	}
 
-	public Page<App> findByIdInAndNameStartsWithIgnoreCase(List<Long> myappsid, String name, Pageable pageable) {
+	public Page<App> findByNameStartsWithIgnoreCaseAndUsersUserName(String appname, String username,
+			Pageable pageable) {
 
-		return appRepository.findByIdInAndNameStartsWithIgnoreCase(myappsid, name, pageable);
+		return appRepository.findByNameStartsWithIgnoreCaseAndUsersUsername(appname, username, pageable);
+
 	}
-	
+
+	public Page<App> findByNameStartsWithIgnoreCaseAndUsersId(String appname, Long userid, Pageable pageable) {
+
+		return appRepository.findByNameStartsWithIgnoreCaseAndUsersId(appname, userid, pageable);
+
+	}
+
 	public Page<App> findByIdIn(List<Long> myappsid, Pageable pageable) {
 
 		return appRepository.findByIdIn(myappsid, pageable);

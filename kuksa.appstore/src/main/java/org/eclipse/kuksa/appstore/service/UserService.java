@@ -41,7 +41,7 @@ public class UserService {
 
 			throw new BadRequestException("Username and password are mandatory field!");
 
-		} else if (userRepository.findByUserName(username) != null) {
+		} else if (userRepository.findByUsername(username) != null) {
 			throw new AlreadyExistException("User name already exist. username: " + username);
 		} else {
 			userRepository.save(newUser);
@@ -61,7 +61,7 @@ public class UserService {
 		User currentUser = userRepository.findById(Long.parseLong(userId));
 		if (currentUser == null) {
 			throw new NotFoundException("User not found. userId: " + userId);
-		} else if (userObject.getUserName() == null || userObject.getUserName().equals("")) {
+		} else if (userObject.getUsername() == null || userObject.getUsername().equals("")) {
 
 			throw new BadRequestException("Username is mandatory field!");
 
@@ -69,14 +69,14 @@ public class UserService {
 
 			throw new BadRequestException("Password is mandatory field!");
 
-		} else if (userObject.getUserName().contains(" ") || userObject.getPassword().contains(" ")) {
+		} else if (userObject.getUsername().contains(" ") || userObject.getPassword().contains(" ")) {
 
 			throw new BadRequestException("Username or password should not contains space character!");
 
-		} else if (!currentUser.getUserName().equals(userObject.getUserName())) {
-			if (userRepository.findByUserName(userObject.getUserName()) != null) {
+		} else if (!currentUser.getUsername().equals(userObject.getUsername())) {
+			if (userRepository.findByUsername(userObject.getUsername()) != null) {
 				throw new AlreadyExistException(
-						"New User name already exist. New username: " + userObject.getUserName());
+						"New User name already exist. New username: " + userObject.getUsername());
 			}
 		}
 		userObject.setId(currentUser.getId());
@@ -102,7 +102,7 @@ public class UserService {
 
 	public User findByUserNameAndPassword(String username, String password) {
 
-		return userRepository.findByUserNameAndPassword(username, password);
+		return userRepository.findByUsernameAndPassword(username, password);
 
 	}
 
@@ -114,7 +114,7 @@ public class UserService {
 
 	public User findByUserName(String userName) {
 
-		return userRepository.findByUserName(userName);
+		return userRepository.findByUsername(userName);
 
 	}
 
@@ -132,7 +132,7 @@ public class UserService {
 
 	public List<User> findByUserNameStartsWithIgnoreCase(String username) {
 
-		return userRepository.findByUserNameStartsWithIgnoreCase(username);
+		return userRepository.findByUsernameStartsWithIgnoreCase(username);
 
 	}
 

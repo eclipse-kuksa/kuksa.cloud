@@ -81,8 +81,11 @@ public class UserEditView extends CustomComponent implements View {
 				VaadinSession.getCurrent().getAttribute("isCurrentUserAdmin").toString()), actions, gridLayout);
 		grid.setHeight(500, Unit.PIXELS);
 		grid.setWidth("100%");
-		grid.setColumns("id", "userName", "password", "adminuser");
-		addIconColumn();
+		grid.setColumns("id", "username", "password", "adminuser");
+		grid.getColumn("username").setCaption("User Name");
+		grid.getColumn("password").setCaption("Password");
+		grid.getColumn("adminuser").setCaption("Is Admin?");		
+		addEditColumn("Edit");
 		
 		grid.asSingleSelect().addValueChangeListener(e -> {
 			userEditor.editStudent(e.getValue());
@@ -134,13 +137,13 @@ public class UserEditView extends CustomComponent implements View {
 
 		setCompositionRoot(mainLayout);
 	}
-	private void addIconColumn() {
+	private void addEditColumn(String caption) {
         ImageRenderer<User> renderer = new ImageRenderer<>();
         renderer.addClickListener(e -> iconClicked(e.getItem()));
 
         Grid.Column<User, ThemeResource> iconColumn =
                 grid.addColumn(i -> new ThemeResource("img/edit.png"), renderer);
-        iconColumn.setCaption("Edit");
+        iconColumn.setCaption(caption);
         iconColumn.setMaximumWidth(70);
         grid.addItemClickListener(e -> {
             if (e.getColumn().equals(iconColumn)) {
@@ -148,7 +151,6 @@ public class UserEditView extends CustomComponent implements View {
             }
         });
     }
-
     private void iconClicked(User user) {
     	
 		User item = userManagerService.findById(user.getId().toString());

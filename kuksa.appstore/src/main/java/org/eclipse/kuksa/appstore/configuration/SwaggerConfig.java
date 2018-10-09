@@ -47,7 +47,7 @@ public class SwaggerConfig {
           "Based on the this API you can manage and monitor application update operations via HTTP/HTTPS.This API supports JSON payload with hypermedia as well as filtering, sorting and paging. Furthermore The API is protected and needs authentication and authorization based on the security concept.", 
           "1.0", 
           "Terms of service", 
-          new Contact("Fatih Ayvaz", "www.netas.com.tr", "fayvaz@netas.com.tr"),          
+          new Contact("Fatih Ayvaz", "https://www.eclipse.org/kuksa", "fayvaz@netas.com.tr"),          
           "License of API", "license");
    }
 }
