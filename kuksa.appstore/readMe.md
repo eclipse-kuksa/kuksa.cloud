@@ -53,7 +53,7 @@ Just run `AppStoreApplication.java` class.Spring boot has an embedded Tomcat ins
  
 - Update MariaDB DBMS server IP, port and credential properly in src\main\resources\application.properties file: 
 
-> spring.datasource.url=jdbc:mariadb://:3306/appstore    //default ip is localhost  
+> spring.datasource.url=jdbc:mariadb://{mariaDB-server-ip}:3306/appstore    //default ip is localhost  
 > spring.datasource.username={mariaDB-server-user}          // default user name is admin  
 > spring.datasource.password={mariaDB-server-pwd}           // default password is admin  
 
