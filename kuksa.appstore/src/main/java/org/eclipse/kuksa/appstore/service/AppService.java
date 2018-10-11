@@ -126,12 +126,28 @@ public class AppService {
 		appRepository.save(app);
 
 	}
-
-	public Page<App> findByIdInAndNameStartsWithIgnoreCase(List<Long> myappsid, String name, Pageable pageable) {
-
-		return appRepository.findByIdInAndNameStartsWithIgnoreCase(myappsid, name, pageable);
-	}
 	
+	public App incrementAppDownloadCount(App app) {
+
+		 app.setDownloadcount(app.getDownloadcount() + 1);
+		 
+		 return app;
+
+	}
+
+	public Page<App> findByNameStartsWithIgnoreCaseAndUsersUserName(String appname, String username,
+			Pageable pageable) {
+
+		return appRepository.findByNameStartsWithIgnoreCaseAndUsersUsername(appname, username, pageable);
+
+	}
+
+	public Page<App> findByNameStartsWithIgnoreCaseAndUsersId(String appname, Long userid, Pageable pageable) {
+
+		return appRepository.findByNameStartsWithIgnoreCaseAndUsersId(appname, userid, pageable);
+
+	}
+
 	public Page<App> findByIdIn(List<Long> myappsid, Pageable pageable) {
 
 		return appRepository.findByIdIn(myappsid, pageable);

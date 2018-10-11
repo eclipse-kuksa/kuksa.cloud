@@ -12,18 +12,24 @@
  ******************************************************************************/
 package org.eclipse.kuksa.appstore.model;
 
+import java.util.List;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.ManyToMany;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
 public class User {
 
 	public User(Long id, String username, String password, boolean adminUser) {
 		this.password = password;
-		this.userName = username;
+		this.username = username;
 		this.adminuser = adminUser;
 		this.id = id;
 	}
@@ -33,16 +39,17 @@ public class User {
 	@Column(name = "id")
 	private Long id;
 
-	
 	@Column(name = "user_name")
-	//@Email(message = "Hatali email")
-	private String userName;
+	private String username;
 
 	@Column(name = "password")
 	private String password;
 
 	@Column(name = "adminuser")
 	private boolean adminuser;
+
+	@ManyToMany(mappedBy = "users", fetch = FetchType.EAGER)
+	private List<App> apps;
 
 	public boolean getAdminuser() {
 		return adminuser;
@@ -63,12 +70,12 @@ public class User {
 		this.id = id;
 	}
 
-	public String getUserName() {
-		return userName;
+	public String getUsername() {
+		return username;
 	}
 
-	public void setUserName(String username) {
-		this.userName = username;
+	public void setUsername(String username) {
+		this.username = username;
 	}
 
 	public String getPassword() {
@@ -77,6 +84,15 @@ public class User {
 
 	public void setPassword(String password) {
 		this.password = password;
+	}
+
+	@JsonIgnore
+	public List<App> getApps() {
+		return apps;
+	}
+
+	public void setBooks(List<App> apps) {
+		this.apps = apps;
 	}
 
 }

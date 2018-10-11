@@ -22,11 +22,11 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface UserRepository extends CrudRepository<User, String> {
 
-	User findByUserNameAndPassword(String userName, String password);
+	User findByUsernameAndPassword(String username, String password);
 
-	List<User> findByUserNameStartsWithIgnoreCase(String Name);
+	List<User> findByUsernameStartsWithIgnoreCase(String name);
 
-	User findByUserName(String userName);
+	User findByUsername(String username);
 
 	Page<User> findAll(Pageable pageable);
 

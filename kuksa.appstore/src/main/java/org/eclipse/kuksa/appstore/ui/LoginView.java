@@ -81,7 +81,7 @@ public class LoginView extends CustomComponent implements View {
 				
 				if (loggedUser != null) {
 					
-					VaadinSession.getCurrent().setAttribute("user", loggedUser.getUserName());
+					VaadinSession.getCurrent().setAttribute("user", loggedUser.getUsername());
 					VaadinSession.getCurrent().setAttribute("isCurrentUserAdmin", loggedUser.getAdminuser());
 					
 					if (loggedUser.getAdminuser() == true) {

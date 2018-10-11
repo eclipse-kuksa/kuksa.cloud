@@ -24,18 +24,20 @@ import org.springframework.stereotype.Repository;
 public interface AppRepository extends CrudRepository<App, String> {
 
 	List<App> findByNameStartsWithIgnoreCase(String name);
-	
-	Page<App> findByNameStartsWithIgnoreCase(String name,Pageable pageable);
+
+	Page<App> findByNameStartsWithIgnoreCase(String name, Pageable pageable);
 
 	List<App> findAll();
 
 	App findById(Long id);
-	
-	App findByName(String name);	
+
+	App findByName(String name);
 
 	Page<App> findAll(Pageable pageable);
 
-	Page<App> findByIdIn(List<Long> id,Pageable pageable);
-	
-	Page<App> findByIdInAndNameStartsWithIgnoreCase(List<Long> id,String name,Pageable pageable);
+	Page<App> findByIdIn(List<Long> id, Pageable pageable);
+
+	Page<App> findByNameStartsWithIgnoreCaseAndUsersUsername(String Name, String username, Pageable pageable);
+
+	Page<App> findByNameStartsWithIgnoreCaseAndUsersId(String appname, Long userid, Pageable pageable);
 }

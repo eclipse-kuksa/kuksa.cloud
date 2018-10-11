@@ -25,10 +25,8 @@ import org.eclipse.kuksa.appstore.model.Rule;
 import org.eclipse.kuksa.appstore.model.RuleMain;
 import org.eclipse.kuksa.appstore.model.TargetByData;
 import org.eclipse.kuksa.appstore.model.User;
-import org.eclipse.kuksa.appstore.model.Usersapps;
 import org.eclipse.kuksa.appstore.service.AppService;
 import org.eclipse.kuksa.appstore.service.UserService;
-import org.eclipse.kuksa.appstore.service.UsersAppsService;
 import org.eclipse.kuksa.appstore.ui.component.NavHeader;
 import org.eclipse.kuksa.appstore.utils.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,7 +56,7 @@ public class AppView extends CustomComponent implements View {
 
 	public static final String TITLE_NAME = "App";
 
-	private String imgPath="img";
+	private String imgPath = "img";
 	CustomLayout appslayout;
 	VerticalLayout mainlayout;
 	private final MessageFeignClient messageFeignClient;
@@ -67,8 +65,6 @@ public class AppView extends CustomComponent implements View {
 	UserService userManagerService;
 	@Autowired
 	AppService appManagerService;
-	@Autowired
-	UsersAppsService installedAppsService;
 
 	@Autowired
 	public AppView(MessageFeignClient messageFeignClient) {
@@ -103,7 +99,7 @@ public class AppView extends CustomComponent implements View {
 			image.setSource(new FileResource(new_file));
 		} else {
 
-			image.setSource(new ThemeResource(imgPath+"/noimage.png"));
+			image.setSource(new ThemeResource(imgPath + "/noimage.png"));
 		}
 
 		appslayout.addComponent(image, "appimage");
@@ -163,27 +159,35 @@ public class AppView extends CustomComponent implements View {
 						AssignedResult response = messageFeignClient.sendApptoDevice(comboBox.getSelectedItem().get(),
 								ruleNew);
 						if (response.getAssigned() > 0) {
-							Usersapps installedapp = new Usersapps(null, currentUser.getId(),
-									currentapp.getId(), "INSTALLED", null);
 
-							installedAppsService.addInstalledApp(installedapp);
 
-							appManagerService.incrementAppDownloadCount(currentapp.getId());
+							currentapp=appManagerService.incrementAppDownloadCount(currentapp);							
+							
+							List<User> list = currentapp.getUsers();
+							list.add(currentUser);
+							currentapp.setUsers(list);
+							appManagerService.updateApp(currentapp);
+
 
 							new Notification("Succes Update Action",
-									"The updating action has been sent to Hawkbit for selected device",
+									"The updating action has been sent to Hawkbit for selected device.",
 									Notification.Type.TRAY_NOTIFICATION).show(com.vaadin.server.Page.getCurrent());
+
+						}else if (response.getAlreadyAssigned() > 0) {
+							new Notification("Already Assigned Update Action",
+									"The updating action is already assigned for selected device.",
+									Notification.Type.ERROR_MESSAGE).show(com.vaadin.server.Page.getCurrent());
 
 						} else {
 							new Notification("Fail Update Action",
-									"The updating action hasnt been sent to Hawkbit for selected device",
+									"The updating action hasnt been sent to Hawkbit for selected device.",
 									Notification.Type.ERROR_MESSAGE).show(com.vaadin.server.Page.getCurrent());
 
 						}
 					} catch (Exception e) {
 						// TODO: handle exception
 						new Notification("Fail Update Action",
-								"The updating action hasnt been sent to Hawkbit for selected device",
+								"The updating action hasnt been sent to Hawkbit for selected device.",
 								Notification.Type.ERROR_MESSAGE).show(com.vaadin.server.Page.getCurrent());
 
 					}

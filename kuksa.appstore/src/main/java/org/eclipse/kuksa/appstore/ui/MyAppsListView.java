@@ -18,10 +18,8 @@ import java.util.List;
 import javax.annotation.PostConstruct;
 
 import org.eclipse.kuksa.appstore.model.App;
-import org.eclipse.kuksa.appstore.model.User;
 import org.eclipse.kuksa.appstore.service.AppService;
 import org.eclipse.kuksa.appstore.service.UserService;
-import org.eclipse.kuksa.appstore.service.UsersAppsService;
 import org.eclipse.kuksa.appstore.ui.component.NavHeader;
 import org.eclipse.kuksa.appstore.utils.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,7 +52,6 @@ public class MyAppsListView extends CustomComponent implements View {
 
 	public static final String TITLE_NAME = "My Apps";
 
-
 	final TextField searchText;
 
 	VerticalLayout mainlayout;
@@ -66,23 +63,22 @@ public class MyAppsListView extends CustomComponent implements View {
 	UserService userService;
 	@Autowired
 	AppService appService;
-	@Autowired
-	UsersAppsService installedAppsService;
+
 	@Autowired
 	public MyAppsListView() {
-		com.vaadin.server.Page.getCurrent().setTitle(TITLE_NAME);	
+		com.vaadin.server.Page.getCurrent().setTitle(TITLE_NAME);
 		this.searchText = new TextField();
 		appslayout = new CssLayout();
 		mainlayout = new VerticalLayout();
 	}
-	
+
 	@PostConstruct
 	public void init() {
 		int currentpage = 1;
 		int limit = 6;
 		int total;
-		Page<App> appsList = findByText(searchText.getValue(),currentpage - 1, limit);
-		total = (int) appsList.getTotalElements();		
+		Page<App> appsList = findByText(searchText.getValue(), currentpage - 1, limit);
+		total = (int) appsList.getTotalElements();
 		appslayout = crateAppLayout(appsList);
 
 		navHeaderLayout = new NavHeader().create(VIEW_NAME,
@@ -95,7 +91,7 @@ public class MyAppsListView extends CustomComponent implements View {
 		searchText.setWidth("600");
 		// Listen changes made by the filter textbox, refresh data from backend
 		searchText.addValueChangeListener(event -> {
-			
+
 			listApps(event.getValue());
 		});
 		mainlayout.addComponent(actions);
@@ -104,14 +100,14 @@ public class MyAppsListView extends CustomComponent implements View {
 		mainlayout.addComponent(paginationComponent);
 		setCompositionRoot(mainlayout);
 	}
-	
+
 	// basla
 	public void listApps(String text) {
-		
+
 		int currentpage = 1;
 		int limit = 6;
 		int total;
-		Page<App> appsList = findByText(text,currentpage - 1, limit);
+		Page<App> appsList = findByText(text, currentpage - 1, limit);
 		total = (int) appsList.getTotalElements();
 		CssLayout appslayoutnew = new CssLayout();
 		appslayoutnew = crateAppLayout(appsList);
@@ -122,7 +118,7 @@ public class MyAppsListView extends CustomComponent implements View {
 		paginationComponent = createPaginationComponent(total, currentpage, limit);
 		mainlayout.addComponent(paginationComponent);
 		setCompositionRoot(mainlayout);
-		
+
 	}
 
 	public Component createPaginationComponent(int total, int currentpage, int limit) {
@@ -137,7 +133,7 @@ public class MyAppsListView extends CustomComponent implements View {
 		pagination.addPageChangeListener(new PaginationChangeListener() {
 			@Override
 			public void changed(PaginationResource event) {
-				Page<App> appsList = findByText(searchText.getValue(),event.pageIndex(), event.limit());
+				Page<App> appsList = findByText(searchText.getValue(), event.pageIndex(), event.limit());
 				CssLayout appslayoutnew = new CssLayout();
 				appslayoutnew = crateAppLayout(appsList);
 				mainlayout.removeAllComponents();
@@ -152,15 +148,12 @@ public class MyAppsListView extends CustomComponent implements View {
 		final VerticalLayout layout = createContent(pagination);
 		return layout;
 	}
-	
-	public Page<App> findByText(String text,int page, int size) {
-		Pageable pageable = new PageRequest(page, size);
 
-		User currentUser = userService
-				.findByUserName(VaadinSession.getCurrent().getAttribute("user").toString());
-		List<Long> myappsid = installedAppsService.findAppidByUserid(currentUser.getId());
-		// System.out.println(myappsid.get(0));
-		Page<App> apps = appService.findByIdInAndNameStartsWithIgnoreCase(myappsid,text, pageable);
+	public Page<App> findByText(String text, int page, int size) {
+		Pageable pageable = new PageRequest(page, size);
+		Page<App> apps = appService.findByNameStartsWithIgnoreCaseAndUsersUserName(text,
+				VaadinSession.getCurrent().getAttribute("user").toString(), pageable);
+
 		return apps;
 	}
 
@@ -198,7 +191,7 @@ public class MyAppsListView extends CustomComponent implements View {
 			for (int j = 0; j < intFetchSize; j++) {
 
 				int index = (i * intFetchSize) + (j);
-				if (index < listsApp.size()) {					
+				if (index < listsApp.size()) {
 					hlayout.addComponent(createAppItem(listsApp.get(index)));
 				} else {
 					break;
@@ -218,13 +211,14 @@ public class MyAppsListView extends CustomComponent implements View {
 		return mainlayout;
 
 	}
+
 	private VerticalLayout createAppItem(App app) {
 		VerticalLayout vinsidelayout = new VerticalLayout();
 
 		String imageName = "app" + app.getId() + ".png";
 
 		Image image = new Image();
-		File new_file = new File(Utils.getImageFolderPath()+File.separator + imageName);
+		File new_file = new File(Utils.getImageFolderPath() + File.separator + imageName);
 		image.setSource(new FileResource(new_file));
 		image.setWidth("300");
 		image.setHeight("200");
@@ -235,16 +229,15 @@ public class MyAppsListView extends CustomComponent implements View {
 		Label namelabel = new Label(app.getName());
 		namelabel.setWidth("300");
 		namelabel.addStyleName(ValoTheme.LABEL_BOLD);
-		Label versionlabel = new Label(
-				app.getVersion() + "    /    " + app.getOwner());
+		Label versionlabel = new Label(app.getVersion() + "    /    " + app.getOwner());
 		versionlabel.setWidth("300");
 
 		vinsidelayout.addComponent(image);
 		vinsidelayout.addComponent(namelabel);
 		vinsidelayout.addComponent(versionlabel);
-		
+
 		return vinsidelayout;
-		
+
 	}
 
 	@Override

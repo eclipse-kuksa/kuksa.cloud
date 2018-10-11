@@ -69,7 +69,7 @@ public class VaadinUI extends UI {
 
 	private void router(String route) {
 		if (getSession().getAttribute("user") != null) {
-			User loggedUser = userRepository.findByUserName(getSession().getAttribute("user").toString());
+			User loggedUser = userRepository.findByUsername(getSession().getAttribute("user").toString());
 
 			getNavigator().addView(AppEditView.VIEW_NAME, AppEditView.class);
 			getNavigator().addView(AppsListView.VIEW_NAME, AppsListView.class);
