@@ -126,6 +126,14 @@ public class AppService {
 		appRepository.save(app);
 
 	}
+	
+	public App incrementAppDownloadCount(App app) {
+
+		 app.setDownloadcount(app.getDownloadcount() + 1);
+		 
+		 return app;
+
+	}
 
 	public Page<App> findByNameStartsWithIgnoreCaseAndUsersUserName(String appname, String username,
 			Pageable pageable) {

@@ -16,7 +16,7 @@ Just run `AppStoreApplication.java` class.Spring boot has an embedded Tomcat ins
 
 ## Key Features for this version
 * Vaadin UI based Spring Boot application
-* Used MariaDB as DBMS. MariaDB is an open source database forked from MySQL.
+* Used H2 as DBMS. 
 * Supported Kuksa App Store account types are system admin and regular user
 * Kuksa App Store user accounts are unique and must be same as vehicle platform and cloud user accounts
 * User and app CRUD operations by system admin account
@@ -47,15 +47,7 @@ Just run `AppStoreApplication.java` class.Spring boot has an embedded Tomcat ins
 > hawkbit.port= {hawkbit-port} //default port is 8080  
 > hawkbit.username= {hawkbit-user-name} // default user name is admin  
 > hawkbit.password= {hawkbit-pwd} // default password is admin 
-
-- Create a database like appstore in MariaDB Server (In order to install MariaDB, please follow the instructions in the link: https://downloads.mariadb.org/mariadb/repositories) 
-
  
-- Update MariaDB DBMS server IP, port and credential properly in src\main\resources\application.properties file and create "appstore" DB in mariaDB: 
-
-> spring.datasource.url=jdbc:mariadb://{mariaDB-server-ip}:3306/appstore    //default ip is localhost  
-> spring.datasource.username={mariaDB-server-user}          // default user name is admin  
-> spring.datasource.password={mariaDB-server-pwd}           // default password is admin  
 
 - Build Kuksa App Store jar file:
 

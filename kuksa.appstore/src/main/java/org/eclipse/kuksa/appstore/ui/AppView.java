@@ -161,7 +161,7 @@ public class AppView extends CustomComponent implements View {
 						if (response.getAssigned() > 0) {
 
 
-							appManagerService.incrementAppDownloadCount(currentapp.getId());
+							currentapp=appManagerService.incrementAppDownloadCount(currentapp);							
 							
 							List<User> list = currentapp.getUsers();
 							list.add(currentUser);
