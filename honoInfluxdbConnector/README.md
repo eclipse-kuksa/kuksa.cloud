@@ -59,6 +59,7 @@ hono.tenant.id=DEFAULT_TENANT
 hono.user=user1@HONO
 hono.password=pw
 hono.trustedStorePath=src/main/resources/trusted-certs.pem
+hono.reconnectAttempts=100
 ```
 
 **Start the consumer**
@@ -71,4 +72,6 @@ or (if you prefer to execute the consumer as background task)
 
 ## Known issues
 
-- Once the connection is lost, HonoInfluxDBConnector will lose the connection until it is restarted (there is currently no way to reconnect it otherwise)
+- The connector reconnects to Hono as often as defined in the `hono.reconnectAttempts` defined in the properties.
+Still though sometimes the connector is unable to reconnect.
+In this case the connector has to be restarted (there is currently no way to reconnect it otherwise).
