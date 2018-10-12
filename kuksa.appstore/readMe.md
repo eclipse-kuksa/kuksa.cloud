@@ -74,3 +74,9 @@ Just run `AppStoreApplication.java` class.Spring boot has an embedded Tomcat ins
 - It can be accessed to the Swagger UI of Kuksa App Store API by following link;
 
 > http://{appstore-ip}:8082/swagger-ui.html#/
+
+- src\main\resources\load_test_data.sh curl shell script file is added into  to load test data to Hawkbit and Appstore. It includes a sample load data for one app, one user and one device and the file can be extended with new curl commands according to test scenario. The instruction set to exucute the script is given below:
+
+> chmod +x load_test_data.sh  
+> ./load_test_data.sh {hawkbit_ip:port} {appstore_ip:port}
+ 
