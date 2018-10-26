@@ -41,9 +41,6 @@ public class NavHeader {
 		// LOGO
 		sample = new CustomLayout("navItem-layout");
 		image = new Image();
-		image.setWidth("268");
-		image.setHeight("52");
-		image.setSource(new ThemeResource(imgPath + "/logo.png"));
 		image.setStyleName("v-logo");
 		image.addClickListener(e -> {
 			Page.getCurrent().setUriFragment("!" + "main");
