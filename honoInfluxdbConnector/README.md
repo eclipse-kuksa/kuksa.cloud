@@ -62,6 +62,8 @@ hono.trustedStorePath=src/main/resources/trusted-certs.pem
 hono.reconnectAttempts=100
 ```
 
+Depending on the used Eclipse Hono version, it may be further necessary to replace the `src/main/resources/trusted-certs.pem` with a suitable certificate (cf. https://www.eclipse.org/hono/download/)
+
 **Start the consumer**
 
 Enter `mvn spring-boot:run`
