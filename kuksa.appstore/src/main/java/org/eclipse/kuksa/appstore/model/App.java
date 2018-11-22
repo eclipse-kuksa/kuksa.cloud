@@ -25,6 +25,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
+import javax.persistence.ManyToOne;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -70,10 +71,17 @@ public class App {
 	@Column(name = "publishdate")
 	private Date publishdate;
 
-	@ManyToMany(fetch = FetchType.EAGER,cascade = CascadeType.ALL)
-	@JoinTable(name = "Usersapps", joinColumns = @JoinColumn(name = "appid", referencedColumnName = "id"), inverseJoinColumns = @JoinColumn(name = "userid", referencedColumnName = "id"))
-	private List<User> users;
+	@ManyToMany(fetch = FetchType.EAGER,cascade = CascadeType.REMOVE)
+	@JoinTable(name = "usersinstalledapps", joinColumns = @JoinColumn(name = "appid", referencedColumnName = "id"), inverseJoinColumns = @JoinColumn(name = "userid", referencedColumnName = "id"))
+	private List<User> installedusers;
+
+	@ManyToMany(fetch = FetchType.EAGER,cascade = CascadeType.REMOVE)
+	@JoinTable(name = "userapps", joinColumns = @JoinColumn(name = "appid", referencedColumnName = "id"), inverseJoinColumns = @JoinColumn(name = "userid", referencedColumnName = "id"))
+	private List<User> ownerusers;
 	
+	@ManyToOne(fetch = FetchType.EAGER)
+	@JoinColumn(name = "appcategory_id", nullable = false)
+	private AppCategory appcategory;
 	
 	public App() {
 	}
@@ -105,9 +113,6 @@ public class App {
 			}
 			sb.append(c);
 		}
-
-		System.out.println("App Name:     " + name);
-		System.out.println("Hawkbit Name:     " + sb);
 		this.hawkbitname = sb.toString();
 
 	}
@@ -126,6 +131,13 @@ public class App {
 
 	public String getVersion() {
 		return version;
+	}
+
+	@Override
+	public String toString() {
+		return "App [id=" + id + ", name=" + name + ", hawkbitname=" + hawkbitname + ", description=" + description
+				+ ", version=" + version + ", owner=" + owner + ", downloadcount=" + downloadcount + ", publishdate="
+				+ publishdate + ", installedusers=" + installedusers + ", appcategory=" + appcategory + "]";
 	}
 
 	public void setVersion(String version) {
@@ -157,18 +169,30 @@ public class App {
 	}
 
 	@JsonIgnore
-    public List<User> getUsers() {
-        return users;
+    public List<User> getInstalledusers() {
+        return installedusers;
     }
 
-    public void setUsers(List<User> users) {
-        this.users = users;
+    public void setInstalledusers(List<User> installedusers) {
+        this.installedusers = installedusers;
+    }
+	@JsonIgnore
+    public List<User> getOwnerusers() {
+        return ownerusers;
     }
 
-	@Override
-	public String toString() {
-		return "App [id=" + id + ", name=" + name + ", description=" + description + ", version=" + version + ", owner="
-				+ owner + ", publishdate=" + publishdate + "]";
+    public void setOwnerusers(List<User> ownerusers) {
+        this.ownerusers = ownerusers;
+    }
+    
+	public AppCategory getAppcategory() {
+		return appcategory;
 	}
+
+	public void setAppcategory(AppCategory appcategory) {
+		this.appcategory = appcategory;
+	}
+
+	
 
 }

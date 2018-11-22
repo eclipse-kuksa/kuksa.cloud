@@ -12,90 +12,165 @@
  ******************************************************************************/
 package org.eclipse.kuksa.appstore.ui;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.List;
 
-import org.eclipse.kuksa.appstore.model.App;
 import org.eclipse.kuksa.appstore.model.User;
-import org.eclipse.kuksa.appstore.repo.AppRepository;
-import org.eclipse.kuksa.appstore.repo.UserRepository;
+import org.eclipse.kuksa.appstore.model.UserType;
+import org.eclipse.kuksa.appstore.service.OemService;
 import org.eclipse.kuksa.appstore.service.UserService;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import com.vaadin.data.Binder;
 import com.vaadin.event.ShortcutAction;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
-import com.vaadin.server.FileResource;
 import com.vaadin.server.FontAwesome;
-import com.vaadin.server.Page;
+import com.vaadin.server.Sizeable;
+import com.vaadin.shared.ui.dnd.DropEffect;
 import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.UIScope;
 import com.vaadin.ui.Button;
-import com.vaadin.ui.CheckBox;
-import com.vaadin.ui.Embedded;
+import com.vaadin.ui.ComboBox;
+import com.vaadin.ui.Grid;
 import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Notification;
+import com.vaadin.ui.ItemCaptionGenerator;
 import com.vaadin.ui.TextField;
-import com.vaadin.ui.Upload;
-import com.vaadin.ui.Upload.Receiver;
-import com.vaadin.ui.Upload.SucceededEvent;
-import com.vaadin.ui.Upload.SucceededListener;
 import com.vaadin.ui.VerticalLayout;
+import com.vaadin.ui.components.grid.GridRowDragger;
 import com.vaadin.ui.themes.ValoTheme;
 
 @SpringComponent
 @UIScope
-public class UserEditor extends VerticalLayout implements View {	
-
-	@Autowired
-	UserService userManagerService;
-
+public class UserEditor extends VerticalLayout implements View {
+	private UserService userService;
+	private OemService oemService;
 	public User user;
-	// id,name,description,version,type,publishDate
-	/* Fields to edit properties in Student entity */
 	public TextField username = new TextField("Username");
 	public TextField password = new TextField("Password");
-	public CheckBox adminuser = new CheckBox("Admin Access");
-	// DateField birthDate = new DateField("Birth date");
-
+	public ComboBox<String> comboBoxUserType = new ComboBox<>("User Type");
+	public ComboBox<String> comboBoxOem = new ComboBox<>("Select an Oem");
 	/* Action buttons */
 	public Button save = new Button("Save", FontAwesome.SAVE);
 	public Button cancel = new Button("Cancel");
 	public Button delete = new Button("Delete", FontAwesome.TRASH_O);
-	HorizontalLayout hlayout = new HorizontalLayout();
-	VerticalLayout vlayout = new VerticalLayout();
+	VerticalLayout mainLayout = new VerticalLayout();
+	HorizontalLayout vlayout = new HorizontalLayout();
 	Binder<User> binder = new Binder<>(User.class);
+	Grid<User> left = new Grid<>(User.class);
+	Grid<User> right = new Grid<>(User.class);
 
-	@Autowired
+	public void setUserService(UserService userService) {
+		this.userService = userService;
+	}
+
+	public void setOemService(OemService oemService) {
+		this.oemService = oemService;
+	}
+
 	public UserEditor() {
-
+		comboBoxOem.setEmptySelectionAllowed(false);
+		comboBoxUserType.setEmptySelectionAllowed(false);
+		comboBoxUserType.setTextInputAllowed(false);
 		// upload
-		// actions.addComponents(upload,appimage);
-		vlayout.addComponents(username, password);
-		hlayout.addComponent(vlayout);
+		vlayout.addComponents(username, password, comboBoxUserType, comboBoxOem);
+		mainLayout.addComponent(vlayout);
 
-		vlayout = new VerticalLayout();
-		vlayout.addComponents(adminuser);
-		hlayout.addComponent(vlayout);
+		vlayout = new HorizontalLayout();
+		vlayout.addComponents(left, right);
 
-		vlayout = new VerticalLayout();
-		vlayout.addComponents(save, cancel, delete);
-		hlayout.addComponent(vlayout);
+		mainLayout.addComponent(vlayout);
 
-		// hlayout.addComponents();
-		addComponents(hlayout);
-		// bind using naming convention
+		vlayout = new HorizontalLayout();
+		vlayout.addComponents(save, delete, cancel);
+		mainLayout.addComponent(vlayout);
+
+		addComponents(mainLayout);
+
+		binder.forField(comboBoxUserType).bind(User -> {
+			if (User.getUserType() != null) {
+				// if there is any row and it is not empty
+				return User.getUserType().toString();
+			}
+			return null; // if address is null, return empty string
+		}, (User, usertype) -> {
+			UserType newUserType = UserType.valueOf(usertype);
+			User.setUserType(newUserType);
+		});
+		binder.forField(comboBoxOem).bind(User -> {
+			if (User.getOem() != null) {
+				// if there is any row and it is not empty
+				return User.getOem().getId().toString();
+			}
+			return null; // if address is null, return empty string
+		}, (User, oem) -> {
+			User.setOem(oemService.findById(Long.parseLong(oem)));
+		});
 		binder.bindInstanceFields(this);
 
 		// Configure and style components
 		setSpacing(true);
-		// actions.setStyleName(ValoTheme.LAYOUT_COMPONENT_GROUP);
 		save.setStyleName(ValoTheme.BUTTON_PRIMARY);
 		save.setClickShortcut(ShortcutAction.KeyCode.ENTER);
 
 		setVisible(false);
+
+		comboBoxOem.setVisible(false);
+		left.setVisible(false);
+		right.setVisible(false);
+		comboBoxUserType.addValueChangeListener(event -> {
+
+			if (event.getValue().equals(UserType.GroupAdmin.toString())) {
+
+				comboBoxOem.setVisible(true);
+				left.setVisible(true);
+				right.setVisible(true);
+
+			} else {
+
+				comboBoxOem.setVisible(false);
+				left.setVisible(false);
+				right.setVisible(false);
+
+			}
+
+		});
+		ItemCaptionGenerator<String> icg = new ItemCaptionGenerator<String>() {
+			@Override
+			public String apply(String item) {
+				return oemService.findById(Long.parseLong(item)).getName();
+			}
+		};
+		comboBoxOem.setItemCaptionGenerator(icg);
+
+		// Create a sub-window and set the content
+
+		left.setColumns("id", "username");
+		left.setCaption("Users");
+
+		right.setColumns("id", "username");
+		right.setCaption("Members");
+
+		left.setWidth(300, Sizeable.Unit.PIXELS);
+		right.setWidth(300, Sizeable.Unit.PIXELS);
+
+		// enable row dnd from left to right and handle drops
+		GridRowDragger<User> leftToRight = new GridRowDragger<>(left, right);
+
+		// enable row dnd from right to left and handle drops
+		GridRowDragger<User> rightToLeft = new GridRowDragger<>(right, left);
+
+		// don't allow drops to left when it is the source
+		leftToRight.getGridDragSource()
+				.addDragStartListener(event -> rightToLeft.getGridDropTarget().setDropEffect(DropEffect.MOVE));
+		leftToRight.getGridDragSource()
+				.addDragEndListener(event -> rightToLeft.getGridDropTarget().setDropEffect(DropEffect.MOVE));
+
+		// don't allow drops to right when it is the source
+		rightToLeft.getGridDragSource()
+				.addDragStartListener(event -> leftToRight.getGridDropTarget().setDropEffect(DropEffect.MOVE));
+		rightToLeft.getGridDragSource()
+				.addDragEndListener(event -> leftToRight.getGridDropTarget().setDropEffect(DropEffect.MOVE));
+
 	}
 
 	public interface ChangeHandler {
@@ -103,35 +178,59 @@ public class UserEditor extends VerticalLayout implements View {
 		void onChange();
 	}
 
-	public final void editStudent(User s) {
-		if (s == null) {
+	public final void editUser(User u) {
+		if (u == null) {
 			setVisible(false);
 			return;
 		}
-		final boolean persisted = s.getId() != null;
+		final boolean persisted = u.getId() != null;
 		if (persisted) {
 			// Find fresh entity for editing
-			user = userManagerService.findById(Long.toString(s.getId()));
+			user = userService.findById(Long.toString(u.getId()));
 		} else {
-			user = new User(null, "", "", false);
+			user = u;
 		}
-		cancel.setVisible(persisted);
-		// Bind student properties to similarly named fields
-		// Could also use annotation or "manual binding" or programmatically
-		// moving values from fields to entities before saving
+		delete.setVisible(persisted);
 		binder.setBean(user);
 
 		setVisible(true);
-
-		// A hack to ensure the whole form is visible
 		save.focus();
-		// Select all text in firstName field automatically
 		username.selectAll();
+
+		comboBoxUserType.setItems(UserType.Normal.toString(), UserType.SystemAdmin.toString(),
+				UserType.GroupAdmin.toString());
+
+		List<String> oemlist = oemService.getAllId();
+		comboBoxOem.setItems(oemlist);
+
+		fillGrids(user);
+	}
+
+	public void fillGrids(User user) {
+
+		List<User> rightList = new ArrayList<User>();
+
+		if (user.getMembers() != null) {
+			rightList.addAll(user.getMembers());
+		}
+
+		List<Long> notInList = new ArrayList<Long>();
+		if (user.getId() != null) {
+			notInList.add(user.getId());
+		}
+		for (int i = 0; i < rightList.size(); i++) {
+			notInList.add(rightList.get(i).getId());
+		}
+
+		if (notInList.size() != 0) {
+			left.setItems(userService.findByIdNotIn(notInList));
+		} else {
+			left.setItems(userService.findAll());
+		}
+		right.setItems(rightList);
 	}
 
 	public void setChangeHandler(ChangeHandler h) {
-		// ChangeHandler is notified when either save or delete
-		// is clicked
 		save.addClickListener(e -> h.onChange());
 		delete.addClickListener(e -> h.onChange());
 	}

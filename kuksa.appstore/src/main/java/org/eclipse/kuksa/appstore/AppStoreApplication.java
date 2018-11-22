@@ -14,6 +14,7 @@ package org.eclipse.kuksa.appstore;
 
 import org.eclipse.kuksa.appstore.exception.AlreadyExistException;
 import org.eclipse.kuksa.appstore.exception.BadRequestException;
+import org.eclipse.kuksa.appstore.model.UserType;
 import org.eclipse.kuksa.appstore.service.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,7 +54,7 @@ public class AppStoreApplication {
 	public void EventListenerExecute() throws AlreadyExistException, BadRequestException {
 		
 		if(userservice.findByUserName(username)==null) {			
-			userservice.createUser(username, password, true);
+			userservice.createUser(username, password, UserType.SystemAdmin, null, null);
 			LOG.debug("[EventListenerExecute]: The user is added. : {}", username);
 		}else {
 			LOG.debug("[EventListenerExecute]: The user already exists. : {}", username);			

@@ -18,8 +18,8 @@ import java.util.List;
 import javax.annotation.PostConstruct;
 
 import org.eclipse.kuksa.appstore.model.App;
-import org.eclipse.kuksa.appstore.service.AppCategoryService;
 import org.eclipse.kuksa.appstore.service.AppService;
+import org.eclipse.kuksa.appstore.service.UserService;
 import org.eclipse.kuksa.appstore.ui.component.NavHeader;
 import org.eclipse.kuksa.appstore.utils.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,27 +35,24 @@ import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.server.FileResource;
 import com.vaadin.server.VaadinSession;
 import com.vaadin.spring.annotation.SpringView;
-import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.CssLayout;
 import com.vaadin.ui.CustomComponent;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Image;
-import com.vaadin.ui.ItemCaptionGenerator;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
 
-@SpringView(name = AppsListView.VIEW_NAME)
-public class AppsListView extends CustomComponent implements View {
+@SpringView(name = InstalledAppsListView.VIEW_NAME)
+public class InstalledAppsListView extends CustomComponent implements View {
 
-	public static final String VIEW_NAME = "applist";
+	public static final String VIEW_NAME = "installedapps";
 
-	public static final String TITLE_NAME = "App List";
+	public static final String TITLE_NAME = "Installed Apps";
 
-	final TextField serachText;
-	final ComboBox<String> comboBox = new ComboBox<>();
+	final TextField searchText;
 
 	VerticalLayout mainlayout;
 	CssLayout appslayout;
@@ -63,14 +60,14 @@ public class AppsListView extends CustomComponent implements View {
 	HorizontalLayout navHeaderLayout;
 	HorizontalLayout actions;
 	@Autowired
-	AppService appService;
+	UserService userService;
 	@Autowired
-	AppCategoryService appCategoryService;
+	AppService appService;
 
 	@Autowired
-	public AppsListView() {
+	public InstalledAppsListView() {
 		com.vaadin.server.Page.getCurrent().setTitle(TITLE_NAME);
-		this.serachText = new TextField();
+		this.searchText = new TextField();
 		appslayout = new CssLayout();
 		mainlayout = new VerticalLayout();
 	}
@@ -78,9 +75,9 @@ public class AppsListView extends CustomComponent implements View {
 	@PostConstruct
 	public void init() {
 		int currentpage = 1;
-		int limit = 9;
+		int limit = 6;
 		int total;
-		Page<App> appsList = findByText(serachText.getValue(), comboBox.getValue(), currentpage - 1, limit);
+		Page<App> appsList = findByText(searchText.getValue(), currentpage - 1, limit);
 		total = (int) appsList.getTotalElements();
 		appslayout = crateAppLayout(appsList);
 
@@ -88,30 +85,13 @@ public class AppsListView extends CustomComponent implements View {
 				VaadinSession.getCurrent().getAttribute("isCurrentUserAdmin").toString());
 		mainlayout.addComponent(navHeaderLayout);
 
-		ItemCaptionGenerator<String> icg = new ItemCaptionGenerator<String>() {
-			@Override
-			public String apply(String item) {
-				return appCategoryService.findById(Long.parseLong(item)).getName();
-			}
-		};
-		comboBox.setItemCaptionGenerator(icg);
-		comboBox.setItems(appCategoryService.getAllId());
-		comboBox.setPlaceholder("Select a category");
-		comboBox.setEmptySelectionCaption("All");
-		comboBox.setEmptySelectionAllowed(true);
-		comboBox.addValueChangeListener(event -> {
-
-			listApps(serachText.getValue(), event.getValue());
-
-		});
-
-		actions = new HorizontalLayout(comboBox, serachText);
+		actions = new HorizontalLayout(searchText);
 		actions.setStyleName("v-actions");
-		serachText.setPlaceholder("Search by App Name");
+		searchText.setPlaceholder("Search by App Name");
 		// Listen changes made by the filter textbox, refresh data from backend
-		serachText.addValueChangeListener(event -> {
+		searchText.addValueChangeListener(event -> {
 
-			listApps(event.getValue(), comboBox.getValue());
+			listApps(event.getValue());
 		});
 		mainlayout.addComponent(actions);
 		mainlayout.addComponent(appslayout);
@@ -121,12 +101,12 @@ public class AppsListView extends CustomComponent implements View {
 	}
 
 	// basla
-	public void listApps(String text, String categoryId) {
+	public void listApps(String text) {
 
 		int currentpage = 1;
-		int limit = 9;
+		int limit = 6;
 		int total;
-		Page<App> appsList = findByText(text, categoryId, currentpage - 1, limit);
+		Page<App> appsList = findByText(text, currentpage - 1, limit);
 		total = (int) appsList.getTotalElements();
 		CssLayout appslayoutnew = new CssLayout();
 		appslayoutnew = crateAppLayout(appsList);
@@ -152,8 +132,7 @@ public class AppsListView extends CustomComponent implements View {
 		pagination.addPageChangeListener(new PaginationChangeListener() {
 			@Override
 			public void changed(PaginationResource event) {
-				Page<App> appsList = findByText(serachText.getValue(), comboBox.getValue(), event.pageIndex(),
-						event.limit());
+				Page<App> appsList = findByText(searchText.getValue(), event.pageIndex(), event.limit());
 				CssLayout appslayoutnew = new CssLayout();
 				appslayoutnew = crateAppLayout(appsList);
 				mainlayout.removeAllComponents();
@@ -169,21 +148,12 @@ public class AppsListView extends CustomComponent implements View {
 		return layout;
 	}
 
-	public Page<App> findByText(String text, String categoryId, int page, int size) {
+	public Page<App> findByText(String text, int page, int size) {
 		Pageable pageable = new PageRequest(page, size);
-		Page<App> users;
-		if (text == null && categoryId == null) {
-			return null;
-		} else if (text == null && categoryId != null) {
-			users = appService.findByAppcategoryId(Long.parseLong(categoryId), pageable);
-		} else if (text != null && categoryId == null) {
-			users = appService.findByNameStartsWithIgnoreCase(text, pageable);
-		} else {
-			users = appService.findByNameStartsWithIgnoreCaseAndAppcategoryId(text, Long.parseLong(categoryId),
-					pageable);
-		}
+		Page<App> apps = appService.findByNameStartsWithIgnoreCaseAndInstalledusersUserName(text,
+				VaadinSession.getCurrent().getAttribute("user").toString(), pageable);
 
-		return users;
+		return apps;
 	}
 
 	private Pagination createPagination(long total, int page, int limit) {
@@ -209,7 +179,7 @@ public class AppsListView extends CustomComponent implements View {
 
 		List<App> listsApp = appsList.getContent();
 
-		int intFetchSize = 3;
+		int intFetchSize = 2;
 		int noOfRec = listsApp.size();
 		int rows = noOfRec / intFetchSize;
 		if (noOfRec % intFetchSize != 0) {
@@ -258,7 +228,7 @@ public class AppsListView extends CustomComponent implements View {
 		Label namelabel = new Label(app.getName());
 		namelabel.setWidth("300");
 		namelabel.addStyleName(ValoTheme.LABEL_BOLD);
-		Label versionlabel = new Label(app.getVersion() + "    /    " + app.getAppcategory().getName());
+		Label versionlabel = new Label(app.getVersion() + "    /    " + app.getOwner());
 		versionlabel.setWidth("300");
 
 		vinsidelayout.addComponent(image);

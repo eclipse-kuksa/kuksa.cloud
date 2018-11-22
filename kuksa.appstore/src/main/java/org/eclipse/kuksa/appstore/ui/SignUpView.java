@@ -14,6 +14,7 @@ package org.eclipse.kuksa.appstore.ui;
 
 import org.eclipse.kuksa.appstore.exception.AlreadyExistException;
 import org.eclipse.kuksa.appstore.exception.BadRequestException;
+import org.eclipse.kuksa.appstore.model.UserType;
 import org.eclipse.kuksa.appstore.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -76,7 +77,7 @@ public class SignUpView extends CustomComponent implements View {
 
 				try {
 
-					UserService.createUser(username.getValue(), password.getValue(), false);
+					UserService.createUser(username.getValue(), password.getValue(), UserType.Normal, null, null);
 
 					new Notification("Succes Sign Up", "Welcome to Kuksa Appstore", Notification.Type.TRAY_NOTIFICATION)
 							.show(com.vaadin.server.Page.getCurrent());
