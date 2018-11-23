@@ -12,6 +12,28 @@
  ******************************************************************************/
 package org.eclipse.kuksa.appstore.model;
 
-public class Modules {
+public enum UserType {
+    Normal("Normal"), SystemAdmin("SystemAdmin"), GroupAdmin("GroupAdmin");
 
+    private final String type;
+
+    private UserType(final String type) {
+        this.type = type;
+    }
+
+    @Override
+    public String toString() {
+        return type;
+    }
+
+    public static UserType fromString(String text) {
+        if (text != null) {
+            for (UserType userType : UserType.values()) {
+                if (text.equalsIgnoreCase(userType.type)) {
+                    return userType;
+                }
+            }
+        }
+        return null;
+    }
 }

@@ -18,7 +18,11 @@ import java.util.Date;
 
 import javax.annotation.PostConstruct;
 
+import org.eclipse.kuksa.appstore.exception.AlreadyExistException;
+import org.eclipse.kuksa.appstore.exception.BadRequestException;
+import org.eclipse.kuksa.appstore.exception.NotFoundException;
 import org.eclipse.kuksa.appstore.model.App;
+import org.eclipse.kuksa.appstore.service.AppCategoryService;
 import org.eclipse.kuksa.appstore.service.AppService;
 import org.eclipse.kuksa.appstore.ui.component.NavHeader;
 import org.eclipse.kuksa.appstore.utils.Utils;
@@ -36,81 +40,84 @@ import com.vaadin.spring.annotation.SpringView;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.CustomComponent;
 import com.vaadin.ui.Grid;
+import com.vaadin.ui.Grid.Column;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.PopupView;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.VerticalLayout;
+import com.vaadin.ui.Window;
 import com.vaadin.ui.renderers.ImageRenderer;
-
 
 @SpringView(name = AppEditView.VIEW_NAME)
 public class AppEditView extends CustomComponent implements View {
 
-	public static final String VIEW_NAME = "main";
-
+	public static final String VIEW_NAME = "appedit";
 	public static final String TITLE_NAME = "App Edit";
-	private final AppEditor editor;
+	final AppEditor appEditor = new AppEditor();
 
 	final Grid<App> grid;
 
 	final TextField searchText;
 
-	private final PopupView popup;
+	final Window appEditorWindow = new Window("App Editor");
 	private final Button addNewBtn;
 	@Autowired
-	AppService appManagerService;
+	AppService appService;
+	@Autowired
+	AppCategoryService appCategoryService;
 
 	@Autowired
-	public AppEditView(AppEditor editor) {
+	public AppEditView() {
 		com.vaadin.server.Page.getCurrent().setTitle(TITLE_NAME);
 
-		this.editor = editor;
 		this.grid = new Grid<>(App.class);
 		this.searchText = new TextField();
 		this.addNewBtn = new Button("New App", FontAwesome.PLUS);
 		addNewBtn.setStyleName("v-button-primary");
 
 		VerticalLayout popupContent = new VerticalLayout();
-		popupContent.addComponent(editor);
-		popup = new PopupView(null, popupContent);
-
-		HorizontalLayout actions = new HorizontalLayout(searchText, popup, addNewBtn);
-
-		HorizontalLayout gridLayout = new HorizontalLayout();
-
+		popupContent.addComponent(appEditor);
+		appEditorWindow.setContent(popupContent);
+		appEditorWindow.center();
+		appEditorWindow.setModal(true);
+		appEditorWindow.setResizable(false);
+		HorizontalLayout actions = new HorizontalLayout(searchText, addNewBtn);
 		actions.setStyleName("v-actions");
 
+		HorizontalLayout gridLayout = new HorizontalLayout();
 		gridLayout.addComponent(grid);
 		gridLayout.setWidth("100%");
 		gridLayout.setStyleName("v-mainGrid");
+
 		VerticalLayout mainLayout = new VerticalLayout(new NavHeader().create(VIEW_NAME,
 				VaadinSession.getCurrent().getAttribute("isCurrentUserAdmin").toString()), actions, gridLayout);
 
 		grid.setWidth("100%");
-
-		grid.setColumns("id", "name", "description", "version", "owner");
+		grid.setColumns("id", "name", "version", "owner");
 		grid.getColumn("id").setMaximumWidth(150);
-		grid.getColumn("name").setMaximumWidth(200);
-		grid.getColumn("description").setMaximumWidth(700);
-		grid.getColumn("version").setMaximumWidth(150);
-		grid.getColumn("owner").setMaximumWidth(200);
-		addEditColumn("Edit");
-		
-		grid.asSingleSelect().addValueChangeListener(e -> {
-			editor.editStudent(e.getValue());
+		grid.getColumn("name").setMaximumWidth(350);
+		grid.getColumn("version").setMaximumWidth(300);
+		grid.getColumn("owner").setMaximumWidth(300);
 
-			editor.appimage.setVisible(true);
+		// Add generated full name column
+		Column<App, String> categoryColumn = grid.addColumn(app -> app.getAppcategory().getName()).setMaximumWidth(300);
+		categoryColumn.setCaption("Category");
+		addEditColumn("Edit");
+		grid.asSingleSelect().addValueChangeListener(e -> {
+			appEditor.editApp(e.getValue());
+
+			appEditor.appimage.setVisible(true);
 			try {
 				new File(Utils.getImageFolderPath()).mkdirs();
 				File new_file = new File(Utils.getImageFilePath() + e.getValue().getId() + ".png");
 
 				if (new_file.exists()) {
-					editor.appimage.setSource(new FileResource(new_file));
-					editor.upload.setButtonCaption("Change Image");
+					appEditor.appimage.setSource(new FileResource(new_file));
+					appEditor.upload.setButtonCaption("Change Image");
 				} else {
-					editor.upload.setButtonCaption("Add Image");
-					editor.appimage.setSource(new ThemeResource("img/noimage.png"));
+					appEditor.upload.setButtonCaption("Add Image");
+					appEditor.appimage.setSource(new ThemeResource("img/noimage.png"));
 				}
 			} catch (Exception e2) {
 				// TODO: handle exception
@@ -119,84 +126,123 @@ public class AppEditView extends CustomComponent implements View {
 		});
 
 		addNewBtn.addClickListener(e -> {
-			popup.setPopupVisible(true);
-			editor.editStudent(new App(null, "", "", "", "", "", 0, null));
+			appEditorWindow.center();
+			VaadinUI.getCurrent().addWindow(appEditorWindow);
+			appEditor.editApp(new App(null, "", "", "", "", "", 0, null));
 		});
 
-		editor.save.addClickListener(e -> {
-			editor.app.setHawkbitname(editor.app.getName().replace(" ", "_"));
-			editor.app.setPublishdate(new Timestamp(new Date().getTime()));
-			appManagerService.updateApp(editor.app);
-			System.out.println(editor.app.getId());
-			listApps(null);
-			editor.setVisible(false);
-			new Notification("Succes Updating", "The App has been updated.", Notification.Type.TRAY_NOTIFICATION)
-					.show(Page.getCurrent());
+		appEditor.save.addClickListener(e -> {
+			if (appEditor.app.getAppcategory() != null && !appEditor.app.getName().isEmpty()
+					&& appEditor.app.getName() != null) {
+
+				if (appEditor.app.getId() != null) {
+
+					appEditor.app.setHawkbitname(appEditor.app.getName().replace(" ", "_"));
+					appEditor.app.setPublishdate(new Timestamp(new Date().getTime()));
+					try {
+						appService.updateApp(appEditor.app.getId().toString(), appEditor.app);
+						listApps(null);
+						VaadinUI.getCurrent().removeWindow(appEditorWindow);
+						new Notification("Succes Updating", "The App has been updated.",
+								Notification.Type.TRAY_NOTIFICATION).show(Page.getCurrent());
+					} catch (NotFoundException e1) {
+						new Notification("Not Found Exception", e1.getMessage(), Notification.Type.ERROR_MESSAGE)
+								.show(Page.getCurrent());
+					} catch (BadRequestException e1) {
+						new Notification("Bad Request Exception", e1.getMessage(), Notification.Type.ERROR_MESSAGE)
+								.show(Page.getCurrent());
+					} catch (AlreadyExistException e1) {
+						new Notification("Already Exist Exception", "App Name already exists.",
+								Notification.Type.ERROR_MESSAGE).show(Page.getCurrent());
+					}
+
+				} else {
+					appEditor.app.setHawkbitname(appEditor.app.getName().replace(" ", "_"));
+					appEditor.app.setPublishdate(new Timestamp(new Date().getTime()));
+					try {
+						appService.createApp(appEditor.app);
+						listApps(null);
+						VaadinUI.getCurrent().removeWindow(appEditorWindow);
+						new Notification("Succes Updating", "The App has been updated.",
+								Notification.Type.TRAY_NOTIFICATION).show(Page.getCurrent());
+					} catch (AlreadyExistException e1) {
+						new Notification("Already Exist Exception", "App Name already exists.",
+								Notification.Type.ERROR_MESSAGE).show(Page.getCurrent());
+					} catch (BadRequestException e1) {
+						new Notification("Bad Request Exception", e1.getMessage(), Notification.Type.ERROR_MESSAGE)
+								.show(Page.getCurrent());
+					}
+
+				}
+			} else {
+				new Notification("Fill the mandatory fields", "App Category and Name are mandatory fields.",
+						Notification.Type.ERROR_MESSAGE).show(Page.getCurrent());
+			}
 		});
 
-		editor.delete.addClickListener(e -> {
-			popup.setPopupVisible(false);
-			appManagerService.deleteApp(editor.app);
+		appEditor.delete.addClickListener(e -> {
+			appService.deleteApp(appEditor.app);
 			listApps(null);
-			editor.setVisible(false);
+			VaadinUI.getCurrent().removeWindow(appEditorWindow);
 			new Notification("Succes Deleting", "The App has been deleted.", Notification.Type.TRAY_NOTIFICATION)
 					.show(Page.getCurrent());
 		});
 
-		editor.cancel.addClickListener(e -> {
-			popup.setPopupVisible(false);
-			editor.editStudent(editor.app);
+		appEditor.cancel.addClickListener(e -> {
+			appEditor.editApp(appEditor.app);
 			listApps(null);
-			editor.setVisible(false);
+			VaadinUI.getCurrent().removeWindow(appEditorWindow);
 		});
 
 		searchText.setPlaceholder("Search by App Name");
 		searchText.addValueChangeListener(event -> {
-			editor.setVisible(false);
+			VaadinUI.getCurrent().removeWindow(appEditorWindow);
 			listApps(event.getValue());
 		});
 		setCompositionRoot(mainLayout);
 
 	}
+
 	private void addEditColumn(String caption) {
-        ImageRenderer<App> renderer = new ImageRenderer<>();
-        renderer.addClickListener(e -> iconClicked(e.getItem()));
+		ImageRenderer<App> renderer = new ImageRenderer<>();
+		renderer.addClickListener(e -> iconClicked(e.getItem()));
 
-        Grid.Column<App, ThemeResource> iconColumn =
-                grid.addColumn(i -> new ThemeResource("img/edit.png"), renderer);
-        iconColumn.setCaption(caption);
-        iconColumn.setMaximumWidth(70);
-        grid.addItemClickListener(e -> {
-            if (e.getColumn().equals(iconColumn)) {
-                iconClicked(e.getItem());
-            }
-        });
-    }
+		Grid.Column<App, ThemeResource> iconColumn = grid.addColumn(i -> new ThemeResource("img/edit.png"), renderer);
+		iconColumn.setCaption(caption);
+		iconColumn.setMaximumWidth(70);
+		grid.addItemClickListener(e -> {
+			if (e.getColumn().equals(iconColumn)) {
+				iconClicked(e.getItem());
+			}
+		});
+	}
 
-    private void iconClicked(App app) {
-    	
-        App item = appManagerService
-				.findById(app.getId());
+	private void iconClicked(App app) {
+
+		App item = appService.findById(app.getId());
 		grid.select(item);
-		popup.setPopupVisible(true);
-        
-    }
+		appEditorWindow.center();
+		VaadinUI.getCurrent().addWindow(appEditorWindow);
+
+	}
+
 	@PostConstruct
 	public void init() {
 		listApps(null);
+		appEditor.setAppCategoryService(appCategoryService);
+		appEditor.setAppService(appService);
 	}
 
 	void listApps(String searchText) {
 		if (StringUtils.isEmpty(searchText)) {
-			grid.setItems(appManagerService.findAll());
+			grid.setItems(appService.findAll());
 		} else {
-			grid.setItems(appManagerService.findByNameStartsWithIgnoreCase(searchText));
+			grid.setItems(appService.findByNameStartsWithIgnoreCase(searchText));
 		}
 	}
 
 	@Override
 	public void enter(ViewChangeEvent event) {
-		// TODO Auto-generated method stub
 
 	}
 

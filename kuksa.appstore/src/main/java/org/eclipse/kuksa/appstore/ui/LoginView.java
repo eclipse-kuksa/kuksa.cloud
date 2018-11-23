@@ -13,6 +13,7 @@
 package org.eclipse.kuksa.appstore.ui;
 
 import org.eclipse.kuksa.appstore.model.User;
+import org.eclipse.kuksa.appstore.model.UserType;
 import org.eclipse.kuksa.appstore.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -51,7 +52,7 @@ public class LoginView extends CustomComponent implements View {
 
 	@Autowired
 	public LoginView() {
-		
+
 		com.vaadin.server.Page.getCurrent().setTitle(TITLE_NAME);
 
 		CustomLayout sample = new CustomLayout("login-layout");
@@ -75,23 +76,22 @@ public class LoginView extends CustomComponent implements View {
 
 			@Override
 			public void buttonClick(ClickEvent event) {
-				
-				
+
 				User loggedUser = userService.findByUserNameAndPassword(username.getValue(), password.getValue());
-				
+
 				if (loggedUser != null) {
-					
+
 					VaadinSession.getCurrent().setAttribute("user", loggedUser.getUsername());
-					VaadinSession.getCurrent().setAttribute("isCurrentUserAdmin", loggedUser.getAdminuser());
-					
-					if (loggedUser.getAdminuser() == true) {
-						
+					VaadinSession.getCurrent().setAttribute("isCurrentUserAdmin", loggedUser.getUserType());
+
+					if (loggedUser.getUserType() == UserType.SystemAdmin) {
+
 						Page.getCurrent().setUriFragment("!" + AppEditView.VIEW_NAME);
-						
+
 					} else {
-						
+
 						Page.getCurrent().setUriFragment("!" + AppsListView.VIEW_NAME);
-						
+
 					}
 
 				} else {

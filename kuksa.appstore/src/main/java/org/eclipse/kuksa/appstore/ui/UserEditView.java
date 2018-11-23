@@ -12,9 +12,18 @@
  ******************************************************************************/
 package org.eclipse.kuksa.appstore.ui;
 
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 import javax.annotation.PostConstruct;
 
+import org.eclipse.kuksa.appstore.exception.AlreadyExistException;
+import org.eclipse.kuksa.appstore.exception.BadRequestException;
+import org.eclipse.kuksa.appstore.exception.NotFoundException;
 import org.eclipse.kuksa.appstore.model.User;
+import org.eclipse.kuksa.appstore.model.UserType;
+import org.eclipse.kuksa.appstore.service.OemService;
 import org.eclipse.kuksa.appstore.service.UserService;
 import org.eclipse.kuksa.appstore.ui.component.NavHeader;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,9 +41,9 @@ import com.vaadin.ui.CustomComponent;
 import com.vaadin.ui.Grid;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Notification;
-import com.vaadin.ui.PopupView;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.VerticalLayout;
+import com.vaadin.ui.Window;
 import com.vaadin.ui.renderers.ImageRenderer;
 
 @SpringView(name = UserEditView.VIEW_NAME)
@@ -42,23 +51,23 @@ public class UserEditView extends CustomComponent implements View {
 
 	public static final String VIEW_NAME = "userlist";
 	public static final String TITLE_NAME = "User List";
-	private final UserEditor userEditor;
+
+	final UserEditor userEditor = new UserEditor();
 
 	final Grid<User> grid;
 
 	final TextField searchText;
-
+	final Window userEditorWindow = new Window("User Editor");
 	private final Button addNewBtn;
-	private final PopupView popup;
+	@Autowired
+	UserService userService;
+	@Autowired
+	OemService oemService;
 
 	@Autowired
-	UserService userManagerService;
-
-	@Autowired
-	public UserEditView(UserEditor userEditor) {
+	public UserEditView() {
 		com.vaadin.server.Page.getCurrent().setTitle(TITLE_NAME);
 
-		this.userEditor = userEditor;
 		this.grid = new Grid<>(User.class);
 		this.searchText = new TextField();
 		this.addNewBtn = new Button("New User", FontAwesome.PLUS);
@@ -66,10 +75,11 @@ public class UserEditView extends CustomComponent implements View {
 
 		VerticalLayout popupContent = new VerticalLayout();
 		popupContent.addComponent(userEditor);
-		popup = new PopupView(null, popupContent);
-
-		// build layout
-		HorizontalLayout actions = new HorizontalLayout(searchText, popup, addNewBtn);
+		userEditorWindow.setContent(popupContent);
+		userEditorWindow.center();
+		userEditorWindow.setModal(true);
+		userEditorWindow.setResizable(false);
+		HorizontalLayout actions = new HorizontalLayout(searchText, addNewBtn);
 		actions.setStyleName("v-actions");
 
 		HorizontalLayout gridLayout = new HorizontalLayout();
@@ -81,94 +91,147 @@ public class UserEditView extends CustomComponent implements View {
 				VaadinSession.getCurrent().getAttribute("isCurrentUserAdmin").toString()), actions, gridLayout);
 		grid.setHeight(500, Unit.PIXELS);
 		grid.setWidth("100%");
-		grid.setColumns("id", "username", "password", "adminuser");
+		grid.setColumns("id", "username", "password", "userType");
 		grid.getColumn("username").setCaption("User Name");
 		grid.getColumn("password").setCaption("Password");
-		grid.getColumn("adminuser").setCaption("Is Admin?");		
+		grid.getColumn("userType").setCaption("User Type");
 		addEditColumn("Edit");
-		
+
 		grid.asSingleSelect().addValueChangeListener(e -> {
-			userEditor.editStudent(e.getValue());
+			userEditor.editUser(e.getValue());
 		});
 
+		userEditor.comboBoxUserType.addValueChangeListener(event -> {
+
+			userEditorWindow.center();
+	    });
 		addNewBtn.addClickListener(e -> {
-			popup.setPopupVisible(true);
-			userEditor.editStudent(new org.eclipse.kuksa.appstore.model.User(null, "", "", false));
+			userEditorWindow.center();
+			VaadinUI.getCurrent().addWindow(userEditorWindow);
+			userEditor.editUser(new org.eclipse.kuksa.appstore.model.User(null, "", "", UserType.Normal, null, null));
 		});
 
 		userEditor.save.addClickListener(e -> {
+			if (userEditor.user.getUsername() != null && !userEditor.user.getUsername().isEmpty()
+					&& userEditor.user.getPassword() != null && !userEditor.user.getPassword().isEmpty()) {
+				if (userEditor.user.getUserType() != UserType.GroupAdmin && userEditor.user.getOem() != null) {
 
-			try {
-				userManagerService.updateUser(userEditor.user);
-			} catch (Exception e1) {
+					userEditor.user.setOem(null);
+				}
+				if (userEditor.user.getUserType() != UserType.GroupAdmin && userEditor.user.getId() != null) {
 
-				new Notification("Error", "Wrong Email!!", Notification.Type.ERROR_MESSAGE)
-						.show(com.vaadin.server.Page.getCurrent());
-				System.out.println("Exception thrown  :" + e1);
+					userService.deleteAllMembers(userEditor.user.getId().toString());
+				}
+				List<User> rightList = userEditor.right.getDataCommunicator().fetchItemsWithRange(0,
+						userEditor.right.getDataCommunicator().getDataProviderSize());
+
+				Set<User> newmemberList = new HashSet<User>();
+				for (int i = 0; i < rightList.size(); i++) {
+					newmemberList.add(userService.findById(rightList.get(i).getId().toString()));
+				}
+				userEditor.user.setMembers(newmemberList);
+
+
+				if (userEditor.user.getId() != null) {
+
+					try {
+						userService.deleteAllMembers(userEditor.user.getId().toString());
+						userService.updateUser(userEditor.user.getId().toString(), userEditor.user);
+						listUsers(null);
+						VaadinUI.getCurrent().removeWindow(userEditorWindow);
+						new Notification("Succes Updating", "The User has been updated.",
+								Notification.Type.TRAY_NOTIFICATION).show(Page.getCurrent());
+					} catch (NotFoundException e1) {
+						new Notification("NotFound Exist Exception", "User not found.", Notification.Type.ERROR_MESSAGE)
+								.show(Page.getCurrent());
+					} catch (BadRequestException e1) {
+						new Notification("Bad Request Exception", e1.getMessage(), Notification.Type.ERROR_MESSAGE)
+								.show(Page.getCurrent());
+					} catch (AlreadyExistException e1) {
+						new Notification("Already Exist Exception", "Username already exists.",
+								Notification.Type.ERROR_MESSAGE).show(Page.getCurrent());
+					}
+
+				} else {
+					try {
+						userService.createUser(userEditor.user.getUsername(), userEditor.user.getPassword(),
+								userEditor.user.getUserType(), userEditor.user.getOem(), userEditor.user.getMembers());
+						listUsers(null);
+
+						VaadinUI.getCurrent().removeWindow(userEditorWindow);
+						new Notification("Succes Creating", "The User has been created.",
+								Notification.Type.TRAY_NOTIFICATION).show(Page.getCurrent());
+					} catch (AlreadyExistException e1) {
+						new Notification("Already Exist Exception", e1.getMessage(),
+								Notification.Type.ERROR_MESSAGE).show(Page.getCurrent());
+					} catch (BadRequestException e1) {
+						new Notification("Bad Request Exception", e1.getMessage(), Notification.Type.ERROR_MESSAGE)
+								.show(Page.getCurrent());
+					}
+				}
+			} else {
+				new Notification("Fill the mandatory fields", "Username and Password are mandatory fields.",
+						Notification.Type.ERROR_MESSAGE).show(Page.getCurrent());
 			}
-
-			System.out.println(userEditor.user.getId());
-			listUsers(null);
-			userEditor.setVisible(false);
-			new Notification("Succes Updating", "The User has been updated.", Notification.Type.TRAY_NOTIFICATION)
-					.show(Page.getCurrent());
 		});
 
 		userEditor.delete.addClickListener(e -> {
-			userManagerService.deleteUser(userEditor.user);
+			userService.deleteUser(userEditor.user);
 			listUsers(null);
-			userEditor.setVisible(false);
+			VaadinUI.getCurrent().removeWindow(userEditorWindow);
 			new Notification("Succes Deleting", "The User has been deleted.", Notification.Type.TRAY_NOTIFICATION)
 					.show(Page.getCurrent());
 		});
 
 		userEditor.cancel.addClickListener(e -> {
-			userEditor.editStudent(userEditor.user);
+			userEditor.editUser(userEditor.user);
 			listUsers(null);
-			userEditor.setVisible(false);
+			VaadinUI.getCurrent().removeWindow(userEditorWindow);
 		});
 
 		// Listen changes made by the filter textbox, refresh data from backend
 		searchText.setPlaceholder("Search by Username");
 		searchText.addValueChangeListener(event -> {
-			userEditor.setVisible(false);
 			listUsers(event.getValue());
 		});
 
 		setCompositionRoot(mainLayout);
 	}
+
 	private void addEditColumn(String caption) {
-        ImageRenderer<User> renderer = new ImageRenderer<>();
-        renderer.addClickListener(e -> iconClicked(e.getItem()));
+		ImageRenderer<User> renderer = new ImageRenderer<>();
+		renderer.addClickListener(e -> iconClicked(e.getItem()));
 
-        Grid.Column<User, ThemeResource> iconColumn =
-                grid.addColumn(i -> new ThemeResource("img/edit.png"), renderer);
-        iconColumn.setCaption(caption);
-        iconColumn.setMaximumWidth(70);
-        grid.addItemClickListener(e -> {
-            if (e.getColumn().equals(iconColumn)) {
-                iconClicked(e.getItem());
-            }
-        });
-    }
-    private void iconClicked(User user) {
-    	
-		User item = userManagerService.findById(user.getId().toString());
+		Grid.Column<User, ThemeResource> iconColumn = grid.addColumn(i -> new ThemeResource("img/edit.png"), renderer);
+		iconColumn.setCaption(caption);
+		iconColumn.setMaximumWidth(70);
+		grid.addItemClickListener(e -> {
+			if (e.getColumn().equals(iconColumn)) {
+				iconClicked(e.getItem());
+			}
+		});
+	}
 
+	private void iconClicked(User user) {
+
+		User item = userService.findById(user.getId().toString());
 		grid.select(item);
+		userEditorWindow.center();
+		VaadinUI.getCurrent().addWindow(userEditorWindow);
+	}
 
-		popup.setPopupVisible(true);
-    }
 	@PostConstruct
 	public void init() {
 		listUsers(null);
+		userEditor.setUserService(userService);
+		userEditor.setOemService(oemService);
 	}
 
 	public void listUsers(String searchText) {
 		if (StringUtils.isEmpty(searchText)) {
-			grid.setItems(userManagerService.findAll());
+			grid.setItems(userService.findAll());
 		} else {
-			grid.setItems(userManagerService.findByUserNameStartsWithIgnoreCase(searchText));
+			grid.setItems(userService.findByUserNameStartsWithIgnoreCase(searchText));
 		}
 	}
 

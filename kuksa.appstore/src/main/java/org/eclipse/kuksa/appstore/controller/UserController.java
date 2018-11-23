@@ -73,7 +73,7 @@ public class UserController {
 	@PostMapping("/user")
 	public ResponseEntity<?> createUser(@Valid @RequestBody User user)
 			throws AlreadyExistException, BadRequestException {
-		Result<?> response = userService.createUser(user.getUsername(), user.getPassword(), user.getAdminuser());
+		Result<?> response = userService.createUser(user.getUsername(), user.getPassword(), user.getUserType(), user.getOem(), user.getMembers());
 		if (response.isSuccess()) {
 			LOG.debug("[createUser]: createUser request is processed successfully. user: {}", user);
 			return new ResponseEntity<>(response.getPayload(), HttpStatus.OK);

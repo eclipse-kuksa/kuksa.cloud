@@ -13,6 +13,7 @@
 package org.eclipse.kuksa.appstore.ui;
 
 import org.eclipse.kuksa.appstore.model.User;
+import org.eclipse.kuksa.appstore.model.UserType;
 import org.eclipse.kuksa.appstore.repo.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -73,57 +74,60 @@ public class VaadinUI extends UI {
 
 			getNavigator().addView(AppEditView.VIEW_NAME, AppEditView.class);
 			getNavigator().addView(AppsListView.VIEW_NAME, AppsListView.class);
-			getNavigator().addView(AppView.VIEW_NAME, AppsListView.class);
-			getNavigator().addView(MyAppsListView.VIEW_NAME, MyAppsListView.class);
+			getNavigator().addView(AppView.VIEW_NAME, AppView.class);
+			getNavigator().addView(InstalledAppsListView.VIEW_NAME, InstalledAppsListView.class);
 			getNavigator().addView(UserEditView.VIEW_NAME, UserEditView.class);
 			getNavigator().addView(SignUpView.VIEW_NAME, SignUpView.class);
 			getNavigator().addView(ProfileEditView.VIEW_NAME, ProfileEditView.class);
-			if (route.equals("!main")) {
-				if (loggedUser.getAdminuser() == true) {
+			getNavigator().addView(PurchasedAppsListView.VIEW_NAME, PurchasedAppsListView.class);
+			if (route.equals("!appedit")) {
+				if (loggedUser.getUserType() == UserType.SystemAdmin) {
 
-					getNavigator().navigateTo(AppEditView.VIEW_NAME);
+					Page.getCurrent().setUriFragment("!" + AppEditView.VIEW_NAME);
 				} else {
 
-					getNavigator().navigateTo(AppsListView.VIEW_NAME);
+					Page.getCurrent().setUriFragment("!" + AppsListView.VIEW_NAME);
 				}
 
 			} else if (route.equals("!applist")) {
-				getNavigator().navigateTo(AppsListView.VIEW_NAME);
+				Page.getCurrent().setUriFragment("!" + AppsListView.VIEW_NAME);
 			} else if (route.equals("!app")) {
-				getNavigator().navigateTo(AppView.VIEW_NAME);
-			} else if (route.equals("!myapps")) {
-				getNavigator().navigateTo(MyAppsListView.VIEW_NAME);
+				Page.getCurrent().setUriFragment("!" + AppView.VIEW_NAME);
+			} else if (route.equals("!installedapps")) {
+				Page.getCurrent().setUriFragment("!" + InstalledAppsListView.VIEW_NAME);
+			} else if (route.equals("!purchasedapps")) {
+				Page.getCurrent().setUriFragment("!" + PurchasedAppsListView.VIEW_NAME);
 			} else if (route.equals("!profile")) {
-				getNavigator().navigateTo(ProfileEditView.VIEW_NAME);
+				Page.getCurrent().setUriFragment("!" + ProfileEditView.VIEW_NAME);
 			} else if (route.equals("!useredit")) {
 
-				if (loggedUser.getAdminuser() == true) {
+				if (loggedUser.getUserType() == UserType.SystemAdmin) {
 
-					getNavigator().navigateTo(UserEditView.VIEW_NAME);
+					Page.getCurrent().setUriFragment("!" + UserEditView.VIEW_NAME);
 				} else {
 
-					getNavigator().navigateTo(AppsListView.VIEW_NAME);
+					Page.getCurrent().setUriFragment("!" + AppsListView.VIEW_NAME);
 				}
 
 			} else {
 
 				String gotopage;
 
-				gotopage = com.vaadin.server.Page.getCurrent().getUriFragment();
+				gotopage = Page.getCurrent().getUriFragment();
 
 				if (gotopage == null) {
 					gotopage = "!applist";
 
 				}
-				com.vaadin.server.Page.getCurrent().setUriFragment(gotopage);
+				Page.getCurrent().setUriFragment(gotopage);
 
 			}
 
 		} else {
 			if (route.equals("!signup")) {
-				com.vaadin.server.Page.getCurrent().setUriFragment("!" + SignUpView.VIEW_NAME);
+				Page.getCurrent().setUriFragment("!" + SignUpView.VIEW_NAME);
 			} else {
-				com.vaadin.server.Page.getCurrent().setUriFragment("!" + LoginView.VIEW_NAME);
+				Page.getCurrent().setUriFragment("!" + LoginView.VIEW_NAME);
 			}
 		}
 	}

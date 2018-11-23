@@ -8,7 +8,7 @@
  * SPDX-License-Identifier: EPL-2.0
  *  
  * Contributors:
- * Adem Kose and Fatih Ayvaz (Netas Telekomunikasyon A.S.) - Initial functionality
+ * Adem Kose, Fatih Ayvaz and Ilker Kuzu (Netas Telekomunikasyon A.S.) - Initial functionality
  ******************************************************************************/
 package org.eclipse.kuksa.appstore.configuration;
 import java.util.Collections;
@@ -48,6 +48,6 @@ public class SwaggerConfig {
           "1.0", 
           "Terms of service", 
           new Contact("Fatih Ayvaz", "https://www.eclipse.org/kuksa", "fayvaz@netas.com.tr"),          
-          "License of API", "license");
+          "License of API", "license", Collections.emptyList());
    }
 }

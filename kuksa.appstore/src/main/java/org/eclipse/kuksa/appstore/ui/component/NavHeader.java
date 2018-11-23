@@ -12,9 +12,11 @@
  ******************************************************************************/
 package org.eclipse.kuksa.appstore.ui.component;
 
+import org.eclipse.kuksa.appstore.model.UserType;
 import org.eclipse.kuksa.appstore.ui.AppEditView;
 import org.eclipse.kuksa.appstore.ui.AppsListView;
-import org.eclipse.kuksa.appstore.ui.MyAppsListView;
+import org.eclipse.kuksa.appstore.ui.InstalledAppsListView;
+import org.eclipse.kuksa.appstore.ui.PurchasedAppsListView;
 import org.eclipse.kuksa.appstore.ui.ProfileEditView;
 import org.eclipse.kuksa.appstore.ui.UserEditView;
 
@@ -43,13 +45,13 @@ public class NavHeader {
 		image = new Image();
 		image.setStyleName("v-logo");
 		image.addClickListener(e -> {
-			Page.getCurrent().setUriFragment("!" + "main");
+			Page.getCurrent().setUriFragment("!" + "appedit");
 		});
 		headerLayout.addComponent(image);
 		// LOGO
 
 		// App Edit
-		if (isCurrentUserAdmin.equals("true")) {		
+		if (isCurrentUserAdmin.equals(UserType.SystemAdmin.toString())) {		
 			if (!currentPage.equals(AppEditView.VIEW_NAME)) {
 				styleName = "v-test";
 			}
@@ -66,7 +68,7 @@ public class NavHeader {
 		// App Edit
 		
 
-		// Show All Apps
+		// Store
 		styleName = null;
 		if (!currentPage.equals(AppsListView.VIEW_NAME)) {
 			styleName = "v-test";
@@ -79,10 +81,10 @@ public class NavHeader {
 			}
 		};
 
-		headerLayout.addComponent(createNavItem("showallaps.png", styleName, "Show All Apps", listener));		
-		// Show All Apps
+		headerLayout.addComponent(createNavItem("showallaps.png", styleName, "Store", listener));		
+		// Store
 
-		if (isCurrentUserAdmin.equals("true")) {
+		if (isCurrentUserAdmin.equals(UserType.SystemAdmin.toString())) {
 			// User Edit
 			styleName = null;
 			if (!currentPage.equals(UserEditView.VIEW_NAME)) {
@@ -100,24 +102,39 @@ public class NavHeader {
 		}
 		
 		
-		// My Apps		
+		// Installed Apps
 		styleName = null;
-		if (!currentPage.equals(MyAppsListView.VIEW_NAME)) {
+		if (!currentPage.equals(InstalledAppsListView.VIEW_NAME)) {
 			styleName = "v-test";
 		}
 		listener = new LayoutClickListener() {
 
 			@Override
 			public void layoutClick(LayoutClickEvent event) {
-				Page.getCurrent().setUriFragment("!" + MyAppsListView.VIEW_NAME);
+				Page.getCurrent().setUriFragment("!" + InstalledAppsListView.VIEW_NAME);
 			}
 		};
 
-		headerLayout.addComponent(createNavItem("myapps.png", styleName, "My Apps", listener));	
-		// My Apps
-		
-		
-		
+		headerLayout.addComponent(createNavItem("installedapps.png", styleName, "Installed", listener));	
+		// Installed Apps
+
+
+		// Purchased Apps
+		styleName = null;
+		if (!currentPage.equals(PurchasedAppsListView.VIEW_NAME)) {
+			styleName = "v-test";
+		}
+		listener = new LayoutClickListener() {
+
+			@Override
+			public void layoutClick(LayoutClickEvent event) {
+				Page.getCurrent().setUriFragment("!" + PurchasedAppsListView.VIEW_NAME);
+			}
+		};
+
+		headerLayout.addComponent(createNavItem("purchased.png", styleName, "Purchased", listener));	
+		// Purchased Apps
+
 
 		// Logout
 		styleName = "v-test";		

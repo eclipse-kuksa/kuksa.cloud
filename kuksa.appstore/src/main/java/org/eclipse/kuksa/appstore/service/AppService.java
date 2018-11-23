@@ -19,7 +19,9 @@ import org.eclipse.kuksa.appstore.exception.BadRequestException;
 import org.eclipse.kuksa.appstore.exception.NotFoundException;
 import org.eclipse.kuksa.appstore.model.App;
 import org.eclipse.kuksa.appstore.model.Result;
+import org.eclipse.kuksa.appstore.model.User;
 import org.eclipse.kuksa.appstore.repo.AppRepository;
+import org.eclipse.kuksa.appstore.repo.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -30,6 +32,8 @@ import org.springframework.stereotype.Service;
 public class AppService {
 	@Autowired
 	AppRepository appRepository;
+	@Autowired
+	UserRepository userRepository;
 
 	public Result<?> createApp(App app) throws AlreadyExistException, BadRequestException {
 
@@ -38,7 +42,7 @@ public class AppService {
 
 			throw new BadRequestException("Name and Version are mandatory field!");
 
-		} else if (appRepository.findByNameStartsWithIgnoreCase(app.getName()).size() > 0) {
+		} else if (appRepository.findByNameIgnoreCase(app.getName()) != null) {
 			throw new AlreadyExistException("App name already exist. name: " + app.getName());
 		} else {
 			appRepository.save(app);
@@ -70,7 +74,7 @@ public class AppService {
 			throw new BadRequestException("App name and version are mandatory field!");
 
 		} else if (!currentApp.getName().equals(app.getName())) {
-			if (appRepository.findByName(app.getName()) != null) {
+			if (appRepository.findByNameIgnoreCase(app.getName()) != null) {
 				throw new AlreadyExistException("New App name already exist. New name: " + app.getName());
 			}
 		}
@@ -126,30 +130,61 @@ public class AppService {
 		appRepository.save(app);
 
 	}
-	
+
 	public App incrementAppDownloadCount(App app) {
 
-		 app.setDownloadcount(app.getDownloadcount() + 1);
-		 
-		 return app;
+		app.setDownloadcount(app.getDownloadcount() + 1);
+
+		return app;
 
 	}
 
-	public Page<App> findByNameStartsWithIgnoreCaseAndUsersUserName(String appname, String username,
+	public Page<App> findByNameStartsWithIgnoreCaseAndInstalledusersUserName(String appname, String username,
 			Pageable pageable) {
 
-		return appRepository.findByNameStartsWithIgnoreCaseAndUsersUsername(appname, username, pageable);
+		return appRepository.findByNameStartsWithIgnoreCaseAndInstalledusersUsername(appname, username, pageable);
 
 	}
 
-	public Page<App> findByNameStartsWithIgnoreCaseAndUsersId(String appname, Long userid, Pageable pageable) {
+	public Page<App> findByNameStartsWithIgnoreCaseAndInstalledusersId(String appname, Long userid, Pageable pageable) {
 
-		return appRepository.findByNameStartsWithIgnoreCaseAndUsersId(appname, userid, pageable);
+		return appRepository.findByNameStartsWithIgnoreCaseAndInstalledusersId(appname, userid, pageable);
 
 	}
 
 	public Page<App> findByIdIn(List<Long> myappsid, Pageable pageable) {
 
 		return appRepository.findByIdIn(myappsid, pageable);
+	}
+
+	public Page<App> findByAppcategoryId(Long id, Pageable pageable) {
+
+		return appRepository.findByAppcategoryId(id, pageable);
+
+	}
+
+	public Page<App> findByNameStartsWithIgnoreCaseAndAppcategoryId(String name, Long id, Pageable pageable) {
+
+		return appRepository.findByNameStartsWithIgnoreCaseAndAppcategoryId(name, id, pageable);
+
+	}
+
+	public Page<App> findUsersApps(String userId, List<String> oemList, Pageable pageable) {
+
+		return appRepository.findUsersApps(userId, oemList, pageable);
+
+	}
+
+	public Result<?> purchaseApp(Long userId, Long appId) throws NotFoundException {
+		List<User> ownerUserList;
+		App currentApp = appRepository.findById(appId);
+		if (currentApp == null) {
+			throw new NotFoundException("App not found. appId: " + appId);
+		}
+		ownerUserList = currentApp.getOwnerusers();
+		ownerUserList.add(userRepository.findById(userId));
+		currentApp.setOwnerusers(ownerUserList);
+		appRepository.save(currentApp);
+		return Result.success(HttpStatus.OK, currentApp);
 	}
 }
