@@ -172,7 +172,7 @@ public class ProfileEditView extends CustomComponent implements View {
 		deleteOemBtn.addClickListener(e -> {
 			try {
 				if (gridOem.asSingleSelect().getValue() != null) {
-					oemService.deleteOem(gridOem.asSingleSelect().getValue().getId().toString());
+					oemService.deleteOem(gridOem.asSingleSelect().getValue().getId());
 					listOems();
 					new Notification("Succes Deleting", "The Oem has been deleted.",
 							Notification.Type.TRAY_NOTIFICATION).show(Page.getCurrent());

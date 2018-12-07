@@ -44,6 +44,8 @@ public interface AppRepository extends CrudRepository<App, String> {
 
 	Page<App> findByNameStartsWithIgnoreCaseAndInstalledusersId(String appname, Long userid, Pageable pageable);
 
+	Page<App> findByInstalledusersId(Long userid, Pageable pageable);
+
 	Page<App> findByAppcategoryId(Long id, Pageable pageable);
 
 	Page<App> findByNameStartsWithIgnoreCaseAndAppcategoryId(String name, Long id, Pageable pageable);

@@ -168,7 +168,7 @@ public class AppView extends CustomComponent implements View {
 					// TODO Auto-generated method stub
 
 					if (comboBoxDevice.getValue() != null) {
-						String queryname = "name==" + currentApp.getHawkbitname();
+						String queryname = "name==" + currentApp.getName();
 						Rule ruleNew = new Rule();
 						ruleNew.setForcetime("1530893371603");
 						ruleNew.setId(messageFeignClient.getDistributionByName(queryname).getContent().get(0).getId());

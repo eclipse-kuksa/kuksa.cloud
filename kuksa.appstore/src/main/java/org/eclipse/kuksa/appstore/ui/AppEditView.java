@@ -132,52 +132,46 @@ public class AppEditView extends CustomComponent implements View {
 		});
 
 		appEditor.save.addClickListener(e -> {
-			if (appEditor.app.getAppcategory() != null && !appEditor.app.getName().isEmpty()
-					&& appEditor.app.getName() != null) {
 
-				if (appEditor.app.getId() != null) {
+			if (appEditor.app.getId() != null) {
 
-					appEditor.app.setHawkbitname(appEditor.app.getName().replace(" ", "_"));
-					appEditor.app.setPublishdate(new Timestamp(new Date().getTime()));
-					try {
-						appService.updateApp(appEditor.app.getId().toString(), appEditor.app);
-						listApps(null);
-						VaadinUI.getCurrent().removeWindow(appEditorWindow);
-						new Notification("Succes Updating", "The App has been updated.",
-								Notification.Type.TRAY_NOTIFICATION).show(Page.getCurrent());
-					} catch (NotFoundException e1) {
-						new Notification("Not Found Exception", e1.getMessage(), Notification.Type.ERROR_MESSAGE)
-								.show(Page.getCurrent());
-					} catch (BadRequestException e1) {
-						new Notification("Bad Request Exception", e1.getMessage(), Notification.Type.ERROR_MESSAGE)
-								.show(Page.getCurrent());
-					} catch (AlreadyExistException e1) {
-						new Notification("Already Exist Exception", "App Name already exists.",
-								Notification.Type.ERROR_MESSAGE).show(Page.getCurrent());
-					}
 
-				} else {
-					appEditor.app.setHawkbitname(appEditor.app.getName().replace(" ", "_"));
-					appEditor.app.setPublishdate(new Timestamp(new Date().getTime()));
-					try {
-						appService.createApp(appEditor.app);
-						listApps(null);
-						VaadinUI.getCurrent().removeWindow(appEditorWindow);
-						new Notification("Succes Updating", "The App has been updated.",
-								Notification.Type.TRAY_NOTIFICATION).show(Page.getCurrent());
-					} catch (AlreadyExistException e1) {
-						new Notification("Already Exist Exception", "App Name already exists.",
-								Notification.Type.ERROR_MESSAGE).show(Page.getCurrent());
-					} catch (BadRequestException e1) {
-						new Notification("Bad Request Exception", e1.getMessage(), Notification.Type.ERROR_MESSAGE)
-								.show(Page.getCurrent());
-					}
-
+				appEditor.app.setPublishdate(new Timestamp(new Date().getTime()));
+				try {
+					appService.updateApp(appEditor.app.getId().toString(), appEditor.app);
+					listApps(null);
+					VaadinUI.getCurrent().removeWindow(appEditorWindow);
+					new Notification("Succes Updating", "The App has been updated.",
+							Notification.Type.TRAY_NOTIFICATION).show(Page.getCurrent());
+				} catch (NotFoundException e1) {
+					new Notification("Not Found Exception", e1.getMessage(), Notification.Type.ERROR_MESSAGE)
+							.show(Page.getCurrent());
+				} catch (BadRequestException e1) {
+					new Notification("Bad Request Exception", e1.getMessage(), Notification.Type.ERROR_MESSAGE)
+							.show(Page.getCurrent());
+				} catch (AlreadyExistException e1) {
+					new Notification("Already Exist Exception", "App Name already exists.",
+							Notification.Type.ERROR_MESSAGE).show(Page.getCurrent());
 				}
+
 			} else {
-				new Notification("Fill the mandatory fields", "App Category and Name are mandatory fields.",
-						Notification.Type.ERROR_MESSAGE).show(Page.getCurrent());
+				appEditor.app.setPublishdate(new Timestamp(new Date().getTime()));
+				try {
+					appService.createApp(appEditor.app);
+					listApps(null);
+					VaadinUI.getCurrent().removeWindow(appEditorWindow);
+					new Notification("Succes Updating", "The App has been updated.",
+							Notification.Type.TRAY_NOTIFICATION).show(Page.getCurrent());
+				} catch (AlreadyExistException e1) {
+					new Notification("Already Exist Exception", "App Name already exists.",
+							Notification.Type.ERROR_MESSAGE).show(Page.getCurrent());
+				} catch (BadRequestException e1) {
+					new Notification("Bad Request Exception", e1.getMessage(), Notification.Type.ERROR_MESSAGE)
+							.show(Page.getCurrent());
+				}
+
 			}
+
 		});
 
 		appEditor.delete.addClickListener(e -> {
