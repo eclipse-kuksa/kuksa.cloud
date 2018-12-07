@@ -19,6 +19,7 @@ import java.util.List;
 import org.eclipse.kuksa.appstore.exception.AlreadyExistException;
 import org.eclipse.kuksa.appstore.exception.BadRequestException;
 import org.eclipse.kuksa.appstore.exception.NotFoundException;
+import org.eclipse.kuksa.appstore.model.AppCategory;
 import org.eclipse.kuksa.appstore.model.Oem;
 import org.eclipse.kuksa.appstore.model.Result;
 import org.eclipse.kuksa.appstore.repo.OemRepository;
@@ -66,33 +67,36 @@ public class OemService {
 
 	}
 
-	/*
-	 * public Result<?> updateOem(String oemId, Oem oem) throws NotFoundException,
-	 * BadRequestException, AlreadyExistException {
-	 * 
-	 * Oem currentOem = OemRepository.findById(Long.parseLong(oemId)); if
-	 * (currentOem == null) { throw new NotFoundException("Oem not found. appId: " +
-	 * oemId); } else if (oem.getName() == null || oem.getName().equals("") ||
-	 * oem.getName().contains(" ")) {
-	 * 
-	 * throw new BadRequestException("Oem name and version are mandatory field!");
-	 * 
-	 * } else if (!currentOem.getName().equals(oem.getName())) { if
-	 * (OemRepository.findByName(oem.getName()) != null) { throw new
-	 * AlreadyExistException( "New Oem name already exist. New name: " +
-	 * oem.getName()); } } oem.setId(currentOem.getId()); OemRepository.save(oem);
-	 * return Result.success(HttpStatus.OK, oem);
-	 * 
-	 * }
-	 */
+	public Result<?> updateOem(Long oemId, Oem oem)
+			throws NotFoundException, BadRequestException, AlreadyExistException {
+
+		Oem currentOEM = oemRepository.findById(oemId);
+		if (currentOEM == null) {
+			throw new NotFoundException(" currentOEM not found. appId: " + oemId);
+		} else if (oem.getName() == null || oem.getName().equals("")
+				|| oem.getName().contains(" ")) {
+
+			throw new BadRequestException("OEM name is mandatory field!");
+
+		} else if (!currentOEM.getName().equals(oem.getName())) {
+			if (oemRepository.findByName(oem.getName()) != null) {
+				throw new AlreadyExistException(
+						"New Oem name already exist. New oem name: " + oem.getName());
+			}
+		}
+		oem.setId(currentOEM.getId());
+		oemRepository.save(oem);
+		return Result.success(HttpStatus.OK, oem);
+
+	}
 	public void deleteOem(Oem oem) {
 
 		oemRepository.delete(oem);
 
 	}
 
-	public void deleteOem(String oemId) throws NotFoundException {
-		Oem currentOem = oemRepository.findById(Long.parseLong(oemId));
+	public void deleteOem(Long oemId) throws NotFoundException {
+		Oem currentOem = oemRepository.findById(oemId);
 		if (currentOem == null) {
 			throw new NotFoundException("Oem not found. userId: " + oemId);
 		} else {
@@ -105,11 +109,11 @@ public class OemService {
 		return oemRepository.findAll();
 	}
 
-	/*
-	 * public Page<Oem> findAll(Pageable pageable) {
-	 * 
-	 * return OemRepository.findAll(pageable); }
-	 */
+	public Page<Oem> findAll(Pageable pageable) {
+
+		return oemRepository.findAll(pageable);
+	}
+
 	public List<String> getAllId() {
 
 		List<String> list = new ArrayList<>();

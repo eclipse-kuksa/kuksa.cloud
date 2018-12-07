@@ -44,7 +44,7 @@ import io.swagger.annotations.Authorization;
 
 @RestController
 @RequestMapping("/api/1.0")
-@Api(value = "/api/1.0", description = "User API Rest Controller", tags = "User API", consumes = "application/json")
+@Api(value = "/api/1.0", description = "User API", tags = "User", consumes = "application/json")
 public class UserController {
 	private final Logger LOG = LoggerFactory.getLogger(this.getClass());
 	@Autowired
@@ -52,7 +52,7 @@ public class UserController {
 	@Autowired
 	AppService appService;
 
-	@ApiOperation(notes = "This process is used to get an user with Id of an user. Id parameter should given in get operation.", value = "Getting an User", nickname = "getUserbyId", produces = "application/json", authorizations = @Authorization(value = "api_key"))
+	@ApiOperation(notes = "Returns the User specified by the userId parameter. The response includes all details about the User.", value = "Getting an User", nickname = "getUserbyId", produces = "application/json", authorizations = @Authorization(value = "api_key"))
 	@ApiImplicitParam(name = "Authorization", value = "Token Format: 'base64(username: password)'", required = true, dataType = "String", paramType = "Header", defaultValue = "Basic Token")
 	@GetMapping(value = "/user/{userId}")
 	public ResponseEntity<?> getUserbyId(@PathVariable String userId) throws NotFoundException {
@@ -68,22 +68,23 @@ public class UserController {
 
 	}
 
-	@ApiOperation(notes = "This process is used to create an user with User model. Id parameter should not implemented in post operation because of that it is already given by server.", value = "Create an User", nickname = "createUser", produces = "application/json", authorizations = @Authorization(value = "api_key"))
+	@ApiOperation(notes = "Creates an User defined in the request JSON body. Id field should not implemented in post request JSON body because of that it is already given by server.", value = "Create an User", nickname = "createUser", produces = "application/json", authorizations = @Authorization(value = "api_key"))
 	@ApiImplicitParam(name = "Authorization", value = "Token Format: 'base64(username: password)'", required = true, dataType = "String", paramType = "Header", defaultValue = "Basic Token")
 	@PostMapping("/user")
 	public ResponseEntity<?> createUser(@Valid @RequestBody User user)
 			throws AlreadyExistException, BadRequestException {
-		Result<?> response = userService.createUser(user.getUsername(), user.getPassword(), user.getUserType(), user.getOem(), user.getMembers());
+		Result<?> response = userService.createUser(user.getUsername(), user.getPassword(), user.getUserType(),
+				user.getOem(), user.getMembers());
 		if (response.isSuccess()) {
 			LOG.debug("[createUser]: createUser request is processed successfully. user: {}", user);
-			return new ResponseEntity<>(response.getPayload(), HttpStatus.OK);
+			return new ResponseEntity<>(response.getPayload(), HttpStatus.CREATED);
 		} else {
 			LOG.debug("[createUser]: createUser request is received. user: {}", user);
 			return new ResponseEntity<>(HttpStatus.BAD_REQUEST.getReasonPhrase(), HttpStatus.BAD_REQUEST);
 		}
 	}
 
-	@ApiOperation(notes = "This process is used to update an user with Id of an user. Id parameter should given in put operation.", value = "Updating an User", nickname = "updateUser", produces = "application/json", authorizations = @Authorization(value = "api_key"))
+	@ApiOperation(notes = "Updates the User identified by the appId parameter and the JSON body.", value = "Updating an User", nickname = "updateUser", produces = "application/json", authorizations = @Authorization(value = "api_key"))
 	@ApiImplicitParam(name = "Authorization", value = "Token Format: 'base64(username: password)'", required = true, dataType = "String", paramType = "Header", defaultValue = "Basic Token")
 	@PutMapping("/user/{userId}")
 	public ResponseEntity<?> updateUser(@PathVariable String userId, @Valid @RequestBody User user)
@@ -99,7 +100,7 @@ public class UserController {
 		}
 	}
 
-	@ApiOperation(notes = "This process is used to delete an user with Id of an user. Id parameter should given in delete operation.", value = "Deleting an User", nickname = "deleteUser", produces = "application/json", authorizations = @Authorization(value = "api_key"))
+	@ApiOperation(notes = "Deletes the User specified by the userId path parameter.", value = "Deleting an User", nickname = "deleteUser", produces = "application/json", authorizations = @Authorization(value = "api_key"))
 	@ApiImplicitParam(name = "Authorization", value = "Token Format: 'base64(username: password)'", required = true, dataType = "String", paramType = "Header", defaultValue = "Basic Token")
 	@DeleteMapping("/user/{userId}")
 	public ResponseEntity<?> deleteUser(@PathVariable String userId) throws NotFoundException {
@@ -110,9 +111,9 @@ public class UserController {
 		return new ResponseEntity<>(null, HttpStatus.OK);
 	}
 
-	@ApiOperation(notes = "This process is used to get all user.You can use Pageable that ensures that You can get a page you want.", value = "Getting all User", nickname = "getAllUser", produces = "application/json", authorizations = @Authorization(value = "api_key"))
+	@ApiOperation(notes = "Returns all Users.", value = "Getting all User", nickname = "getAllUser", produces = "application/json", authorizations = @Authorization(value = "api_key"))
 	@ApiImplicitParam(name = "Authorization", value = "Token Format: 'base64(username: password)'", required = true, dataType = "String", paramType = "Header", defaultValue = "Basic Token")
-	@GetMapping(value = "/users")
+	@GetMapping(value = "/user")
 	public ResponseEntity<?> getAllUser(Pageable pageable) throws NotFoundException {
 
 		Page<User> users = userService.findAll(pageable);

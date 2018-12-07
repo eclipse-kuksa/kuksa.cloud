@@ -461,31 +461,31 @@ echo "\nend Create User to Appstore\n"
 #Purchase App for an user on Appstore
 echo "\nstart Purchase App for an user on Appstore\n"
 
-curl "http://$APPSTORE_IP_PORT/api/1.0/apps/1/purchase/2" -X GET --header 'Accept: application/json' --header 'Authorization: Basic YWRtaW46YWRtaW4='
+curl "http://$APPSTORE_IP_PORT/api/1.0/app/1/purchase/2" -X GET --header 'Accept: application/json' --header 'Authorization: Basic YWRtaW46YWRtaW4='
 
-curl "http://$APPSTORE_IP_PORT/api/1.0/apps/1/purchase/3" -X GET --header 'Accept: application/json' --header 'Authorization: Basic YWRtaW46YWRtaW4='
+curl "http://$APPSTORE_IP_PORT/api/1.0/app/1/purchase/3" -X GET --header 'Accept: application/json' --header 'Authorization: Basic YWRtaW46YWRtaW4='
 
-curl "http://$APPSTORE_IP_PORT/api/1.0/apps/1/purchase/5" -X GET --header 'Accept: application/json' --header 'Authorization: Basic YWRtaW46YWRtaW4='
+curl "http://$APPSTORE_IP_PORT/api/1.0/app/1/purchase/5" -X GET --header 'Accept: application/json' --header 'Authorization: Basic YWRtaW46YWRtaW4='
 
-curl "http://$APPSTORE_IP_PORT/api/1.0/apps/2/purchase/3" -X GET --header 'Accept: application/json' --header 'Authorization: Basic YWRtaW46YWRtaW4='
+curl "http://$APPSTORE_IP_PORT/api/1.0/app/2/purchase/3" -X GET --header 'Accept: application/json' --header 'Authorization: Basic YWRtaW46YWRtaW4='
 
-curl "http://$APPSTORE_IP_PORT/api/1.0/apps/2/purchase/6" -X GET --header 'Accept: application/json' --header 'Authorization: Basic YWRtaW46YWRtaW4='
+curl "http://$APPSTORE_IP_PORT/api/1.0/app/2/purchase/6" -X GET --header 'Accept: application/json' --header 'Authorization: Basic YWRtaW46YWRtaW4='
 
-curl "http://$APPSTORE_IP_PORT/api/1.0/apps/3/purchase/3" -X GET --header 'Accept: application/json' --header 'Authorization: Basic YWRtaW46YWRtaW4='
+curl "http://$APPSTORE_IP_PORT/api/1.0/app/3/purchase/3" -X GET --header 'Accept: application/json' --header 'Authorization: Basic YWRtaW46YWRtaW4='
 
-curl "http://$APPSTORE_IP_PORT/api/1.0/apps/3/purchase/4" -X GET --header 'Accept: application/json' --header 'Authorization: Basic YWRtaW46YWRtaW4='
+curl "http://$APPSTORE_IP_PORT/api/1.0/app/3/purchase/4" -X GET --header 'Accept: application/json' --header 'Authorization: Basic YWRtaW46YWRtaW4='
 
-curl "http://$APPSTORE_IP_PORT/api/1.0/apps/4/purchase/5" -X GET --header 'Accept: application/json' --header 'Authorization: Basic YWRtaW46YWRtaW4='
+curl "http://$APPSTORE_IP_PORT/api/1.0/app/4/purchase/5" -X GET --header 'Accept: application/json' --header 'Authorization: Basic YWRtaW46YWRtaW4='
 
-curl "http://$APPSTORE_IP_PORT/api/1.0/apps/5/purchase/6" -X GET --header 'Accept: application/json' --header 'Authorization: Basic YWRtaW46YWRtaW4='
+curl "http://$APPSTORE_IP_PORT/api/1.0/app/5/purchase/6" -X GET --header 'Accept: application/json' --header 'Authorization: Basic YWRtaW46YWRtaW4='
 
-curl "http://$APPSTORE_IP_PORT/api/1.0/apps/6/purchase/7" -X GET --header 'Accept: application/json' --header 'Authorization: Basic YWRtaW46YWRtaW4='
+curl "http://$APPSTORE_IP_PORT/api/1.0/app/6/purchase/7" -X GET --header 'Accept: application/json' --header 'Authorization: Basic YWRtaW46YWRtaW4='
 
-curl "http://$APPSTORE_IP_PORT/api/1.0/apps/7/purchase/8" -X GET --header 'Accept: application/json' --header 'Authorization: Basic YWRtaW46YWRtaW4='
+curl "http://$APPSTORE_IP_PORT/api/1.0/app/7/purchase/8" -X GET --header 'Accept: application/json' --header 'Authorization: Basic YWRtaW46YWRtaW4='
 
-curl "http://$APPSTORE_IP_PORT/api/1.0/apps/8/purchase/9" -X GET --header 'Accept: application/json' --header 'Authorization: Basic YWRtaW46YWRtaW4='
+curl "http://$APPSTORE_IP_PORT/api/1.0/app/8/purchase/9" -X GET --header 'Accept: application/json' --header 'Authorization: Basic YWRtaW46YWRtaW4='
 
-curl "http://$APPSTORE_IP_PORT/api/1.0/apps/9/purchase/10" -X GET --header 'Accept: application/json' --header 'Authorization: Basic YWRtaW46YWRtaW4='
+curl "http://$APPSTORE_IP_PORT/api/1.0/app/9/purchase/10" -X GET --header 'Accept: application/json' --header 'Authorization: Basic YWRtaW46YWRtaW4='
 
 
 

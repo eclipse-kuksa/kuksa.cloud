@@ -56,7 +56,7 @@ public class UserService {
 			 */ else {
 			userRepository.save(newUser);
 		}
-		return Result.success(HttpStatus.CREATED, newUser);
+		return Result.success(HttpStatus.CREATED, userRepository.findByUsername(username));
 
 	}
 
@@ -71,6 +71,10 @@ public class UserService {
 		User currentUser = userRepository.findById(Long.parseLong(userId));
 		if (currentUser == null) {
 			throw new NotFoundException("User not found. userId: " + userId);
+		} else if (userObject.getId() != null && !userObject.getId().toString().equals(userId)) {
+
+			throw new BadRequestException("The userId parameter and id of userObject should be same!");
+
 		} else if (userObject.getUsername() == null || userObject.getUsername().equals("")) {
 
 			throw new BadRequestException("Username is mandatory field!");
@@ -93,6 +97,7 @@ public class UserService {
 						"New User name already exist. New username: " + userObject.getUsername());
 			}
 		}
+		userObject.setId(currentUser.getId());
 		userRepository.save(userObject);
 		return Result.success(HttpStatus.OK, userObject);
 

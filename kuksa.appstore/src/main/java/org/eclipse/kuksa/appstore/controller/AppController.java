@@ -45,15 +45,15 @@ import io.swagger.annotations.Authorization;
 
 @RestController
 @RequestMapping("/api/1.0")
-@Api(value = "/api/1.0", description = "App API Rest Controller", tags = "App API", consumes = "application/json")
+@Api(value = "/api/1.0", description = "Applications API", tags = "Applications", consumes = "application/json")
 public class AppController {
 	private final Logger LOG = LoggerFactory.getLogger(this.getClass());
 	@Autowired
 	AppService appService;
 
-	@ApiOperation(notes = "This process is used to get an app with Id of an app. Id parameter should given in get operation.", value = "Getting an App", nickname = "getAppbyId", produces = "application/json", authorizations = @Authorization(value = "api_key"))
+	@ApiOperation(notes = "Returns the App specified by the appId path parameter. The response includes all details about the App.", value = "Getting an App", nickname = "getAppbyId", produces = "application/json", authorizations = @Authorization(value = "api_key"))
 	@ApiImplicitParam(name = "Authorization", value = "Token Format: 'base64(username: password)'", required = true, dataType = "String", paramType = "Header", defaultValue = "Basic Token")
-	@GetMapping(value = "/apps/{appId}")
+	@GetMapping(value = "/app/{appId}")
 	public ResponseEntity<?> getAppbyId(@PathVariable String appId) throws NotFoundException {
 
 		App app = appService.findById(Long.parseLong(appId));
@@ -67,7 +67,7 @@ public class AppController {
 
 	}
 
-	@ApiOperation(notes = "This process is used to create app with app model. Id parameter should not implemented in post operation because of that it is already given by server", value = "Creating an App", nickname = "createApp", produces = "application/json", authorizations = @Authorization(value = "api_key"))
+	@ApiOperation(notes = "Creates an App defined in the request JSON body. Id field should not implemented in post request JSON body because of that it is already given by server.", value = "Creating an App", nickname = "createApp", produces = "application/json", authorizations = @Authorization(value = "api_key"))
 	@ApiImplicitParam(name = "Authorization", value = "Token Format: 'base64(username: password)'", required = true, dataType = "String", paramType = "Header", defaultValue = "Basic Token")
 	@PostMapping("/app")
 	public ResponseEntity<?> createApp(@Valid @RequestBody App app) throws AlreadyExistException, BadRequestException {
@@ -81,7 +81,7 @@ public class AppController {
 		}
 	}
 
-	@ApiOperation(notes = "This process is used to update an app with app model. Id parameter should given in put operation.", value = "Updating an App", nickname = "updateApp", produces = "application/json", authorizations = @Authorization(value = "api_key"))
+	@ApiOperation(notes = "Updates the App identified by the appId parameter and the JSON body.", value = "Updating an App", nickname = "updateApp", produces = "application/json", authorizations = @Authorization(value = "api_key"))
 	@ApiImplicitParam(name = "Authorization", value = "Token Format: 'base64(username: password)'", required = true, dataType = "String", paramType = "Header", defaultValue = "Basic Token")
 	@PutMapping("/app/{appId}")
 	public ResponseEntity<?> updateApp(@PathVariable String appId, @Valid @RequestBody App app)
@@ -97,7 +97,7 @@ public class AppController {
 		}
 	}
 
-	@ApiOperation(notes = "This process is used to delete an app with Id of an app. Id parameter should given in delete operation.", value = "Deleting an App", nickname = "deleteApp", produces = "application/json", authorizations = @Authorization(value = "api_key"))
+	@ApiOperation(notes = "Deletes the App specified by the appId parameter.", value = "Deleting an App", nickname = "deleteApp", produces = "application/json", authorizations = @Authorization(value = "api_key"))
 	@ApiImplicitParam(name = "Authorization", value = "Token Format: 'base64(username: password)'", required = true, dataType = "String", paramType = "Header", defaultValue = "Basic Token")
 	@DeleteMapping("/app/{appId}")
 	public ResponseEntity<?> deleteApp(@PathVariable String appId) throws NotFoundException {
@@ -108,9 +108,9 @@ public class AppController {
 		return new ResponseEntity<>(null, HttpStatus.OK);
 	}
 
-	@ApiOperation(notes = "This process is used to get all app. You can use Pageable that ensures that You can get a page you want.", value = "Getting all App", nickname = "getAllApp", produces = "application/json", authorizations = @Authorization(value = "api_key"))
+	@ApiOperation(notes = "Returns all Apps.", value = "Getting all App", nickname = "getAllApp", produces = "application/json", authorizations = @Authorization(value = "api_key"))
 	@ApiImplicitParam(name = "Authorization", value = "Token Format: 'base64(username: password)'", required = true, dataType = "String", paramType = "Header", defaultValue = "Basic Token")
-	@GetMapping(value = "/apps")
+	@GetMapping(value = "/app")
 	public ResponseEntity<?> getAllApp(Pageable pageable) throws NotFoundException {
 
 		Page<App> apps = appService.findAll(pageable);
@@ -123,10 +123,10 @@ public class AppController {
 		}
 	}
 
-	@ApiOperation(notes = "This process is used to get User's installed apps. You can use Pageable that ensures that You can get a page you want.", value = "Getting User's Installed Apps", nickname = "getAllInstalledApps", produces = "application/json", authorizations = @Authorization(value = "api_key"))
+	@ApiOperation(notes = "Returns user's purchased apps.", value = "Getting User's Purchased Apps", nickname = "getPurchasedAppsbyUserId", produces = "application/json", authorizations = @Authorization(value = "api_key"))
 	@ApiImplicitParam(name = "Authorization", value = "Token Format: 'base64(username: password)'", required = true, dataType = "String", paramType = "Header", defaultValue = "Basic Token")
-	@GetMapping(value = "/apps/user/{userId}")
-	public ResponseEntity<?> getUserApssbyUserId(@PathVariable Long userId, Pageable pageable)
+	@GetMapping(value = "/app/purchased/user/{userId}")
+	public ResponseEntity<?> getPurchasedAppsbyUserId(@PathVariable Long userId, Pageable pageable)
 			throws NotFoundException {
 
 		Page<App> apps = appService.findByNameStartsWithIgnoreCaseAndInstalledusersId("", userId, pageable);
@@ -137,52 +137,69 @@ public class AppController {
 
 	}
 
-	@ApiOperation(notes = "This process is used to get User's installed app with filter text. You can use Pageable that ensures that You can get a page you want.", value = "Getting User's installed App with Filter Text", nickname = "getAllinstalledApps", produces = "application/json", authorizations = @Authorization(value = "api_key"))
+	@ApiOperation(notes = "Returns User's installed Apps by userId and name parameter. The name parameter ensures to search by App Name.", value = "Getting User's installed Apps.", nickname = "getUserApssbyUserId", produces = "application/json", authorizations = @Authorization(value = "api_key"))
 	@ApiImplicitParam(name = "Authorization", value = "Token Format: 'base64(username: password)'", required = true, dataType = "String", paramType = "Header", defaultValue = "Basic Token")
-	@GetMapping(value = "/apps/user/{userId}/{text}")
-	public ResponseEntity<?> getUserApssbyUserIdAndText(@PathVariable Long userId, @PathVariable String text,
+	@GetMapping(value = "/app/installed/user/{userId}")
+	public ResponseEntity<?> getUserApssbyUserId(@PathVariable Long userId, Pageable pageable)
+			throws NotFoundException {
+
+		Page<App> apps = appService.findByInstalledusersId(userId, pageable);
+
+		LOG.debug("[getUserApssbyUserId]: getUserApssbyUserId request is processed successfully. userId: {}", userId);
+
+		return new ResponseEntity<>(apps, HttpStatus.OK);
+
+	}
+
+	@ApiOperation(notes = "Returns User's installed Apps by userId and name parameter. The name parameter ensures to search by App Name.", value = "Getting User's installed Apps by name.", nickname = "getUserApssbyUserIdAndName", produces = "application/json", authorizations = @Authorization(value = "api_key"))
+	@ApiImplicitParam(name = "Authorization", value = "Token Format: 'base64(username: password)'", required = true, dataType = "String", paramType = "Header", defaultValue = "Basic Token")
+	@GetMapping(value = "/app/installed/user/{userId}/{name}")
+	public ResponseEntity<?> getUserApssbyUserIdAndName(@PathVariable Long userId, @PathVariable String name,
 			Pageable pageable) throws NotFoundException {
 
-		Page<App> apps = appService.findByNameStartsWithIgnoreCaseAndInstalledusersId(text, userId, pageable);
+		Page<App> apps = appService.findByNameStartsWithIgnoreCaseAndInstalledusersId(name, userId, pageable);
 
 		LOG.debug(
-				"[getUserApssbyUserIdAndText]: getUserApssbyUserIdAndText request is processed successfully. Device: {}",
+				"[getUserApssbyUserIdAndName]: getUserApssbyUserIdAndName request is processed successfully. userId: {}",
 				userId);
 
 		return new ResponseEntity<>(apps, HttpStatus.OK);
 
 	}
 
-	@ApiOperation(notes = "This process is used to get app by App category Id. You can use Pageable that ensures that You can get a page you want.", value = "Getting Apps By App Category Id", nickname = "getAllAppsByAppcategoryId", produces = "application/json", authorizations = @Authorization(value = "api_key"))
+	@ApiOperation(notes = "Returns Apps specified by appCategoryId parameter.", value = "Getting Apps By App Category Id", nickname = "getApssbyAppCategoryId", produces = "application/json", authorizations = @Authorization(value = "api_key"))
 	@ApiImplicitParam(name = "Authorization", value = "Token Format: 'base64(username: password)'", required = true, dataType = "String", paramType = "Header", defaultValue = "Basic Token")
-	@GetMapping(value = "/apps/category/{appCategoryId}")
+	@GetMapping(value = "/app/category/{appCategoryId}")
 	public ResponseEntity<?> getApssbyAppCategoryId(@PathVariable Long appCategoryId, Pageable pageable)
 			throws NotFoundException {
 
 		Page<App> apps = appService.findByAppcategoryId(appCategoryId, pageable);
-
-		return new ResponseEntity<>(apps, HttpStatus.OK);
-
-	}
-
-	@ApiOperation(notes = "This process is used to get app by App category Id and filter text. You can use Pageable that ensures that You can get a page you want.", value = "Getting Apps By App Category Id with Filter Text", nickname = "getAllAppsByAppcategoryId", produces = "application/json", authorizations = @Authorization(value = "api_key"))
-	@ApiImplicitParam(name = "Authorization", value = "Token Format: 'base64(username: password)'", required = true, dataType = "String", paramType = "Header", defaultValue = "Basic Token")
-	@GetMapping(value = "/apps/category/{appCategoryId}/{text}")
-	public ResponseEntity<?> getApssbyNameStartsWithIgnoreCaseAndAppcategoryId(@PathVariable Long appCategoryId,
-			@PathVariable String text, Pageable pageable) throws NotFoundException {
-
-		Page<App> apps = appService.findByNameStartsWithIgnoreCaseAndAppcategoryId(text, appCategoryId, pageable);
 		LOG.debug(
-				"[getApssbyNameStartsWithIgnoreCaseAndAppcategoryId]: getApssbyNameStartsWithIgnoreCaseAndAppcategoryId request is processed successfully. appCategoryId: {}",
+				"[getApssbyAppCategoryId]: getApssbyAppCategoryId request is processed successfully. appCategoryId: {}",
 				appCategoryId);
 		return new ResponseEntity<>(apps, HttpStatus.OK);
 
 	}
 
-	@ApiOperation(notes = "This process is used to get app by App category Id and filter text. You can use Pageable that ensures that You can get a page you want.", value = "Purchase an App", nickname = "purchaseApp", produces = "application/json", authorizations = @Authorization(value = "api_key"))
+	@ApiOperation(notes = "Returns Apps specified by appCategoryId parameter and name parameter. The name parameter ensures to search by App Name.", value = "Getting Apps By App Category Id with Filter Text", nickname = "getApssbyNameAndAppcategoryId", produces = "application/json", authorizations = @Authorization(value = "api_key"))
 	@ApiImplicitParam(name = "Authorization", value = "Token Format: 'base64(username: password)'", required = true, dataType = "String", paramType = "Header", defaultValue = "Basic Token")
-	@GetMapping(value = "/apps/{appId}/purchase/{userId}")
-	public ResponseEntity<?> purchaseApp(@PathVariable Long userId, @PathVariable Long appId) throws NotFoundException {
+	@GetMapping(value = "/app/category/{appCategoryId}/{name}")
+	public ResponseEntity<?> getApssbyNameAndAppcategoryId(@PathVariable Long appCategoryId, @PathVariable String name,
+			Pageable pageable) throws NotFoundException {
+
+		Page<App> apps = appService.findByNameStartsWithIgnoreCaseAndAppcategoryId(name, appCategoryId, pageable);
+		LOG.debug(
+				"[getApssbyNameAndAppcategoryId]: getApssbyNameAndAppcategoryId request is processed successfully. appCategoryId: {}",
+				appCategoryId);
+		return new ResponseEntity<>(apps, HttpStatus.OK);
+
+	}
+
+	@ApiOperation(notes = "This process is used to purchase an App specified by userId and appId.", value = "Purchase an App", nickname = "purchaseApp", produces = "application/json", authorizations = @Authorization(value = "api_key"))
+	@ApiImplicitParam(name = "Authorization", value = "Token Format: 'base64(username: password)'", required = true, dataType = "String", paramType = "Header", defaultValue = "Basic Token")
+	@PostMapping(value = "/app/{appId}/purchase/{userId}")
+	public ResponseEntity<?> purchaseApp(@PathVariable Long userId, @PathVariable Long appId)
+			throws NotFoundException, BadRequestException {
 
 		LOG.debug("[purchaseApp]: purchaseApp request is processed successfully. purchaseApp: {}", appId);
 		return new ResponseEntity<>(appService.purchaseApp(userId, appId), HttpStatus.OK);

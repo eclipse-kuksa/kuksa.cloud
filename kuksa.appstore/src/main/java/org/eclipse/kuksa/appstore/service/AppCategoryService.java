@@ -73,7 +73,7 @@ public class AppCategoryService {
 		} else if (appCategory.getName() == null || appCategory.getName().equals("")
 				|| appCategory.getName().contains(" ")) {
 
-			throw new BadRequestException("AppCategory name and version are mandatory field!");
+			throw new BadRequestException("AppCategory name is mandatory field!");
 
 		} else if (!currentAppCategory.getName().equals(appCategory.getName())) {
 			if (appCategoryRepository.findByName(appCategory.getName()) != null) {

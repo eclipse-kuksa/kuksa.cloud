@@ -26,22 +26,23 @@ import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
+import javax.persistence.PrePersist;
+import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
 public class App {
 
-	public App(Long id, String name, String hawkbitname, String description, String version, String owner, int downloadcount,
-			Date publishdate) {
+	public App(Long id, String name, String hawkbitname, String description, String version, String owner,
+			int downloadcount, Date publishdate) {
 		super();
 		this.id = id;
 		this.name = name;
-		this.hawkbitname = hawkbitname;
 		this.description = description;
 		this.version = version;
 		this.owner = owner;
-		this.downloadcount=downloadcount;
+		this.downloadcount = downloadcount;
 		this.publishdate = publishdate;
 	}
 
@@ -52,9 +53,6 @@ public class App {
 
 	@Column(name = "name")
 	private String name;
-
-	@Column(name = "hawkbitname")
-	private String hawkbitname;
 
 	@Column(name = "description")
 	private String description;
@@ -71,18 +69,18 @@ public class App {
 	@Column(name = "publishdate")
 	private Date publishdate;
 
-	@ManyToMany(fetch = FetchType.EAGER,cascade = CascadeType.REMOVE)
+	@ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.REMOVE)
 	@JoinTable(name = "usersinstalledapps", joinColumns = @JoinColumn(name = "appid", referencedColumnName = "id"), inverseJoinColumns = @JoinColumn(name = "userid", referencedColumnName = "id"))
 	private List<User> installedusers;
 
-	@ManyToMany(fetch = FetchType.EAGER,cascade = CascadeType.REMOVE)
+	@ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.REMOVE)
 	@JoinTable(name = "userapps", joinColumns = @JoinColumn(name = "appid", referencedColumnName = "id"), inverseJoinColumns = @JoinColumn(name = "userid", referencedColumnName = "id"))
 	private List<User> ownerusers;
-	
+
 	@ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name = "appcategory_id", nullable = false)
 	private AppCategory appcategory;
-	
+
 	public App() {
 	}
 
@@ -96,25 +94,6 @@ public class App {
 
 	public String getName() {
 		return name;
-	}
-
-	public String getHawkbitname() {
-		return hawkbitname;
-	}
-
-	public void setHawkbitname(String hawkbitname) {
-
-		StringBuffer sb = new StringBuffer();
-
-		for (int i = 0; i < name.length(); i++) {
-			char c = name.charAt(i);
-			if (Character.isWhitespace(c)) {
-				c = '_';
-			}
-			sb.append(c);
-		}
-		this.hawkbitname = sb.toString();
-
 	}
 
 	public void setName(String name) {
@@ -135,7 +114,7 @@ public class App {
 
 	@Override
 	public String toString() {
-		return "App [id=" + id + ", name=" + name + ", hawkbitname=" + hawkbitname + ", description=" + description
+		return "App [id=" + id + ", name=" + name + ", description=" + description
 				+ ", version=" + version + ", owner=" + owner + ", downloadcount=" + downloadcount + ", publishdate="
 				+ publishdate + ", installedusers=" + installedusers + ", appcategory=" + appcategory + "]";
 	}
@@ -168,23 +147,24 @@ public class App {
 		this.downloadcount = downloadcount;
 	}
 
-	@JsonIgnore
-    public List<User> getInstalledusers() {
-        return installedusers;
-    }
+	//@JsonIgnore
+	public List<User> getInstalledusers() {
+		return installedusers;
+	}
 
-    public void setInstalledusers(List<User> installedusers) {
-        this.installedusers = installedusers;
-    }
-	@JsonIgnore
-    public List<User> getOwnerusers() {
-        return ownerusers;
-    }
+	public void setInstalledusers(List<User> installedusers) {
+		this.installedusers = installedusers;
+	}
 
-    public void setOwnerusers(List<User> ownerusers) {
-        this.ownerusers = ownerusers;
-    }
-    
+	//@JsonIgnore
+	public List<User> getOwnerusers() {
+		return ownerusers;
+	}
+
+	public void setOwnerusers(List<User> ownerusers) {
+		this.ownerusers = ownerusers;
+	}
+
 	public AppCategory getAppcategory() {
 		return appcategory;
 	}
@@ -193,6 +173,9 @@ public class App {
 		this.appcategory = appcategory;
 	}
 
-	
+	@PrePersist
+	void createdAt() {
+		this.publishdate = new Date();
+	}
 
 }
