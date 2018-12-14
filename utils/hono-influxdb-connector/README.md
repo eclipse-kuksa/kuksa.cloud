@@ -12,7 +12,7 @@ Contributors:
 *****************************************************************************
 -->
 
-# HonoInfluxDBConnector
+# Hono-InfluxDB-Connector
 
 ## General information
 
@@ -34,7 +34,7 @@ or provide environment variables for the configuration parameters (its standard 
 
 ## Configuration
 
-This section describes how to configure HonoInfluxDBConnector to operate on the idial.institute hono instance.
+This section describes how to configure the hono-influxdb-connector to operate on the idial.institute hono instance.
 
 **Install dependencies**
 
