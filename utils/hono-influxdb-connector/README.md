@@ -58,7 +58,7 @@ qpid.router.port=15671
 hono.tenant.id=DEFAULT_TENANT
 hono.user=user1@HONO
 hono.password=pw
-hono.trustedStorePath=src/main/resources/trusted-certs.pem
+hono.trustedStorePath=trusted-certs.pem
 hono.reconnectAttempts=100
 ```
 
