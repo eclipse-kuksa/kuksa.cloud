@@ -1,0 +1,18 @@
+# Intellij IDEA
+.idea/
+*.iml
+
+# Java
+*.class
+*.jar
+
+# Gradle
+build/
+gradle/
+gradlew
+gradlew.bat
+gradle-app.setting
+
+# Maven
+target/
+
