@@ -35,7 +35,8 @@ public class NavHeader {
 	private CustomLayout sample;
 	private Image image;
 	private String imgPath = "img";
-	private String styleName=null;
+	private String styleName = null;
+
 	public HorizontalLayout create(String currentPage, String isCurrentUserAdmin) {
 		HorizontalLayout headerLayout = new HorizontalLayout();
 		headerLayout.setStyleName("v-navHeader");
@@ -51,7 +52,7 @@ public class NavHeader {
 		// LOGO
 
 		// App Edit
-		if (isCurrentUserAdmin.equals(UserType.SystemAdmin.toString())) {		
+		if (isCurrentUserAdmin.equals(UserType.SystemAdmin.toString())) {
 			if (!currentPage.equals(AppEditView.VIEW_NAME)) {
 				styleName = "v-test";
 			}
@@ -66,7 +67,6 @@ public class NavHeader {
 			headerLayout.addComponent(createNavItem("appedit.png", styleName, "App Edit", listener));
 		}
 		// App Edit
-		
 
 		// Store
 		styleName = null;
@@ -81,10 +81,11 @@ public class NavHeader {
 			}
 		};
 
-		headerLayout.addComponent(createNavItem("showallaps.png", styleName, "Store", listener));		
+		headerLayout.addComponent(createNavItem("showallaps.png", styleName, "Store", listener));
 		// Store
 
-		if (isCurrentUserAdmin.equals(UserType.SystemAdmin.toString())) {
+		if (isCurrentUserAdmin.equals(UserType.SystemAdmin.toString())
+				|| isCurrentUserAdmin.equals(UserType.GroupAdmin.toString())) {
 			// User Edit
 			styleName = null;
 			if (!currentPage.equals(UserEditView.VIEW_NAME)) {
@@ -97,11 +98,10 @@ public class NavHeader {
 					Page.getCurrent().setUriFragment("!" + UserEditView.VIEW_NAME);
 				}
 			};
-			headerLayout.addComponent(createNavItem("useredit.png", styleName, "User Edit", listener));					
+			headerLayout.addComponent(createNavItem("useredit.png", styleName, "User Edit", listener));
 			// User Edit
 		}
-		
-		
+
 		// Installed Apps
 		styleName = null;
 		if (!currentPage.equals(InstalledAppsListView.VIEW_NAME)) {
@@ -115,9 +115,8 @@ public class NavHeader {
 			}
 		};
 
-		headerLayout.addComponent(createNavItem("installedapps.png", styleName, "Installed", listener));	
+		headerLayout.addComponent(createNavItem("installedapps.png", styleName, "Installed", listener));
 		// Installed Apps
-
 
 		// Purchased Apps
 		styleName = null;
@@ -132,12 +131,11 @@ public class NavHeader {
 			}
 		};
 
-		headerLayout.addComponent(createNavItem("purchased.png", styleName, "Purchased", listener));	
+		headerLayout.addComponent(createNavItem("purchased.png", styleName, "Purchased", listener));
 		// Purchased Apps
 
-
 		// Logout
-		styleName = "v-test";		
+		styleName = "v-test";
 		listener = new LayoutClickListener() {
 
 			@Override
@@ -146,12 +144,11 @@ public class NavHeader {
 				Page.getCurrent().setLocation("");
 			}
 		};
-		headerLayout.addComponent(createNavItem("logout.png", styleName, "Logout", listener));	
+		headerLayout.addComponent(createNavItem("logout.png", styleName, "Logout", listener));
 		// Logout
-		
-		
+
 		// Profile
-		styleName = "v-profilePhoto";		
+		styleName = "v-profilePhoto";
 		listener = new LayoutClickListener() {
 
 			@Override
@@ -159,8 +156,9 @@ public class NavHeader {
 				Page.getCurrent().setUriFragment("!" + ProfileEditView.VIEW_NAME);
 			}
 		};
-		headerLayout.addComponent(createNavItem("user.png", styleName, VaadinSession.getCurrent().getAttribute("user").toString(), listener));			
-		
+		headerLayout.addComponent(createNavItem("user.png", styleName,
+				VaadinSession.getCurrent().getAttribute("user").toString(), listener));
+
 		// Profile
 		return headerLayout;
 

@@ -10,8 +10,20 @@
  * Contributors:
  * Adem Kose, Fatih Ayvaz and Ilker Kuzu (Netas Telekomunikasyon A.S.) - Initial functionality
  ******************************************************************************/
-package org.eclipse.kuksa.appstore.model;
+package org.eclipse.kuksa.appstore.configuration;
 
-public class Modules {
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+import feign.auth.BasicAuthRequestInterceptor;
+import feign.codec.Encoder;
+
+public class HawkbitFeignConfig {
+
+	@Bean
+	public BasicAuthRequestInterceptor basicAuthRequestInterceptor() {
+		return new BasicAuthRequestInterceptor("admin", "admin");
+	}
+
 
 }

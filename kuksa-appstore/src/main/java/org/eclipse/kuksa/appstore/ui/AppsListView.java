@@ -12,7 +12,6 @@
  ******************************************************************************/
 package org.eclipse.kuksa.appstore.ui;
 
-import java.io.File;
 import java.util.List;
 
 import javax.annotation.PostConstruct;
@@ -20,8 +19,9 @@ import javax.annotation.PostConstruct;
 import org.eclipse.kuksa.appstore.model.App;
 import org.eclipse.kuksa.appstore.service.AppCategoryService;
 import org.eclipse.kuksa.appstore.service.AppService;
+import org.eclipse.kuksa.appstore.ui.component.AppGridView;
+import org.eclipse.kuksa.appstore.ui.component.AppViewBox;
 import org.eclipse.kuksa.appstore.ui.component.NavHeader;
-import org.eclipse.kuksa.appstore.utils.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -32,7 +32,6 @@ import com.vaadin.addon.pagination.PaginationChangeListener;
 import com.vaadin.addon.pagination.PaginationResource;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
-import com.vaadin.server.FileResource;
 import com.vaadin.server.VaadinSession;
 import com.vaadin.spring.annotation.SpringView;
 import com.vaadin.ui.ComboBox;
@@ -40,12 +39,9 @@ import com.vaadin.ui.Component;
 import com.vaadin.ui.CssLayout;
 import com.vaadin.ui.CustomComponent;
 import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Image;
 import com.vaadin.ui.ItemCaptionGenerator;
-import com.vaadin.ui.Label;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.themes.ValoTheme;
 
 @SpringView(name = AppsListView.VIEW_NAME)
 public class AppsListView extends CustomComponent implements View {
@@ -82,7 +78,7 @@ public class AppsListView extends CustomComponent implements View {
 		int total;
 		Page<App> appsList = findByText(serachText.getValue(), comboBox.getValue(), currentpage - 1, limit);
 		total = (int) appsList.getTotalElements();
-		appslayout = crateAppLayout(appsList);
+		appslayout = AppGridView.crateAppGridView(appsList, 3);
 
 		navHeaderLayout = new NavHeader().create(VIEW_NAME,
 				VaadinSession.getCurrent().getAttribute("isCurrentUserAdmin").toString());
@@ -120,7 +116,6 @@ public class AppsListView extends CustomComponent implements View {
 		setCompositionRoot(mainlayout);
 	}
 
-	// basla
 	public void listApps(String text, String categoryId) {
 
 		int currentpage = 1;
@@ -129,7 +124,7 @@ public class AppsListView extends CustomComponent implements View {
 		Page<App> appsList = findByText(text, categoryId, currentpage - 1, limit);
 		total = (int) appsList.getTotalElements();
 		CssLayout appslayoutnew = new CssLayout();
-		appslayoutnew = crateAppLayout(appsList);
+		appslayoutnew = AppGridView.crateAppGridView(appsList, 3);
 		mainlayout.removeAllComponents();
 		mainlayout.addComponent(navHeaderLayout);
 		mainlayout.addComponent(actions);
@@ -155,7 +150,7 @@ public class AppsListView extends CustomComponent implements View {
 				Page<App> appsList = findByText(serachText.getValue(), comboBox.getValue(), event.pageIndex(),
 						event.limit());
 				CssLayout appslayoutnew = new CssLayout();
-				appslayoutnew = crateAppLayout(appsList);
+				appslayoutnew = AppGridView.crateAppGridView(appsList, 3);
 				mainlayout.removeAllComponents();
 				mainlayout.addComponent(navHeaderLayout);
 				mainlayout.addComponent(actions);
@@ -200,73 +195,6 @@ public class AppsListView extends CustomComponent implements View {
 		layout.setSpacing(true);
 		layout.addComponents(pagination);
 		return layout;
-	}
-
-	private CssLayout crateAppLayout(Page<App> appsList) {
-		CssLayout mainlayout = new CssLayout();
-		VerticalLayout vlayout = new VerticalLayout();
-		HorizontalLayout hlayout;
-
-		List<App> listsApp = appsList.getContent();
-
-		int intFetchSize = 3;
-		int noOfRec = listsApp.size();
-		int rows = noOfRec / intFetchSize;
-		if (noOfRec % intFetchSize != 0) {
-			rows++;
-		}
-		for (int i = 0; i < rows; i++) {
-			hlayout = new HorizontalLayout();
-			for (int j = 0; j < intFetchSize; j++) {
-
-				int index = (i * intFetchSize) + (j);
-				if (index < listsApp.size()) {
-					hlayout.addComponent(createAppItem(listsApp.get(index)));
-				} else {
-					break;
-				}
-
-			}
-			vlayout.addComponent(hlayout);
-		}
-		mainlayout.addComponent(vlayout);
-
-		mainlayout.setSizeFull();
-
-		mainlayout.addStyleName("v-scrollable");
-		mainlayout.addStyleName("h-scrollable");
-		mainlayout.setHeight("100%");
-
-		return mainlayout;
-
-	}
-
-	private VerticalLayout createAppItem(App app) {
-		VerticalLayout vinsidelayout = new VerticalLayout();
-
-		String imageName = "app" + app.getId() + ".png";
-
-		Image image = new Image();
-		File new_file = new File(Utils.getImageFolderPath() + File.separator + imageName);
-		image.setSource(new FileResource(new_file));
-		image.setWidth("300");
-		image.setHeight("200");
-		image.addClickListener(e -> {
-			VaadinSession.getCurrent().setAttribute("app", app.getId());
-			com.vaadin.server.Page.getCurrent().setUriFragment("!" + AppView.VIEW_NAME);
-		});
-		Label namelabel = new Label(app.getName());
-		namelabel.setWidth("300");
-		namelabel.addStyleName(ValoTheme.LABEL_BOLD);
-		Label versionlabel = new Label(app.getVersion() + "    /    " + app.getAppcategory().getName());
-		versionlabel.setWidth("300");
-
-		vinsidelayout.addComponent(image);
-		vinsidelayout.addComponent(namelabel);
-		vinsidelayout.addComponent(versionlabel);
-
-		return vinsidelayout;
-
 	}
 
 	@Override

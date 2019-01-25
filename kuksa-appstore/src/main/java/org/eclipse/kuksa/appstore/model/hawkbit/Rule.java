@@ -10,13 +10,13 @@
  * Contributors:
  * Adem Kose, Fatih Ayvaz and Ilker Kuzu (Netas Telekomunikasyon A.S.) - Initial functionality
  ******************************************************************************/
-package org.eclipse.kuksa.appstore.model;
+package org.eclipse.kuksa.appstore.model.hawkbit;
 
 public class Rule {
 
 	RuleMain maintenanceWindow;
 	String forcetime;
-	String id;
+	Integer id;
 	String type;
 
 	@Override
@@ -41,11 +41,11 @@ public class Rule {
 		this.forcetime = forcetime;
 	}
 
-	public String getId() {
+	public Integer getId() {
 		return id;
 	}
 
-	public void setId(String id) {
+	public void setId(Integer id) {
 		this.id = id;
 	}
 

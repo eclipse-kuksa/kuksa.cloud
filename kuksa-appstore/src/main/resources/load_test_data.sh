@@ -42,187 +42,6 @@ curl "http://$HAWKBIT_IP_PORT/rest/v1/targets" -i -X POST -H 'Content-Type: appl
 echo "\nend CREATE_TARGET\n"
 #-------------
 
-#Create software modules
-echo "\nstart Create software modules\n"
-
-curl "http://$HAWKBIT_IP_PORT/rest/v1/softwaremodules" -i -X POST -H 'Content-Type: application/hal+json;charset=UTF-8' -H 'Authorization: Basic YWRtaW46YWRtaW4='  -d '[ {
-  "vendor" : "NETAS",
-  "name" : "app1",
-  "description" : "app for NETAS",
-  "type" : "os",
-  "version" : "1.0.0"
-} ]'
-
-curl "http://$HAWKBIT_IP_PORT/rest/v1/softwaremodules" -i -X POST -H 'Content-Type: application/hal+json;charset=UTF-8' -H 'Authorization: Basic YWRtaW46YWRtaW4='  -d '[ {
-  "vendor" : "NETAS",
-  "name" : "app2",
-  "description" : "app for NETAS",
-  "type" : "os",
-  "version" : "1.0.0"
-} ]'
-
-curl "http://$HAWKBIT_IP_PORT/rest/v1/softwaremodules" -i -X POST -H 'Content-Type: application/hal+json;charset=UTF-8' -H 'Authorization: Basic YWRtaW46YWRtaW4='  -d '[ {
-  "vendor" : "NETAS",
-  "name" : "app3",
-  "description" : "app for NETAS",
-  "type" : "os",
-  "version" : "1.0.0"
-} ]'
-
-curl "http://$HAWKBIT_IP_PORT/rest/v1/softwaremodules" -i -X POST -H 'Content-Type: application/hal+json;charset=UTF-8' -H 'Authorization: Basic YWRtaW46YWRtaW4='  -d '[ {
-  "vendor" : "NETAS",
-  "name" : "app4",
-  "description" : "app for NETAS",
-  "type" : "os",
-  "version" : "1.0.0"
-} ]'
-
-curl "http://$HAWKBIT_IP_PORT/rest/v1/softwaremodules" -i -X POST -H 'Content-Type: application/hal+json;charset=UTF-8' -H 'Authorization: Basic YWRtaW46YWRtaW4='  -d '[ {
-  "vendor" : "NETAS",
-  "name" : "app5",
-  "description" : "app for NETAS",
-  "type" : "os",
-  "version" : "1.0.0"
-} ]'
-
-curl "http://$HAWKBIT_IP_PORT/rest/v1/softwaremodules" -i -X POST -H 'Content-Type: application/hal+json;charset=UTF-8' -H 'Authorization: Basic YWRtaW46YWRtaW4='  -d '[ {
-  "vendor" : "NETAS",
-  "name" : "app6",
-  "description" : "app for NETAS",
-  "type" : "os",
-  "version" : "1.0.0"
-} ]'
-
-curl "http://$HAWKBIT_IP_PORT/rest/v1/softwaremodules" -i -X POST -H 'Content-Type: application/hal+json;charset=UTF-8' -H 'Authorization: Basic YWRtaW46YWRtaW4='  -d '[ {
-  "vendor" : "NETAS",
-  "name" : "app7",
-  "description" : "app for NETAS",
-  "type" : "os",
-  "version" : "1.0.0"
-} ]'
-
-curl "http://$HAWKBIT_IP_PORT/rest/v1/softwaremodules" -i -X POST -H 'Content-Type: application/hal+json;charset=UTF-8' -H 'Authorization: Basic YWRtaW46YWRtaW4='  -d '[ {
-  "vendor" : "NETAS",
-  "name" : "app8",
-  "description" : "app for NETAS",
-  "type" : "os",
-  "version" : "1.0.0"
-} ]'
-
-curl "http://$HAWKBIT_IP_PORT/rest/v1/softwaremodules" -i -X POST -H 'Content-Type: application/hal+json;charset=UTF-8' -H 'Authorization: Basic YWRtaW46YWRtaW4='  -d '[ {
-  "vendor" : "NETAS",
-  "name" : "app9",
-  "description" : "app for NETAS",
-  "type" : "os",
-  "version" : "1.0.0"
-} ]'
-
-echo "\nend Create software modules\n"
-#--------------
-
-#Create Distribution Sets
-echo "\nstart Create Distribution Sets\n"
-
-curl "http://$HAWKBIT_IP_PORT/rest/v1/distributionsets/" -i -X POST -H 'Content-Type: application/json;charset=UTF-8' -H 'Authorization: Basic YWRtaW46YWRtaW4='  -d '[ {
-  "requiredMigrationStep" : false,
-  "name" : "app1",
-  "description" : "This is a description of app1.",
-  "type" : "os_app",
-  "version" : "1.0.0",
-  "modules" : [ {
-    "id" : 1
-  } ]
-}]'
-
-curl "http://$HAWKBIT_IP_PORT/rest/v1/distributionsets/" -i -X POST -H 'Content-Type: application/json;charset=UTF-8' -H 'Authorization: Basic YWRtaW46YWRtaW4='  -d '[ {
-  "requiredMigrationStep" : false,
-  "name" : "app2",
-  "description" : "This is a description of app2.",
-  "type" : "os_app",
-  "version" : "1.0.0",
-  "modules" : [ {
-    "id" : 2
-  } ]
-}]'
-
-curl "http://$HAWKBIT_IP_PORT/rest/v1/distributionsets/" -i -X POST -H 'Content-Type: application/json;charset=UTF-8' -H 'Authorization: Basic YWRtaW46YWRtaW4='  -d '[ {
-  "requiredMigrationStep" : false,
-  "name" : "app3",
-  "description" : "This is a description of app3.",
-  "type" : "os_app",
-  "version" : "1.0.0",
-  "modules" : [ {
-    "id" : 3
-  } ]
-}]'
-
-curl "http://$HAWKBIT_IP_PORT/rest/v1/distributionsets/" -i -X POST -H 'Content-Type: application/json;charset=UTF-8' -H 'Authorization: Basic YWRtaW46YWRtaW4='  -d '[ {
-  "requiredMigrationStep" : false,
-  "name" : "app4",
-  "description" : "This is a description of app4.",
-  "type" : "os_app",
-  "version" : "1.0.0",
-  "modules" : [ {
-    "id" : 4
-  } ]
-}]'
-
-curl "http://$HAWKBIT_IP_PORT/rest/v1/distributionsets/" -i -X POST -H 'Content-Type: application/json;charset=UTF-8' -H 'Authorization: Basic YWRtaW46YWRtaW4='  -d '[ {
-  "requiredMigrationStep" : false,
-  "name" : "app5",
-  "description" : "This is a description of app5.",
-  "type" : "os_app",
-  "version" : "1.0.0",
-  "modules" : [ {
-    "id" : 5
-  } ]
-}]'
-
-curl "http://$HAWKBIT_IP_PORT/rest/v1/distributionsets/" -i -X POST -H 'Content-Type: application/json;charset=UTF-8' -H 'Authorization: Basic YWRtaW46YWRtaW4='  -d '[ {
-  "requiredMigrationStep" : false,
-  "name" : "app6",
-  "description" : "This is a description of app6.",
-  "type" : "os_app",
-  "version" : "1.0.0",
-  "modules" : [ {
-    "id" : 6
-  } ]
-}]'
-
-curl "http://$HAWKBIT_IP_PORT/rest/v1/distributionsets/" -i -X POST -H 'Content-Type: application/json;charset=UTF-8' -H 'Authorization: Basic YWRtaW46YWRtaW4='  -d '[ {
-  "requiredMigrationStep" : false,
-  "name" : "app7",
-  "description" : "This is a description of app7.",
-  "type" : "os_app",
-  "version" : "1.0.0",
-  "modules" : [ {
-    "id" : 7
-  } ]
-}]'
-
-curl "http://$HAWKBIT_IP_PORT/rest/v1/distributionsets/" -i -X POST -H 'Content-Type: application/json;charset=UTF-8' -H 'Authorization: Basic YWRtaW46YWRtaW4='  -d '[ {
-  "requiredMigrationStep" : false,
-  "name" : "app8",
-  "description" : "This is a description of app8.",
-  "type" : "os_app",
-  "version" : "1.0.0",
-  "modules" : [ {
-    "id" : 8
-  } ]
-}]'
-
-curl "http://$HAWKBIT_IP_PORT/rest/v1/distributionsets/" -i -X POST -H 'Content-Type: application/json;charset=UTF-8' -H 'Authorization: Basic YWRtaW46YWRtaW4='  -d '[ {
-  "requiredMigrationStep" : false,
-  "name" : "app9",
-  "description" : "This is a description of app9.",
-  "type" : "os_app",
-  "version" : "1.0.0",
-  "modules" : [ {
-    "id" : 9
-  } ]
-}]'
-echo "\nend Create Distribution Sets\n"
-#-------------
 #Create an app category to Appstore
 echo "\nstart Create an app category to Appstore\n"
 curl "http://$APPSTORE_IP_PORT/api/1.0/appcategory" -X POST --header 'Content-Type: application/json' --header 'Accept: application/json' --header 'Authorization: Basic YWRtaW46YWRtaW4=' -d '{ 
@@ -231,13 +50,15 @@ curl "http://$APPSTORE_IP_PORT/api/1.0/appcategory" -X POST --header 'Content-Ty
 
 echo "\nend Create an app to Appstore\n"
 
+
+
 #Create an app to Appstore
 echo "\nstart Create an app to Appstore\n"
 curl "http://$APPSTORE_IP_PORT/api/1.0/app" -X POST --header 'Content-Type: application/json' --header 'Accept: application/json' --header 'Authorization: Basic YWRtaW46YWRtaW4=' -d '{ 
 "name": "app1",
 "hawkbitname": "app1",
 "description": "description for app1",
-"version": "1.0.0",
+"version": "1",
 "owner": "NETAS",
 "downloadcount": 0,
 "publishdate": "2018-10-01T06:50:03.000+0000",
@@ -250,7 +71,7 @@ curl "http://$APPSTORE_IP_PORT/api/1.0/app" -X POST --header 'Content-Type: appl
 "name": "app2",
 "hawkbitname": "app2",
 "description": "description for app2",
-"version": "1.0.0",
+"version": "1",
 "owner": "NETAS",
 "downloadcount": 0,
 "publishdate": "2018-10-01T06:50:03.000+0000",
@@ -263,7 +84,7 @@ curl "http://$APPSTORE_IP_PORT/api/1.0/app" -X POST --header 'Content-Type: appl
 "name": "app3",
 "hawkbitname": "app3",
 "description": "description for app3",
-"version": "1.0.0",
+"version": "1",
 "owner": "NETAS",
 "downloadcount": 0,
 "publishdate": "2018-10-01T06:50:03.000+0000",
@@ -276,7 +97,7 @@ curl "http://$APPSTORE_IP_PORT/api/1.0/app" -X POST --header 'Content-Type: appl
 "name": "app4",
 "hawkbitname": "app4",
 "description": "description for app4",
-"version": "1.0.0",
+"version": "1",
 "owner": "NETAS",
 "downloadcount": 0,
 "publishdate": "2018-10-01T06:50:03.000+0000",
@@ -289,7 +110,7 @@ curl "http://$APPSTORE_IP_PORT/api/1.0/app" -X POST --header 'Content-Type: appl
 "name": "app5",
 "hawkbitname": "app5",
 "description": "description for app5",
-"version": "1.0.0",
+"version": "1",
 "owner": "NETAS",
 "downloadcount": 0,
 "publishdate": "2018-10-01T06:50:03.000+0000",
@@ -302,7 +123,7 @@ curl "http://$APPSTORE_IP_PORT/api/1.0/app" -X POST --header 'Content-Type: appl
 "name": "app6",
 "hawkbitname": "app6",
 "description": "description for app6",
-"version": "1.0.0",
+"version": "1",
 "owner": "NETAS",
 "downloadcount": 0,
 "publishdate": "2018-10-01T06:50:03.000+0000",
@@ -315,7 +136,7 @@ curl "http://$APPSTORE_IP_PORT/api/1.0/app" -X POST --header 'Content-Type: appl
 "name": "app7",
 "hawkbitname": "app7",
 "description": "description for app7",
-"version": "1.0.0",
+"version": "1",
 "owner": "NETAS",
 "downloadcount": 0,
 "publishdate": "2018-10-01T06:50:03.000+0000",
@@ -328,7 +149,7 @@ curl "http://$APPSTORE_IP_PORT/api/1.0/app" -X POST --header 'Content-Type: appl
 "name": "app8",
 "hawkbitname": "app8",
 "description": "description for app8",
-"version": "1.0.0",
+"version": "1",
 "owner": "NETAS",
 "downloadcount": 0,
 "publishdate": "2018-10-01T06:50:03.000+0000",
@@ -341,7 +162,7 @@ curl "http://$APPSTORE_IP_PORT/api/1.0/app" -X POST --header 'Content-Type: appl
 "name": "app9",
 "hawkbitname": "app9",
 "description": "description for app9",
-"version": "1.0.0",
+"version": "1",
 "owner": "NETAS",
 "downloadcount": 0,
 "publishdate": "2018-10-01T06:50:03.000+0000",

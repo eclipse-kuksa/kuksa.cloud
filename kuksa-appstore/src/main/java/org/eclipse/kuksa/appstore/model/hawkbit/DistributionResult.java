@@ -10,21 +10,21 @@
  * Contributors:
  * Adem Kose, Fatih Ayvaz and Ilker Kuzu (Netas Telekomunikasyon A.S.) - Initial functionality
  ******************************************************************************/
-package org.eclipse.kuksa.appstore.model;
+package org.eclipse.kuksa.appstore.model.hawkbit;
 
 import java.util.List;
 
-public class DistributionResultByName {
+public class DistributionResult {
 
-	List<DistributionByName> content;
+	List<Distribution> content;
 	int total;
 	int size;
 
-	public List<DistributionByName> getContent() {
+	public List<Distribution> getContent() {
 		return content;
 	}
 
-	public void setContent(List<DistributionByName> content) {
+	public void setContent(List<Distribution> content) {
 		this.content = content;
 	}
 
@@ -46,7 +46,7 @@ public class DistributionResultByName {
 
 	@Override
 	public String toString() {
-		return "DistributionResultByName [content=" + content + ", total=" + total + ", size=" + size + "]";
+		return "DistributionResult [content=" + content + ", total=" + total + ", size=" + size + "]";
 	}
 
 }

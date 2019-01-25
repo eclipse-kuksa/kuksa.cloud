@@ -51,7 +51,6 @@ public class UserEditor extends VerticalLayout implements View {
 	public ComboBox<String> comboBoxOem = new ComboBox<>("Select an Oem");
 	/* Action buttons */
 	public Button save = new Button("Save", FontAwesome.SAVE);
-	public Button cancel = new Button("Cancel");
 	public Button delete = new Button("Delete", FontAwesome.TRASH_O);
 	VerticalLayout mainLayout = new VerticalLayout();
 	HorizontalLayout vlayout = new HorizontalLayout();
@@ -68,7 +67,8 @@ public class UserEditor extends VerticalLayout implements View {
 	}
 
 	public UserEditor() {
-		comboBoxOem.setEmptySelectionAllowed(false);
+		comboBoxOem.setEmptySelectionAllowed(true);
+		comboBoxOem.setTextInputAllowed(true);
 		comboBoxUserType.setEmptySelectionAllowed(false);
 		comboBoxUserType.setTextInputAllowed(false);
 		// upload
@@ -81,7 +81,7 @@ public class UserEditor extends VerticalLayout implements View {
 		mainLayout.addComponent(vlayout);
 
 		vlayout = new HorizontalLayout();
-		vlayout.addComponents(save, delete, cancel);
+		vlayout.addComponents(save, delete);
 		mainLayout.addComponent(vlayout);
 
 		addComponents(mainLayout);
@@ -103,7 +103,11 @@ public class UserEditor extends VerticalLayout implements View {
 			}
 			return null; // if address is null, return empty string
 		}, (User, oem) -> {
-			User.setOem(oemService.findById(Long.parseLong(oem)));
+			if (oem != null) {
+				User.setOem(oemService.findById(Long.parseLong(oem)));
+			} else {
+				User.setOem(null);
+			}
 		});
 		binder.bindInstanceFields(this);
 
@@ -111,6 +115,7 @@ public class UserEditor extends VerticalLayout implements View {
 		setSpacing(true);
 		save.setStyleName(ValoTheme.BUTTON_PRIMARY);
 		save.setClickShortcut(ShortcutAction.KeyCode.ENTER);
+		delete.setStyleName(ValoTheme.BUTTON_DANGER);
 
 		setVisible(false);
 

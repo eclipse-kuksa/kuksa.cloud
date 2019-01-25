@@ -35,6 +35,7 @@ import com.vaadin.server.FontAwesome;
 import com.vaadin.server.Page;
 import com.vaadin.server.ThemeResource;
 import com.vaadin.server.VaadinSession;
+import com.vaadin.shared.ui.grid.HeightMode;
 import com.vaadin.spring.annotation.SpringView;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.CustomComponent;
@@ -64,6 +65,9 @@ public class UserEditView extends CustomComponent implements View {
 	@Autowired
 	OemService oemService;
 
+	User currentUser;
+	HorizontalLayout actions;
+
 	@Autowired
 	public UserEditView() {
 		com.vaadin.server.Page.getCurrent().setTitle(TITLE_NAME);
@@ -79,7 +83,8 @@ public class UserEditView extends CustomComponent implements View {
 		userEditorWindow.center();
 		userEditorWindow.setModal(true);
 		userEditorWindow.setResizable(false);
-		HorizontalLayout actions = new HorizontalLayout(searchText, addNewBtn);
+
+		actions = new HorizontalLayout(searchText, addNewBtn);
 		actions.setStyleName("v-actions");
 
 		HorizontalLayout gridLayout = new HorizontalLayout();
@@ -89,22 +94,18 @@ public class UserEditView extends CustomComponent implements View {
 
 		VerticalLayout mainLayout = new VerticalLayout(new NavHeader().create(VIEW_NAME,
 				VaadinSession.getCurrent().getAttribute("isCurrentUserAdmin").toString()), actions, gridLayout);
-		grid.setHeight(500, Unit.PIXELS);
 		grid.setWidth("100%");
+		grid.setHeightMode(HeightMode.UNDEFINED);
 		grid.setColumns("id", "username", "password", "userType");
 		grid.getColumn("username").setCaption("User Name");
 		grid.getColumn("password").setCaption("Password");
 		grid.getColumn("userType").setCaption("User Type");
 		addEditColumn("Edit");
 
-		grid.asSingleSelect().addValueChangeListener(e -> {
-			userEditor.editUser(e.getValue());
-		});
-
 		userEditor.comboBoxUserType.addValueChangeListener(event -> {
 
 			userEditorWindow.center();
-	    });
+		});
 		addNewBtn.addClickListener(e -> {
 			userEditorWindow.center();
 			VaadinUI.getCurrent().addWindow(userEditorWindow);
@@ -130,7 +131,6 @@ public class UserEditView extends CustomComponent implements View {
 					newmemberList.add(userService.findById(rightList.get(i).getId().toString()));
 				}
 				userEditor.user.setMembers(newmemberList);
-
 
 				if (userEditor.user.getId() != null) {
 
@@ -162,8 +162,8 @@ public class UserEditView extends CustomComponent implements View {
 						new Notification("Succes Creating", "The User has been created.",
 								Notification.Type.TRAY_NOTIFICATION).show(Page.getCurrent());
 					} catch (AlreadyExistException e1) {
-						new Notification("Already Exist Exception", e1.getMessage(),
-								Notification.Type.ERROR_MESSAGE).show(Page.getCurrent());
+						new Notification("Already Exist Exception", e1.getMessage(), Notification.Type.ERROR_MESSAGE)
+								.show(Page.getCurrent());
 					} catch (BadRequestException e1) {
 						new Notification("Bad Request Exception", e1.getMessage(), Notification.Type.ERROR_MESSAGE)
 								.show(Page.getCurrent());
@@ -181,12 +181,6 @@ public class UserEditView extends CustomComponent implements View {
 			VaadinUI.getCurrent().removeWindow(userEditorWindow);
 			new Notification("Succes Deleting", "The User has been deleted.", Notification.Type.TRAY_NOTIFICATION)
 					.show(Page.getCurrent());
-		});
-
-		userEditor.cancel.addClickListener(e -> {
-			userEditor.editUser(userEditor.user);
-			listUsers(null);
-			VaadinUI.getCurrent().removeWindow(userEditorWindow);
 		});
 
 		// Listen changes made by the filter textbox, refresh data from backend
@@ -215,6 +209,7 @@ public class UserEditView extends CustomComponent implements View {
 	private void iconClicked(User user) {
 
 		User item = userService.findById(user.getId().toString());
+		userEditor.editUser(item);
 		grid.select(item);
 		userEditorWindow.center();
 		VaadinUI.getCurrent().addWindow(userEditorWindow);
@@ -222,16 +217,26 @@ public class UserEditView extends CustomComponent implements View {
 
 	@PostConstruct
 	public void init() {
+		this.currentUser = userService.findByUserName(VaadinSession.getCurrent().getAttribute("user").toString());
+		if (!this.currentUser.getUserType().equals(UserType.SystemAdmin)) {
+			actions.setVisible(false);
+		}
 		listUsers(null);
 		userEditor.setUserService(userService);
 		userEditor.setOemService(oemService);
 	}
 
 	public void listUsers(String searchText) {
-		if (StringUtils.isEmpty(searchText)) {
-			grid.setItems(userService.findAll());
+		if (currentUser.getUserType().equals(UserType.SystemAdmin)) {
+			if (StringUtils.isEmpty(searchText)) {
+				grid.setItems(userService.findAll());
+			} else {
+				grid.setItems(userService.findByUserNameStartsWithIgnoreCase(searchText));
+			}
+			userEditor.comboBoxUserType.setEnabled(true);
 		} else {
-			grid.setItems(userService.findByUserNameStartsWithIgnoreCase(searchText));
+			grid.setItems(userService.findByUserName(currentUser.getUsername()));
+			userEditor.comboBoxUserType.setEnabled(false);
 		}
 	}
 

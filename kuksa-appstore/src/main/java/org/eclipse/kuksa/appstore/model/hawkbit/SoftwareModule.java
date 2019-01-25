@@ -10,11 +10,9 @@
  * Contributors:
  * Adem Kose, Fatih Ayvaz and Ilker Kuzu (Netas Telekomunikasyon A.S.) - Initial functionality
  ******************************************************************************/
-package org.eclipse.kuksa.appstore.model;
+package org.eclipse.kuksa.appstore.model.hawkbit;
 
-import java.util.List;
-
-public class Distribution {
+public class SoftwareModule {
 
 	String createdBy;
 	String createdAt;
@@ -23,124 +21,99 @@ public class Distribution {
 	String name;
 	String description;
 	String version;
-	List<DisModules> modules;
-	String requiredMigrationStep;
 	String type;
-	String complete;
-	String deleted;
-	int id;
-
+	String vendor;
+	Integer id;
+	boolean deleted;
 	public String getCreatedBy() {
 		return createdBy;
 	}
-
 	public void setCreatedBy(String createdBy) {
 		this.createdBy = createdBy;
 	}
-
 	public String getCreatedAt() {
 		return createdAt;
 	}
-
 	public void setCreatedAt(String createdAt) {
 		this.createdAt = createdAt;
 	}
-
 	public String getLastModifiedBy() {
 		return lastModifiedBy;
 	}
-
 	public void setLastModifiedBy(String lastModifiedBy) {
 		this.lastModifiedBy = lastModifiedBy;
 	}
-
 	public String getLastModifiedAt() {
 		return lastModifiedAt;
 	}
-
 	public void setLastModifiedAt(String lastModifiedAt) {
 		this.lastModifiedAt = lastModifiedAt;
 	}
-
 	public String getName() {
 		return name;
 	}
-
 	public void setName(String name) {
 		this.name = name;
 	}
-
 	public String getDescription() {
 		return description;
 	}
-
 	public void setDescription(String description) {
 		this.description = description;
 	}
-
 	public String getVersion() {
 		return version;
 	}
-
 	public void setVersion(String version) {
 		this.version = version;
 	}
-
-	public List<DisModules> getModules() {
-		return modules;
-	}
-
-	public void setModules(List<DisModules> modules) {
-		this.modules = modules;
-	}
-
-	public String getRequiredMigrationStep() {
-		return requiredMigrationStep;
-	}
-
-	public void setRequiredMigrationStep(String requiredMigrationStep) {
-		this.requiredMigrationStep = requiredMigrationStep;
-	}
-
 	public String getType() {
 		return type;
 	}
-
 	public void setType(String type) {
 		this.type = type;
 	}
-
-	public String getComplete() {
-		return complete;
+	public String getVendor() {
+		return vendor;
 	}
-
-	public void setComplete(String complete) {
-		this.complete = complete;
+	public void setVendor(String vendor) {
+		this.vendor = vendor;
 	}
-
-	public String getDeleted() {
-		return deleted;
-	}
-
-	public void setDeleted(String deleted) {
-		this.deleted = deleted;
-	}
-
-	public int getId() {
+	public Integer getId() {
 		return id;
 	}
-
-	public void setId(int id) {
+	public void setId(Integer id) {
 		this.id = id;
 	}
-
 	@Override
 	public String toString() {
-		return "Distribution [createdBy=" + createdBy + ", createdAt=" + createdAt + ", lastModifiedBy="
+		return "SoftwareModule [createdBy=" + createdBy + ", createdAt=" + createdAt + ", lastModifiedBy="
 				+ lastModifiedBy + ", lastModifiedAt=" + lastModifiedAt + ", name=" + name + ", description="
-				+ description + ", version=" + version + ", modules=" + modules + ", requiredMigrationStep="
-				+ requiredMigrationStep + ", type=" + type + ", complete=" + complete + ", deleted=" + deleted + ", id="
-				+ id + "]";
+				+ description + ", version=" + version + ", type=" + type + ", vendor=" + vendor + ", id=" + id
+				+ ", deleted=" + deleted + "]";
 	}
-
+	public SoftwareModule(String name, String description, String version, String type, String vendor) {
+		this.name = name;
+		this.description = description;
+		this.version = version;
+		this.type = type;
+		this.vendor = vendor;
+	}
+	public SoftwareModule() {
+	}
+	public SoftwareModule(Integer id) {
+		super();
+		this.id = id;
+	}
+	public boolean isDeleted() {
+		return deleted;
+	}
+	public void setDeleted(boolean deleted) {
+		this.deleted = deleted;
+	}
+	public SoftwareModule(String description, String vendor) {
+		super();
+		this.description = description;
+		this.vendor = vendor;
+	}
 }

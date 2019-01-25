@@ -10,20 +10,33 @@
  * Contributors:
  * Adem Kose, Fatih Ayvaz and Ilker Kuzu (Netas Telekomunikasyon A.S.) - Initial functionality
  ******************************************************************************/
-package org.eclipse.kuksa.appstore.model;
+package org.eclipse.kuksa.appstore.model.hawkbit;
 
-public class DisModules {
+public class Artifact {
 
 	String createdBy;
 	String createdAt;
 	String lastModifiedBy;
 	String lastModifiedAt;
-	String name;
-	String description;
-	String version;
-	String type;
-	String vendor;
-	String deleted;
+	String id;
+	String providedFilename;
+	String size;
+
+	public String getProvidedFilename() {
+		return providedFilename;
+	}
+
+	public void setProvidedFilename(String providedFilename) {
+		this.providedFilename = providedFilename;
+	}
+
+	public String getSize() {
+		return size;
+	}
+
+	public void setSize(String size) {
+		this.size = size;
+	}
 
 	public String getCreatedBy() {
 		return createdBy;
@@ -57,59 +70,19 @@ public class DisModules {
 		this.lastModifiedAt = lastModifiedAt;
 	}
 
-	public String getName() {
-		return name;
+	public String getId() {
+		return id;
 	}
 
-	public void setName(String name) {
-		this.name = name;
-	}
-
-	public String getDescription() {
-		return description;
-	}
-
-	public void setDescription(String description) {
-		this.description = description;
-	}
-
-	public String getVersion() {
-		return version;
-	}
-
-	public void setVersion(String version) {
-		this.version = version;
-	}
-
-	public String getType() {
-		return type;
-	}
-
-	public void setType(String type) {
-		this.type = type;
-	}
-
-	public String getVendor() {
-		return vendor;
-	}
-
-	public void setVendor(String vendor) {
-		this.vendor = vendor;
-	}
-
-	public String getDeleted() {
-		return deleted;
-	}
-
-	public void setDeleted(String deleted) {
-		this.deleted = deleted;
+	public void setId(String id) {
+		this.id = id;
 	}
 
 	@Override
 	public String toString() {
-		return "DisModules [createdBy=" + createdBy + ", createdAt=" + createdAt + ", lastModifiedBy=" + lastModifiedBy
-				+ ", lastModifiedAt=" + lastModifiedAt + ", name=" + name + ", description=" + description
-				+ ", version=" + version + ", type=" + type + ", vendor=" + vendor + ", deleted=" + deleted + "]";
+		return "Artifact [createdBy=" + createdBy + ", createdAt=" + createdAt + ", lastModifiedBy=" + lastModifiedBy
+				+ ", lastModifiedAt=" + lastModifiedAt + ", id=" + id + ", providedFilename=" + providedFilename
+				+ ", size=" + size + "]";
 	}
 
 }
