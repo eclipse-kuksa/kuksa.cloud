@@ -20,7 +20,7 @@ import org.eclipse.kuksa.appstore.exception.AlreadyExistException;
 import org.eclipse.kuksa.appstore.exception.BadRequestException;
 import org.eclipse.kuksa.appstore.exception.NotFoundException;
 import org.eclipse.kuksa.appstore.model.AppCategory;
-import org.eclipse.kuksa.appstore.model.Result;
+import org.eclipse.kuksa.appstore.model.hawkbit.Result;
 import org.eclipse.kuksa.appstore.repo.AppCategoryRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;

@@ -31,6 +31,7 @@ Just run `AppStoreApplication.java` class.Spring boot has an embedded Tomcat ins
 * OEM for group users
 * Adding or removing member users to GroupUser
 * Purchasing Applicaton
+* No necessary Hawkbit's UI dependency for App operations
 
 ## Deployment Steps
 
@@ -108,10 +109,9 @@ If You run load_test_data.sh ; It will do following steps to Hawkbit and AppStor
   3. VW_device3 is connected to OEM of VW.It's ownwer is user2.
   4. BMW_device4 is connected to OEM of BMW.It's ownwer is user3.
 
-- Software Modules and Distribution Sets created in Hawkbit instance:
+- Software Modules created in Hawkbit instance:
 
-
-| Software Distribution Set | 
+| Software Modules Set |
 | :-------------:|  
 |  App1 |  
 |  App2 |  

@@ -10,28 +10,22 @@
  * Contributors:
  * Adem Kose, Fatih Ayvaz and Ilker Kuzu (Netas Telekomunikasyon A.S.) - Initial functionality
  ******************************************************************************/
-package org.eclipse.kuksa.appstore.model;
+package org.eclipse.kuksa.appstore.model.hawkbit;
 
-public class AssignedResult {
+import java.util.List;
 
-	int assigned;
-	int alreadyAssigned;
+public class TargetResult {
+
+	List<Target> content;
 	int total;
+	int size;
 
-	public int getAssigned() {
-		return assigned;
+	public List<Target> getContent() {
+		return content;
 	}
 
-	public void setAssigned(int assigned) {
-		this.assigned = assigned;
-	}
-
-	public int getAlreadyAssigned() {
-		return alreadyAssigned;
-	}
-
-	public void setAlreadyAssigned(int alreadyAssigned) {
-		this.alreadyAssigned = alreadyAssigned;
+	public void setContent(List<Target> content) {
+		this.content = content;
 	}
 
 	public int getTotal() {
@@ -42,9 +36,17 @@ public class AssignedResult {
 		this.total = total;
 	}
 
+	public int getSize() {
+		return size;
+	}
+
+	public void setSize(int size) {
+		this.size = size;
+	}
+
 	@Override
 	public String toString() {
-		return "AssignedResult [assigned=" + assigned + ", alreadyAssigned=" + alreadyAssigned + ", total=" + total
-				+ "]";
+		return "TargetResult [content=" + content + ", total=" + total + ", size=" + size + "]";
 	}
+
 }

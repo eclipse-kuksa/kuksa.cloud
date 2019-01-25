@@ -10,24 +10,25 @@
  * Contributors:
  * Adem Kose, Fatih Ayvaz and Ilker Kuzu (Netas Telekomunikasyon A.S.) - Initial functionality
  ******************************************************************************/
-package org.eclipse.kuksa.appstore.model;
+package org.eclipse.kuksa.appstore.model.hawkbit;
 
 import java.util.List;
 
-public class DistributionByName {
+public class Distribution {
 
 	String createdBy;
 	String createdAt;
 	String lastModifiedBy;
 	String lastModifiedAt;
 	String name;
+	String description;
 	String version;
-	List<Modules> modules;
-	String requiredMigrationStep;
+	List<SoftwareModule> modules;
+	boolean requiredMigrationStep;
 	String type;
-	String complete;
-	String deleted;
-	String id;
+	boolean complete;
+	boolean deleted;
+	Integer id;
 
 	public String getCreatedBy() {
 		return createdBy;
@@ -69,6 +70,14 @@ public class DistributionByName {
 		this.name = name;
 	}
 
+	public String getDescription() {
+		return description;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
+	}
+
 	public String getVersion() {
 		return version;
 	}
@@ -77,19 +86,19 @@ public class DistributionByName {
 		this.version = version;
 	}
 
-	public List<Modules> getModules() {
+	public List<SoftwareModule> getModules() {
 		return modules;
 	}
 
-	public void setModules(List<Modules> modules) {
+	public void setModules(List<SoftwareModule> modules) {
 		this.modules = modules;
 	}
 
-	public String getRequiredMigrationStep() {
+	public boolean getRequiredMigrationStep() {
 		return requiredMigrationStep;
 	}
 
-	public void setRequiredMigrationStep(String requiredMigrationStep) {
+	public void setRequiredMigrationStep(boolean requiredMigrationStep) {
 		this.requiredMigrationStep = requiredMigrationStep;
 	}
 
@@ -101,36 +110,55 @@ public class DistributionByName {
 		this.type = type;
 	}
 
-	public String getComplete() {
+	public boolean getComplete() {
 		return complete;
 	}
 
-	public void setComplete(String complete) {
+	public void setComplete(boolean complete) {
 		this.complete = complete;
 	}
 
-	public String getDeleted() {
+	public boolean getDeleted() {
 		return deleted;
 	}
 
-	public void setDeleted(String deleted) {
+	public void setDeleted(boolean deleted) {
 		this.deleted = deleted;
 	}
 
-	public String getId() {
+	public Integer getId() {
 		return id;
 	}
 
-	public void setId(String id) {
+	public void setId(Integer id) {
 		this.id = id;
 	}
 
 	@Override
 	public String toString() {
-		return "DistributionByName [createdBy=" + createdBy + ", createdAt=" + createdAt + ", lastModifiedBy="
-				+ lastModifiedBy + ", lastModifiedAt=" + lastModifiedAt + ", name=" + name + ", version=" + version
-				+ ", modules=" + modules + ", requiredMigrationStep=" + requiredMigrationStep + ", type=" + type
-				+ ", complete=" + complete + ", deleted=" + deleted + ", id=" + id + "]";
+		return "Distribution [createdBy=" + createdBy + ", createdAt=" + createdAt + ", lastModifiedBy="
+				+ lastModifiedBy + ", lastModifiedAt=" + lastModifiedAt + ", name=" + name + ", description="
+				+ description + ", version=" + version + ", modules=" + modules + ", requiredMigrationStep="
+				+ requiredMigrationStep + ", type=" + type + ", complete=" + complete + ", deleted=" + deleted + ", id="
+				+ id + "]";
 	}
 
+	public Distribution(String name, String description, String version, List<SoftwareModule> modules,
+			boolean requiredMigrationStep, String type) {
+		this.name = name;
+		this.description = description;
+		this.version = version;
+		this.modules = modules;
+		this.requiredMigrationStep = requiredMigrationStep;
+		this.type = type;
+	}
+
+	public Distribution(String description, String version) {
+		this.description = description;
+		this.version = version;
+	}
+
+	public Distribution() {
+		super();
+	}
 }

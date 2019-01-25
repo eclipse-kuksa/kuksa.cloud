@@ -10,21 +10,21 @@
  * Contributors:
  * Adem Kose, Fatih Ayvaz and Ilker Kuzu (Netas Telekomunikasyon A.S.) - Initial functionality
  ******************************************************************************/
-package org.eclipse.kuksa.appstore.model;
+package org.eclipse.kuksa.appstore.model.hawkbit;
 
 import java.util.List;
 
-public class TargetResultByData {
+public class SoftwareModuleResult {
 
-	List<TargetByData> content;
+	List<SoftwareModule> content;
 	int total;
 	int size;
 
-	public List<TargetByData> getContent() {
+	public List<SoftwareModule> getContent() {
 		return content;
 	}
 
-	public void setContent(List<TargetByData> content) {
+	public void setContent(List<SoftwareModule> content) {
 		this.content = content;
 	}
 

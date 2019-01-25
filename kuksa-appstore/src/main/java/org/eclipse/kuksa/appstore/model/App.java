@@ -69,11 +69,11 @@ public class App {
 	@Column(name = "publishdate")
 	private Date publishdate;
 
-	@ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.REMOVE)
+	@ManyToMany(fetch = FetchType.EAGER)
 	@JoinTable(name = "usersinstalledapps", joinColumns = @JoinColumn(name = "appid", referencedColumnName = "id"), inverseJoinColumns = @JoinColumn(name = "userid", referencedColumnName = "id"))
 	private List<User> installedusers;
 
-	@ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.REMOVE)
+	@ManyToMany(fetch = FetchType.EAGER)
 	@JoinTable(name = "userapps", joinColumns = @JoinColumn(name = "appid", referencedColumnName = "id"), inverseJoinColumns = @JoinColumn(name = "userid", referencedColumnName = "id"))
 	private List<User> ownerusers;
 

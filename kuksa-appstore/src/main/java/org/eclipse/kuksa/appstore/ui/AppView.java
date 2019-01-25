@@ -13,18 +13,17 @@
 package org.eclipse.kuksa.appstore.ui;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.annotation.PostConstruct;
 
-import org.eclipse.kuksa.appstore.client.MessageFeignClient;
+import org.eclipse.kuksa.appstore.client.HawkbitFeignClient;
+import org.eclipse.kuksa.appstore.exception.AlreadyExistException;
+import org.eclipse.kuksa.appstore.exception.BadRequestException;
+import org.eclipse.kuksa.appstore.exception.NotFoundException;
 import org.eclipse.kuksa.appstore.model.App;
-import org.eclipse.kuksa.appstore.model.AssignedResult;
-import org.eclipse.kuksa.appstore.model.Rule;
-import org.eclipse.kuksa.appstore.model.RuleMain;
-import org.eclipse.kuksa.appstore.model.TargetByData;
 import org.eclipse.kuksa.appstore.model.User;
+import org.eclipse.kuksa.appstore.model.hawkbit.Result;
 import org.eclipse.kuksa.appstore.service.AppService;
 import org.eclipse.kuksa.appstore.service.UserService;
 import org.eclipse.kuksa.appstore.ui.component.NavHeader;
@@ -62,12 +61,13 @@ public class AppView extends CustomComponent implements View {
 	CustomLayout appslayout;
 	VerticalLayout mainlayout;
 	@Autowired
-	MessageFeignClient messageFeignClient;
+	HawkbitFeignClient hawkbitFeignClient;
 	App currentApp;
 	@Autowired
 	UserService userService;
 	@Autowired
 	AppService appService;
+	Button purchase_install;
 
 	@PostConstruct
 	public void init() {
@@ -89,6 +89,8 @@ public class AppView extends CustomComponent implements View {
 				VaadinSession.getCurrent().getAttribute("isCurrentUserAdmin").toString()));
 
 		Image image = new Image();
+		image.setWidth("300");
+		image.setHeight("200");
 		File new_file = new File(Utils.getImageFilePath() + currentApp.getId() + ".png");
 		if (new_file.exists()) {
 			image.setSource(new FileResource(new_file));
@@ -143,12 +145,22 @@ public class AppView extends CustomComponent implements View {
 		// TODO Auto-generated method stub
 
 	}
+
 	private void createInstallButtonorBuyButton() {
 
-		List<String> listOfTargets = getListOfTargets();
-		boolean isOwner = userService.isUsersAppOwner(currentUser.getId().toString(), currentApp.getId().toString(),
-				getListOfOem(listOfTargets));
+		List<String> listOfTargets;
+		boolean isOwner;
+		try {
+			listOfTargets = appService.getListOfTargets();
 
+			isOwner = userService.isUsersAppOwner(currentUser.getId().toString(), currentApp.getId().toString(),
+					appService.getListOfOem(listOfTargets));
+		} catch (BadRequestException e1) {
+			new Notification(e1.getMessage(), Notification.Type.ERROR_MESSAGE)
+					.show(com.vaadin.server.Page.getCurrent());
+			return;
+
+		}
 		if (isOwner) {
 			ComboBox<String> comboBoxDevice;
 			comboBoxDevice = new ComboBox<>("Select A Device");
@@ -159,60 +171,40 @@ public class AppView extends CustomComponent implements View {
 			comboBoxDevice.setWidth("300");
 			appslayout.addComponent(comboBoxDevice, "appselectdevice");
 
-			Button install_app = new Button("Install App");
+			purchase_install = new Button("Install App");
 
-			install_app.addClickListener(new ClickListener() {
+			purchase_install.addClickListener(new ClickListener() {
 
 				@Override
 				public void buttonClick(ClickEvent event) {
-					// TODO Auto-generated method stub
 
 					if (comboBoxDevice.getValue() != null) {
-						String queryname = "name==" + currentApp.getName();
-						Rule ruleNew = new Rule();
-						ruleNew.setForcetime("1530893371603");
-						ruleNew.setId(messageFeignClient.getDistributionByName(queryname).getContent().get(0).getId());
-						ruleNew.setType("timeforced");
-						RuleMain rulemain = new RuleMain();
-						rulemain.setDuration("00:10:00");
-						rulemain.setSchedule("0 37 8 22 6 ? 2019");
-						rulemain.setTimezone("+00:00");
-						ruleNew.setMaintenanceWindow(rulemain);
 
 						try {
+							Result<?> result = appService.InstallApp(comboBoxDevice.getSelectedItem().get(),
+									currentUser.getId(), currentApp.getId());
 
-							AssignedResult response = messageFeignClient
-									.sendApptoDevice(comboBoxDevice.getSelectedItem().get(), ruleNew);
-							if (response.getAssigned() > 0) {
-
-								currentApp = appService.incrementAppDownloadCount(currentApp);
-
-								List<User> list = currentApp.getInstalledusers();
-								list.add(currentUser);
-								currentApp.setInstalledusers(list);
-								appService.updateApp(currentApp);
-
-								new Notification("Succes Update Action",
-										"The updating action has been sent to Hawkbit for selected device.",
+							if (result.isSuccess()) {
+								new Notification("Succes Install Action",
+										"The installing action has been sent to Hawkbit for selected device.",
 										Notification.Type.TRAY_NOTIFICATION).show(com.vaadin.server.Page.getCurrent());
 
-							} else if (response.getAlreadyAssigned() > 0) {
-								new Notification("Already Assigned Update Action",
-										"The updating action is already assigned for selected device.",
-										Notification.Type.ERROR_MESSAGE).show(com.vaadin.server.Page.getCurrent());
-
 							} else {
-								new Notification("Fail Update Action",
-										"The updating action hasnt been sent to Hawkbit for selected device.",
+								new Notification("Fail Update Action", result.getErrorMessage(),
 										Notification.Type.ERROR_MESSAGE).show(com.vaadin.server.Page.getCurrent());
 
 							}
-						} catch (Exception e) {
-							// TODO: handle exception
-							new Notification("Fail Update Action",
-									"The updating action hasnt been sent to Hawkbit for selected device.",
-									Notification.Type.ERROR_MESSAGE).show(com.vaadin.server.Page.getCurrent());
+						} catch (NotFoundException e) {
+							new Notification(e.getMessage(), Notification.Type.ERROR_MESSAGE)
+									.show(com.vaadin.server.Page.getCurrent());
 
+						} catch (BadRequestException e) {
+							new Notification(e.getMessage(), Notification.Type.ERROR_MESSAGE)
+									.show(com.vaadin.server.Page.getCurrent());
+
+						} catch (AlreadyExistException e) {
+							new Notification(e.getMessage(), Notification.Type.ERROR_MESSAGE)
+							.show(com.vaadin.server.Page.getCurrent());
 						}
 
 					} else {
@@ -223,65 +215,41 @@ public class AppView extends CustomComponent implements View {
 				}
 			});
 
-			install_app.setWidth("300");
-			appslayout.addComponent(install_app, "appinstall");
 		} else {
 
-			Button install_app = new Button("Purchase this App");
+			purchase_install = new Button("Purchase this App");
 
-			install_app.addClickListener(new ClickListener() {
+			purchase_install.addClickListener(new ClickListener() {
 
 				@Override
 				public void buttonClick(ClickEvent event) {
-					// TODO Auto-generated method stub
+					try {
 
-					new Notification("This app is purchased.", "Operation Success", Notification.Type.WARNING_MESSAGE)
-							.show(com.vaadin.server.Page.getCurrent());
-					App currentapp = appService.findById(currentApp.getId());
+						Result<?> result = appService.purchaseApp(currentUser.getId(), currentApp.getId());
 
-					List<User> list = currentapp.getOwnerusers();
-					list.add(userService.findById(currentUser.getId().toString()));
-					currentapp.setOwnerusers(list);
-					appService.updateApp(currentapp);
-					Page.getCurrent().reload();
+						if (result.isSuccess()) {
+							new Notification("This app is purchased.", "Operation Success",
+									Notification.Type.WARNING_MESSAGE).show(com.vaadin.server.Page.getCurrent());
+							Page.getCurrent().reload();
+						} else {
+							new Notification("This purchasing operation is failed.", result.getErrorMessage(),
+									Notification.Type.ERROR_MESSAGE).show(com.vaadin.server.Page.getCurrent());
+
+						}
+					} catch (NotFoundException | BadRequestException e) {
+						// TODO Auto-generated catch block
+						new Notification("This purchasing operation is failed.", e.getMessage(),
+								Notification.Type.WARNING_MESSAGE).show(com.vaadin.server.Page.getCurrent());
+					}
 
 				}
 			});
 
-			install_app.setWidth("300");
-			appslayout.addComponent(install_app, "appinstall");
-
 		}
 
-	}
-	private List<String> getListOfOem(List<String> listOfTargets) {
-		List<String> listOfOem = new ArrayList<>();
-		for (int i = 0; i < listOfTargets.size(); i++) {
-			String deviceName = listOfTargets.get(i);
-			int index = deviceName.indexOf("_");
-			String oem = deviceName.substring(0, index);
-			listOfOem.add(oem);
-		}
-		return listOfOem;
-	}
-	public List<String> getListOfTargets() {
-		List<String> listOfTargets = new ArrayList<>();
-
-		String dis = VaadinSession.getCurrent().getAttribute("user").toString();
-		dis = "" + "*" + dis + "*";
-		dis = "description==" + dis;
-		List<TargetByData> deviceList = new ArrayList<>();
-		try {
-			deviceList = messageFeignClient.getTargetsByDes(dis, "name:ASC").getContent();
-		} catch (Exception e) {
-			new Notification("Not Found Hawkbit Instance",
-					"Make sure that you connect any Hawkbit instance with this AppStore!",
-					Notification.Type.ERROR_MESSAGE).show(com.vaadin.server.Page.getCurrent());
-		}
-		for (TargetByData targetByData : deviceList) {
-			listOfTargets.add(targetByData.getControllerId());
-		}
-		return listOfTargets;
+		purchase_install.setWidth("300");
+		appslayout.addComponent(purchase_install, "appinstall");
 
 	}
+
 }

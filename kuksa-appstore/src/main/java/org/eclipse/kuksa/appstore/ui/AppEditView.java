@@ -18,6 +18,8 @@ import java.util.Date;
 
 import javax.annotation.PostConstruct;
 
+import org.eclipse.kuksa.appstore.client.HawkbitFeignClient;
+import org.eclipse.kuksa.appstore.client.HawkbitMultiPartFileFeignClient;
 import org.eclipse.kuksa.appstore.exception.AlreadyExistException;
 import org.eclipse.kuksa.appstore.exception.BadRequestException;
 import org.eclipse.kuksa.appstore.exception.NotFoundException;
@@ -36,6 +38,7 @@ import com.vaadin.server.FontAwesome;
 import com.vaadin.server.Page;
 import com.vaadin.server.ThemeResource;
 import com.vaadin.server.VaadinSession;
+import com.vaadin.shared.ui.grid.HeightMode;
 import com.vaadin.spring.annotation.SpringView;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.CustomComponent;
@@ -43,7 +46,6 @@ import com.vaadin.ui.Grid;
 import com.vaadin.ui.Grid.Column;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Notification;
-import com.vaadin.ui.PopupView;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window;
@@ -66,6 +68,10 @@ public class AppEditView extends CustomComponent implements View {
 	AppService appService;
 	@Autowired
 	AppCategoryService appCategoryService;
+	@Autowired
+	HawkbitFeignClient hawkbitFeignClient;
+	@Autowired
+	HawkbitMultiPartFileFeignClient hawkbitMultiPartFileFeignClient;
 
 	@Autowired
 	public AppEditView() {
@@ -94,36 +100,13 @@ public class AppEditView extends CustomComponent implements View {
 				VaadinSession.getCurrent().getAttribute("isCurrentUserAdmin").toString()), actions, gridLayout);
 
 		grid.setWidth("100%");
+		grid.setHeightMode(HeightMode.UNDEFINED);
 		grid.setColumns("id", "name", "version", "owner");
-		grid.getColumn("id").setMaximumWidth(150);
-		grid.getColumn("name").setMaximumWidth(350);
-		grid.getColumn("version").setMaximumWidth(300);
-		grid.getColumn("owner").setMaximumWidth(300);
-
+		grid.setHeightMode(HeightMode.UNDEFINED);
 		// Add generated full name column
-		Column<App, String> categoryColumn = grid.addColumn(app -> app.getAppcategory().getName()).setMaximumWidth(300);
+		Column<App, String> categoryColumn = grid.addColumn(app -> app.getAppcategory().getName());
 		categoryColumn.setCaption("Category");
 		addEditColumn("Edit");
-		grid.asSingleSelect().addValueChangeListener(e -> {
-			appEditor.editApp(e.getValue());
-
-			appEditor.appimage.setVisible(true);
-			try {
-				new File(Utils.getImageFolderPath()).mkdirs();
-				File new_file = new File(Utils.getImageFilePath() + e.getValue().getId() + ".png");
-
-				if (new_file.exists()) {
-					appEditor.appimage.setSource(new FileResource(new_file));
-					appEditor.upload.setButtonCaption("Change Image");
-				} else {
-					appEditor.upload.setButtonCaption("Add Image");
-					appEditor.appimage.setSource(new ThemeResource("img/noimage.png"));
-				}
-			} catch (Exception e2) {
-				// TODO: handle exception
-			}
-
-		});
 
 		addNewBtn.addClickListener(e -> {
 			appEditorWindow.center();
@@ -134,7 +117,6 @@ public class AppEditView extends CustomComponent implements View {
 		appEditor.save.addClickListener(e -> {
 
 			if (appEditor.app.getId() != null) {
-
 
 				appEditor.app.setPublishdate(new Timestamp(new Date().getTime()));
 				try {
@@ -147,8 +129,7 @@ public class AppEditView extends CustomComponent implements View {
 					new Notification("Not Found Exception", e1.getMessage(), Notification.Type.ERROR_MESSAGE)
 							.show(Page.getCurrent());
 				} catch (BadRequestException e1) {
-					new Notification("Bad Request Exception", e1.getMessage(), Notification.Type.ERROR_MESSAGE)
-							.show(Page.getCurrent());
+					new Notification(e1.getMessage(), Notification.Type.ERROR_MESSAGE).show(Page.getCurrent());
 				} catch (AlreadyExistException e1) {
 					new Notification("Already Exist Exception", "App Name already exists.",
 							Notification.Type.ERROR_MESSAGE).show(Page.getCurrent());
@@ -175,17 +156,16 @@ public class AppEditView extends CustomComponent implements View {
 		});
 
 		appEditor.delete.addClickListener(e -> {
-			appService.deleteApp(appEditor.app);
-			listApps(null);
-			VaadinUI.getCurrent().removeWindow(appEditorWindow);
-			new Notification("Succes Deleting", "The App has been deleted.", Notification.Type.TRAY_NOTIFICATION)
-					.show(Page.getCurrent());
-		});
+			try {
+				appService.deleteApp(appEditor.app.getId().toString());
+				listApps(null);
+				VaadinUI.getCurrent().removeWindow(appEditorWindow);
+				new Notification("Succes Deleting", "The App has been deleted.", Notification.Type.TRAY_NOTIFICATION)
+						.show(Page.getCurrent());
+			} catch (NotFoundException e1) {
+				new Notification(e1.getMessage(), Notification.Type.ERROR_MESSAGE).show(Page.getCurrent());
+			}
 
-		appEditor.cancel.addClickListener(e -> {
-			appEditor.editApp(appEditor.app);
-			listApps(null);
-			VaadinUI.getCurrent().removeWindow(appEditorWindow);
 		});
 
 		searchText.setPlaceholder("Search by App Name");
@@ -214,6 +194,25 @@ public class AppEditView extends CustomComponent implements View {
 	private void iconClicked(App app) {
 
 		App item = appService.findById(app.getId());
+
+		appEditor.editApp(item);
+
+		appEditor.appimage.setVisible(true);
+		try {
+			new File(Utils.getImageFolderPath()).mkdirs();
+			File new_file = new File(Utils.getImageFilePath() + item.getId() + ".png");
+
+			if (new_file.exists()) {
+				appEditor.appimage.setSource(new FileResource(new_file));
+				appEditor.upload.setButtonCaption("Change Image");
+			} else {
+				appEditor.upload.setButtonCaption("Add Image");
+				appEditor.appimage.setSource(new ThemeResource("img/noimage.png"));
+			}
+		} catch (Exception e2) {
+			// TODO: handle exception
+		}
+
 		grid.select(item);
 		appEditorWindow.center();
 		VaadinUI.getCurrent().addWindow(appEditorWindow);
@@ -225,6 +224,8 @@ public class AppEditView extends CustomComponent implements View {
 		listApps(null);
 		appEditor.setAppCategoryService(appCategoryService);
 		appEditor.setAppService(appService);
+		appEditor.setMessageFeignClient(hawkbitFeignClient);
+		appEditor.setHawkbitFeignClient(hawkbitMultiPartFileFeignClient);
 	}
 
 	void listApps(String searchText) {

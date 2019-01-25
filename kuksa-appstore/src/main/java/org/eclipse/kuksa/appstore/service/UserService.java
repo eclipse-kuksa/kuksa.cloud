@@ -12,7 +12,6 @@
  ******************************************************************************/
 package org.eclipse.kuksa.appstore.service;
 
-import java.math.BigInteger;
 import java.util.List;
 import java.util.Set;
 
@@ -20,9 +19,9 @@ import org.eclipse.kuksa.appstore.exception.AlreadyExistException;
 import org.eclipse.kuksa.appstore.exception.BadRequestException;
 import org.eclipse.kuksa.appstore.exception.NotFoundException;
 import org.eclipse.kuksa.appstore.model.Oem;
-import org.eclipse.kuksa.appstore.model.Result;
 import org.eclipse.kuksa.appstore.model.User;
 import org.eclipse.kuksa.appstore.model.UserType;
+import org.eclipse.kuksa.appstore.model.hawkbit.Result;
 import org.eclipse.kuksa.appstore.repo.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -30,9 +29,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
-import com.vaadin.spring.annotation.SpringComponent;
-
-@SpringComponent
 @Service
 public class UserService {
 

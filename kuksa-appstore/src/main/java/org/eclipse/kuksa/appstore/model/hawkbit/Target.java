@@ -10,9 +10,9 @@
  * Contributors:
  * Adem Kose, Fatih Ayvaz and Ilker Kuzu (Netas Telekomunikasyon A.S.) - Initial functionality
  ******************************************************************************/
-package org.eclipse.kuksa.appstore.model;
+package org.eclipse.kuksa.appstore.model.hawkbit;
 
-public class TargetByData {
+public class Target {
 
 	String createdBy;
 	String createdAt;

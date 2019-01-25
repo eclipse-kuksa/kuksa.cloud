@@ -19,7 +19,7 @@ import org.eclipse.kuksa.appstore.exception.BadRequestException;
 import org.eclipse.kuksa.appstore.exception.NotFoundException;
 import org.eclipse.kuksa.appstore.model.AppCategory;
 import org.eclipse.kuksa.appstore.model.Oem;
-import org.eclipse.kuksa.appstore.model.Result;
+import org.eclipse.kuksa.appstore.model.hawkbit.Result;
 import org.eclipse.kuksa.appstore.service.OemService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

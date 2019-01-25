@@ -17,7 +17,10 @@ import java.io.FileOutputStream;
 import java.io.OutputStream;
 import java.util.List;
 
+import org.eclipse.kuksa.appstore.client.HawkbitFeignClient;
+import org.eclipse.kuksa.appstore.client.HawkbitMultiPartFileFeignClient;
 import org.eclipse.kuksa.appstore.model.App;
+import org.eclipse.kuksa.appstore.model.hawkbit.SoftwareModuleResult;
 import org.eclipse.kuksa.appstore.service.AppCategoryService;
 import org.eclipse.kuksa.appstore.service.AppService;
 import org.eclipse.kuksa.appstore.utils.Utils;
@@ -44,6 +47,7 @@ import com.vaadin.ui.Upload.Receiver;
 import com.vaadin.ui.Upload.SucceededEvent;
 import com.vaadin.ui.Upload.SucceededListener;
 import com.vaadin.ui.VerticalLayout;
+import com.vaadin.ui.Window;
 import com.vaadin.ui.themes.ValoTheme;
 
 @SpringComponent
@@ -58,21 +62,36 @@ public class AppEditor extends VerticalLayout implements View {
 	public TextField version = new TextField("Version");
 	public TextField owner = new TextField("Owner");
 	public Button save = new Button("Save", FontAwesome.SAVE);
-	public Button cancel = new Button("Cancel", FontAwesome.CLOSE);
 	public Button delete = new Button("Delete", FontAwesome.TRASH_O);
+	public Button artifactDetailsBtn = new Button("Artifacts Details", FontAwesome.FILE);
 	public ComboBox<String> categoryComboBox = new ComboBox<>("Select A Category");
 	public Upload upload;
 	public Embedded appimage;
 	HorizontalLayout subHlayout = new HorizontalLayout();
 	VerticalLayout mainVLayout = new VerticalLayout();
 	Binder<App> binder = new Binder<>(App.class);
+	HawkbitFeignClient hawkbitFeignClient;
+	HawkbitMultiPartFileFeignClient hawkbitMultiPartFileFeignClient;
+	final Window artifactFileEditorWindow = new Window("Artifact File");
+	final ArtifactFileEditor artifactFileEditor = new ArtifactFileEditor();
+	SoftwareModuleResult softwareModuleResult;
 
 	public void setAppService(AppService appService) {
 		this.appService = appService;
 	}
+
 	public void setAppCategoryService(AppCategoryService appCategoryService) {
 		this.appCategoryService = appCategoryService;
 	}
+
+	public void setMessageFeignClient(HawkbitFeignClient hawkbitFeignClient) {
+		this.hawkbitFeignClient = hawkbitFeignClient;
+	}
+
+	public void setHawkbitFeignClient(HawkbitMultiPartFileFeignClient hawkbitMultiPartFileFeignClient) {
+		this.hawkbitMultiPartFileFeignClient = hawkbitMultiPartFileFeignClient;
+	}
+
 	public AppEditor() {
 
 		name.setWidth("220px");
@@ -90,6 +109,14 @@ public class AppEditor extends VerticalLayout implements View {
 		appimage.setVisible(false);
 		appimage.setWidth("75");
 		appimage.setHeight("50");
+
+		VerticalLayout popupContent = new VerticalLayout();
+		popupContent.addComponent(artifactFileEditor);
+		artifactFileEditorWindow.setContent(popupContent);
+		artifactFileEditorWindow.center();
+		artifactFileEditorWindow.setModal(true);
+		artifactFileEditorWindow.setResizable(false);
+
 		class ImageUploader implements Receiver, SucceededListener {
 			public File file;
 
@@ -99,7 +126,9 @@ public class AppEditor extends VerticalLayout implements View {
 				try {
 
 					file = new File(Utils.getImageFilePath() + app.getId() + ".png");
+
 					fos = new FileOutputStream(file);
+
 				} catch (final java.io.FileNotFoundException e) {
 					new Notification("Could not open file<br/>", e.getMessage(), Notification.Type.ERROR_MESSAGE)
 							.show(Page.getCurrent());
@@ -144,11 +173,15 @@ public class AppEditor extends VerticalLayout implements View {
 		mainVLayout.addComponent(subHlayout);
 
 		subHlayout = new HorizontalLayout();
-		subHlayout.addComponents(upload, appimage);
+		subHlayout.addComponents(artifactDetailsBtn, upload);
 		mainVLayout.addComponent(subHlayout);
 
 		subHlayout = new HorizontalLayout();
-		subHlayout.addComponents(save, delete, cancel);
+		subHlayout.addComponents(appimage);
+		mainVLayout.addComponent(subHlayout);
+
+		subHlayout = new HorizontalLayout();
+		subHlayout.addComponents(save, delete);
 		mainVLayout.addComponent(subHlayout);
 
 		addComponents(mainVLayout);
@@ -169,8 +202,20 @@ public class AppEditor extends VerticalLayout implements View {
 		setSpacing(true);
 		save.setStyleName(ValoTheme.BUTTON_PRIMARY);
 		save.setClickShortcut(ShortcutAction.KeyCode.ENTER);
+		delete.setStyleName(ValoTheme.BUTTON_DANGER);
+		artifactDetailsBtn.setStyleName(ValoTheme.BUTTON_ICON_ALIGN_RIGHT);
+
+		artifactDetailsBtn.addClickListener(e -> {
+
+			artifactFileEditorWindow.center();
+			VaadinUI.getCurrent().addWindow(artifactFileEditorWindow);
+			artifactFileEditor.setmessageFeignClient(hawkbitFeignClient);
+			artifactFileEditor.setHawkbitFeignClient(hawkbitMultiPartFileFeignClient);
+			artifactFileEditor.editArtifactFile(Utils.getExistsSoftwareModule(softwareModuleResult.getContent()).toString());
+		});
 
 		setVisible(false);
+
 	}
 
 	public interface ChangeHandler {
@@ -193,6 +238,7 @@ public class AppEditor extends VerticalLayout implements View {
 		delete.setVisible(persisted);
 		upload.setVisible(persisted);
 		appimage.setVisible(persisted);
+		artifactDetailsBtn.setVisible(persisted);
 		binder.setBean(app);
 
 		setVisible(true);
@@ -206,7 +252,20 @@ public class AppEditor extends VerticalLayout implements View {
 			new Notification("Not Found Any App Category!", "Please add an App Category before you want to add an app!",
 					Notification.Type.WARNING_MESSAGE).show(Page.getCurrent());
 		}
+
+		if (app.getName() != null && !app.getName().equals("")) {
+
+			try {
+				softwareModuleResult = hawkbitFeignClient
+						.getSoftwaremoduleByName(Utils.createFIQLEqual("name", app.getName()));
+			} catch (Exception e) {
+				new Notification("Hawkbit connection error. Check your Hawkbit's IP in the propreties file!",
+						Notification.Type.ERROR_MESSAGE).show(Page.getCurrent());
+			}
+
+		}
 	}
+
 	public void setChangeHandler(ChangeHandler h) {
 		save.addClickListener(e -> h.onChange());
 		delete.addClickListener(e -> h.onChange());
