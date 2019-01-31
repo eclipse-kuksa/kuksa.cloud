@@ -15,7 +15,6 @@ package org.eclipse.kuksa.appstore.model;
 import java.util.List;
 import java.util.Set;
 
-import javax.annotation.Nullable;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.ElementCollection;
@@ -71,7 +70,6 @@ public class User {
 	@ManyToMany(mappedBy = "ownerusers", fetch = FetchType.EAGER)
 	private List<App> userapps;
 
-	@Nullable
 	@ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name = "oem_id", nullable = true)
 	private Oem oem;
