@@ -32,6 +32,7 @@ Just run `AppStoreApplication.java` class.Spring boot has an embedded Tomcat ins
 * Adding or removing member users to GroupUser
 * Purchasing Applicaton
 * No necessary Hawkbit's UI dependency for App operations
+* Supported Application Uninstalling 
 
 ## Deployment Steps
 
@@ -86,6 +87,8 @@ Just run `AppStoreApplication.java` class.Spring boot has an embedded Tomcat ins
 - It can be accessed to the Swagger UI of Kuksa App Store API by following link;
 
 > http://{appstore-ip}:8082/swagger-ui.html#/
+
+- Each distribution has DUMMY_SOFTWARE_MODULE that can not be installed software module. We add this DUMMY_SOFTWARE_MODULE to each distributions because of Hawkbit wants to assign at least software module to a distribution. When we want to uninstall all device's applications, we need to delete all software modules that are in the distribution exclude DUMMY_SOFTWARE_MODULE.
 
  
 ### Default Data for Hawkbit and Kuksa App Store 

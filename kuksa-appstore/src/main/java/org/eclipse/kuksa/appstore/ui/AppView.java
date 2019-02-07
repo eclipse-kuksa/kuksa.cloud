@@ -68,7 +68,7 @@ public class AppView extends CustomComponent implements View {
 	@Autowired
 	AppService appService;
 	Button purchase_install;
-
+	Button uninstallButton;
 	@PostConstruct
 	public void init() {
 		if (VaadinSession.getCurrent().getAttribute("app") != null) {
@@ -214,6 +214,53 @@ public class AppView extends CustomComponent implements View {
 					}
 				}
 			});
+
+			uninstallButton = new Button("Uninstall App");
+
+			uninstallButton.addClickListener(new ClickListener() {
+
+				@Override
+				public void buttonClick(ClickEvent event) {
+
+					if (comboBoxDevice.getValue() != null) {
+
+						try {
+							Result<?> result = appService.UninstallApp(comboBoxDevice.getSelectedItem().get(),
+									currentUser.getId(), currentApp.getId());
+
+							if (result.isSuccess()) {
+								new Notification("Succes Uninstall Action",
+										"The uninstalling action has been sent to Hawkbit for selected device.",
+										Notification.Type.TRAY_NOTIFICATION).show(com.vaadin.server.Page.getCurrent());
+
+							} else {
+								new Notification("Fail Uninstall Action", result.getErrorMessage(),
+										Notification.Type.ERROR_MESSAGE).show(com.vaadin.server.Page.getCurrent());
+
+							}
+						} catch (NotFoundException e) {
+							new Notification(e.getMessage(), Notification.Type.ERROR_MESSAGE)
+									.show(com.vaadin.server.Page.getCurrent());
+
+						} catch (BadRequestException e) {
+							new Notification(e.getMessage(), Notification.Type.ERROR_MESSAGE)
+									.show(com.vaadin.server.Page.getCurrent());
+
+						} catch (AlreadyExistException e) {
+							new Notification(e.getMessage(), Notification.Type.ERROR_MESSAGE)
+							.show(com.vaadin.server.Page.getCurrent());
+						}
+
+					} else {
+						new Notification("Select a Device", "You have to select a device!",
+								Notification.Type.ERROR_MESSAGE).show(com.vaadin.server.Page.getCurrent());
+
+					}
+				}
+			});
+
+			uninstallButton.setWidth("300");
+			appslayout.addComponent(uninstallButton, "appuninstall");
 
 		} else {
 

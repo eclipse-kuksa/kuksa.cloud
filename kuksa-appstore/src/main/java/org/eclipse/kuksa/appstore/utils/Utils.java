@@ -73,6 +73,17 @@ public class Utils {
 		}
 		return false;
 	}
+	public static List<SoftwareModule> UninstallApp(SoftwareModule softwareModule,
+			List<SoftwareModule> softwareModuleList) {
+
+		for (SoftwareModule indexSoftwareModule : softwareModuleList) {
+			if (indexSoftwareModule.getId().equals(softwareModule.getId())) {
+				softwareModuleList.remove(indexSoftwareModule);
+				return softwareModuleList;
+			}
+		}
+		return softwareModuleList;
+	}
 	public static boolean isUserAlreadyOwner(User user,
 			List<User> ownerList) {
 
@@ -82,5 +93,16 @@ public class Utils {
 			}
 		}
 		return false;
+	}
+	public static List<User> removeOwnerUser(User user,
+			List<User> ownerList) {
+
+		for (User indexUser : ownerList) {
+			if (indexUser.getId().equals(user.getId())) {
+				ownerList.remove(indexUser);
+				return ownerList;
+			}
+		}
+		return ownerList;
 	}
 }
