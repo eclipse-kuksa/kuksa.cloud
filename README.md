@@ -13,11 +13,18 @@ Contributors:
 -->
 
 # Eclipse Kuksa-Cloud
+[![Eclipse Public License 2.0](https://img.shields.io/badge/license-EPL--2.0-green.svg "Eclipse Public License 2.0")](LICENSE)
 
-This repository contains:
+![Eclipse Kuksa](logos/kuksa.png "Eclipse Kuksa Logo")
+
+## Content
 
 * HonoInfluxDBConnector: A Spring-Boot application that connects a running Eclipse Hono instance with a running InfluxDB instance so that messages received by Hono can be stored in InfluxDB. This is especially useful if one wants to easily create a visualization of some measurements eg with Grafana.
 * AppStore: A Spring-Boot application that connects a running Eclipse HawkBit instance and provides a GUI to manage vehicle (and eventually cloud) applications
 * **ONGOING** Scripts to setup the overall cloud architecture
 
 More information on deployment / usage is given in each modules' subdirectories.
+
+## License
+
+Licensed under the [EPL-2.0](LICENSE) license.
