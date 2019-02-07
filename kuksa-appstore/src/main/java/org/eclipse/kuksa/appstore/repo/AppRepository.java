@@ -62,4 +62,6 @@ public interface AppRepository extends CrudRepository<App, String> {
 					"UNION " +
 				"select USERAPPS.appid from USERAPPS where USERAPPS.userid in ( select id from USER where USER.OEM_ID in (select ID from OEM where name in ?2) ) )")
 	Page<App> findUsersApps(String userId, List<String> oemList, Pageable pageable);
+
+	App findByIdAndInstalledusersId(Long id, Long userid);
 }
