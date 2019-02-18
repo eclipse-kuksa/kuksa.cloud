@@ -1,0 +1,21 @@
+plugins {
+    id 'java'
+    id 'application'
+}
+
+repositories {
+    mavenCentral()
+}
+
+sourceCompatibility = '1.8'
+targetCompatibility = '1.8'
+version = '0.0.2'
+mainClassName = 'org.eclipse.kuksa.honoInfluxConnector.HonoInfluxConnectorApplication'
+
+dependencies {
+    compile 'org.eclipse.hono:hono-client:0.8'
+    compile 'org.springframework.boot:spring-boot-starter:2.1.2.RELEASE'
+    compile 'org.influxdb:influxdb-java:2.14'
+    testCompile 'junit:junit:4.12'
+    testCompile 'org.springframework.boot:spring-boot-starter-test:2.1.2.RELEASE'
+}

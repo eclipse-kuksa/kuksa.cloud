@@ -29,8 +29,7 @@ import java.net.URL;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-@Component
-public class InfluxDBClient implements MessageHandler {
+class InfluxDBClient implements MessageHandler {
 
     /* standard logger for logging information and errors */
     private static final Logger LOGGER = LoggerFactory.getLogger(InfluxDBClient.class);
@@ -48,15 +47,15 @@ public class InfluxDBClient implements MessageHandler {
      * @param dbName    name of the database
      * @throws MalformedURLException throws exception if the given url is in the wrong format
      */
-    public InfluxDBClient(@Value("${influxdb.url}") final String influxURL,
-                          @Value("${influxdb.db.name}") final String dbName) throws MalformedURLException {
+    InfluxDBClient(final String influxURL,
+                   final String dbName) throws MalformedURLException {
         // check the given url string
         URL url = new URL(influxURL);
         influxDB = InfluxDBFactory.connect(url.toString());
 
         LOGGER.info("will connect to InfluxDB server at {} and database {} ", influxURL, dbName);
 
-        influxDB.createDatabase(dbName);
+        //influxDB.createDatabase(dbName);
         influxDB.enableBatch(10, 100, TimeUnit.MILLISECONDS);
 
         this.dbName = dbName;
@@ -70,14 +69,14 @@ public class InfluxDBClient implements MessageHandler {
      * @param msg message to write to process
      */
     public void process(MessageDTO msg) {
-        Point.Builder pointBuilder = Point.measurement(msg.getDeviceID())
-                .time(System.currentTimeMillis(), TimeUnit.MILLISECONDS);
-
         // check for empty messages and just drop them
         Map<String, Object> entries = msg.getEntries();
         if (entries == null || entries.isEmpty()) {
             return;
         }
+
+        Point.Builder pointBuilder = Point.measurement(msg.getDeviceID())
+                .time(System.currentTimeMillis(), TimeUnit.MILLISECONDS);
 
         for (Map.Entry<String, Object> entry : entries.entrySet()) {
             pointBuilder.addField(entry.getKey(), entry.getValue().toString());
@@ -87,9 +86,8 @@ public class InfluxDBClient implements MessageHandler {
         influxDB.write(dbName, "autogen", point);
     }
 
-    @PreDestroy
-    public void cleanUp() throws Exception {
-        LOGGER.info("will terminate.");
+    @Override
+    public void close() {
         influxDB.close();
     }
 }

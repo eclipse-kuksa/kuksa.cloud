@@ -15,34 +15,25 @@
 
 package org.eclipse.kuksa.honoInfluxConnector;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.vertx.core.AsyncResult;
+import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
+import io.vertx.core.json.DecodeException;
+import io.vertx.core.json.JsonObject;
 import io.vertx.proton.ProtonClientOptions;
-import io.vertx.proton.ProtonConnection;
-import org.apache.qpid.proton.amqp.messaging.Data;
-import org.apache.qpid.proton.amqp.messaging.Section;
 import org.apache.qpid.proton.message.Message;
 import org.eclipse.hono.client.HonoClient;
-import org.eclipse.hono.client.MessageConsumer;
-import org.eclipse.hono.client.impl.HonoClientImpl;
-import org.eclipse.hono.connection.ConnectionFactoryImpl;
+import org.eclipse.hono.config.ClientConfigProperties;
 import org.eclipse.hono.util.MessageHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
-import org.springframework.boot.SpringApplication;
-import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
+import java.net.MalformedURLException;
 
 
 @Component
@@ -54,32 +45,22 @@ public class HonoConnector implements ApplicationRunner {
     /* connection options for the connection to the Hono Messaging Service */
     private final ProtonClientOptions options;
 
-    //TODO is this field necessary?
-    private final String honoTenantId;
-
     /* vertx instance opened to connect to Hono Messaging, needs to be closed */
-    private final Vertx vertx = Vertx.vertx();
+    private final Vertx vertx;
 
     /* client used to connect to the Hono Messaging Service to receive new messages */
     private final HonoClient honoClient;
 
     /* message handler forwarding the messages to their final destination */
-    private MessageHandler messageHandler;
-
-    /* handler for a completed connect to Hono Messaging */
-    private final Handler<AsyncResult<MessageConsumer>> completeHandler;
+    private final MessageHandler messageHandler;
 
     /* handler of the outcome of a connection attempt to Hono Messaging */
-    private final Handler<AsyncResult<org.eclipse.hono.client.HonoClient>> connectionHandler;
+    private final Handler<AsyncResult<HonoClient>> connectionHandler;
 
-    /* handler for a disconnect from the Hono Messaging */
-    private final Handler<ProtonConnection> disconnectHandler;
+    private final Handler<Void> closeHandler;
 
     /* current number of reconnects so far */
     private int reconnectCount;
-
-    @Autowired
-    private ApplicationContext appContext;
 
     /**
      * Creates a new client to connect to Hono Messaging and forward the received messages to a
@@ -99,46 +80,46 @@ public class HonoConnector implements ApplicationRunner {
                          @Value("${hono.password}") final String honoPassword,
                          @Value("${hono.trustedStorePath}") final String honoTrustedStorePath,
                          @Value("${hono.reconnectAttempts}") final int reconnectAttempts,
-                         @Value("${hono.tenant.id}") final String honoTenantId) {
-        honoClient = new HonoClientImpl(vertx,
-                ConnectionFactoryImpl.ConnectionFactoryBuilder.newBuilder()
-                        .vertx(vertx)
-                        .host(qpidRouterHost)
-                        .port(qpidRouterPort)
-                        .user(honoUser)
-                        .password(honoPassword)
-                        .trustStorePath(honoTrustedStorePath)
-                        .disableHostnameVerification()
-                        .build());
+                         @Value("${hono.tenant.id}") final String honoTenantId,
+                         @Value("${influxdb.url}") final String influxURL,
+                         @Value("${influxdb.db.name}") final String dbName) throws MalformedURLException {
+        vertx = Vertx.vertx();
+        ClientConfigProperties config = new ClientConfigProperties();
+        config.setHost(qpidRouterHost);
+        config.setPort(qpidRouterPort);
+        config.setUsername(honoUser);
+        config.setPassword(honoPassword);
+        config.setTrustStorePath(honoTrustedStorePath);
+        config.setTlsEnabled(false);
+        config.setReconnectAttempts(2);
+        config.setHostnameVerificationRequired(false);
+
+        honoClient = HonoClient.newClient(vertx, config);
+
         options = new ProtonClientOptions();
         options.setReconnectAttempts(reconnectAttempts);
         options.setConnectTimeout(10000);
-        reconnectCount = 0;
-        this.honoTenantId = honoTenantId;
 
-        // log information of the outcome of the telemetry consumer creation
-        completeHandler = x -> {
-            if (x.succeeded()) {
-                LOGGER.info("Created a telemetry consumer for {}", honoTenantId);
-            } else {
-                LOGGER.error("Failed to create a telemetry consumer. Reason: {}", x.cause());
-                x.cause().printStackTrace();
-            }
-        };
+        reconnectCount = 0;
+        messageHandler = new InfluxDBClient(influxURL, dbName);
+
+        closeHandler = x -> reconnect();
 
         // on connection established create a new telemetry consumer to handle incoming messages
         connectionHandler = x -> {
             if (x.succeeded()) {
-                LOGGER.info("Connected to Hono Messaging at {}:{}", qpidRouterHost, qpidRouterPort);
-                honoClient.createTelemetryConsumer(honoTenantId, this::handleTelemetryMessage, completeHandler);
+                LOGGER.info("Connected to Hono at {}:{}", qpidRouterHost, qpidRouterPort);
+                honoClient.createTelemetryConsumer(honoTenantId, this::handleTelemetryMessage, closeHandler);
             } else {
-                LOGGER.error("unable to connect to the hono messaging service. Reason: {}", x.cause());
-                x.cause().printStackTrace();
+                LOGGER.error("Failed to connect to Hono.", x.cause());
+                disconnect();
             }
         };
+    }
 
-        // on disconnect try to reconnect if there are still reconnects available
-        disconnectHandler = x -> reconnect();
+    private void disconnect() {
+        messageHandler.close();
+        vertx.close();
     }
 
     /**
@@ -151,69 +132,43 @@ public class HonoConnector implements ApplicationRunner {
 
         if (reconnectCount <= options.getReconnectAttempts()) {
             LOGGER.info("Reconnecting to the Hono Messaging Service...");
-            connectToHonoMessaging();
+            connectToHono();
         } else {
             LOGGER.info("Number of reconnects exceeds the user defined threshold of {} reconnects.", options.getReconnectAttempts());
-            shutdown();
-        }
-    }
-
-    /**
-     * Shuts down the connector and calls Spring Boot to terminate.
-     */
-    private void shutdown() {
-        vertx.close();
-        LOGGER.info("Shutting connector down...");
-
-        SpringApplication.exit(appContext, () -> 0);
-    }
-
-    /**
-     * Sets the message handler for incoming messages. null values will be ignored.
-     *
-     * @param messageHandler new message handler to use
-     */
-    @Autowired
-    public void setMessageHandler(final MessageHandler messageHandler) {
-        if (messageHandler != null) {
-            this.messageHandler = messageHandler;
+            //honoClient.disconnect();
         }
     }
 
     @Override
     public void run(final ApplicationArguments applicationArguments) {
         // start with the initial connect to Hono
-        connectToHonoMessaging();
+        connectToHono();
     }
 
-    /**
-     * Connects to Hono Messaging using the options and event handler initialized in the constructor.
-     * In case of a exception the client tries the next reconnect.
-     */
-    private void connectToHonoMessaging() {
+    private void connectToHono() {
         try {
-            honoClient.connect(options, connectionHandler, disconnectHandler);
+            Future<HonoClient> future = honoClient.connect(options);
+            LOGGER.info("Started connection attempt to Hono");
+            future.setHandler(connectionHandler);
         } catch (Exception e) {
-            LOGGER.error("Exception caught during connection attempt to Hono. Reason: {}", e.getMessage());
-            e.printStackTrace();
-            reconnect();
+            LOGGER.error("Failed to connect to Hono.", e);
         }
     }
 
     /**
      * Handles the incoming message and forwards it using the {@code messageHandler}.
+     * If the message is {@code null} it will drop the message.
      *
      * @param msg message to forward
      */
     private void handleTelemetryMessage(final Message msg) {
-        final Section body = msg.getBody();
-
-        if (!(body instanceof Data)) {
+        if (msg == null) {
+            LOGGER.debug("The received message from Hono is null.");
             return;
         }
 
         MessageDTO messageDTO = createMessageDTO(msg);
-        LOGGER.info(messageDTO.toString());
+        LOGGER.debug(messageDTO.toString());
 
         messageHandler.process(messageDTO);
     }
@@ -227,17 +182,16 @@ public class HonoConnector implements ApplicationRunner {
     private static MessageDTO createMessageDTO(final Message msg) {
         final String deviceId = MessageHelper.getDeviceId(msg);
 
-        String content = ((Data) msg.getBody()).getValue().toString();
-
-        Map<String, Object> entries = null;
+        JsonObject json = new JsonObject();
         try {
-            TypeReference<HashMap<String, Object>> typeRef = new TypeReference<HashMap<String, Object>>() {
-            };
-            entries = new ObjectMapper().readValue(content, typeRef);
-        } catch (IOException e) {
-            LOGGER.error("Unable to parse message {}.", content);
+            json = MessageHelper.getJsonPayload(msg);
+        } catch (DecodeException e) {
+            LOGGER.warn("Failed to parse the message body to JSON.", e);
         }
 
-        return new MessageDTO(deviceId, entries);
+        //ObjectMapper mapper = new ObjectMapper();
+        //MapType type = mapper.getTypeFactory().constructMapType(HashMap.class, String.class, Object.class);
+
+        return new MessageDTO(deviceId, json.getMap());
     }
 }
