@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mil-service-deployment
+  namespace: extensions
+spec:    
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mil-service
+  template:
+    metadata:
+      labels:
+        app: mil-service
+    spec:
+      containers:
+      - name: mil-service-container
+        image: <PLACEHOLDER>
+        imagePullPolicy: Always
+        envFrom:
+        - configMapRef:
+            name: mil-service-configmap
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: 200m
+          limits:
+            memory: "1024Mi"
+            cpu: 700m
+      

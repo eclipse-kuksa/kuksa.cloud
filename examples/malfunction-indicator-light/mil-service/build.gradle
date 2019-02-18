@@ -1,0 +1,35 @@
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:2.1.0.RELEASE")
+    }
+}
+
+apply plugin: 'java'
+apply plugin: 'application'
+apply plugin: 'org.springframework.boot'
+apply plugin: 'io.spring.dependency-management'
+
+bootJar {
+    baseName = 'indicator-light-service'
+    version = '0.1.0'
+}
+
+mainClassName = "org.eclipse.kuksa.mil.service.Application"
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile 'org.springframework.boot:spring-boot-starter:2.1.0.RELEASE'
+    compile 'com.squareup.okhttp3:okhttp:3.12.0'
+    compile 'com.fasterxml.jackson.core:jackson-core:2.9.7'
+    compile 'com.fasterxml.jackson.core:jackson-annotations:2.9.7'
+    compile 'com.fasterxml.jackson.core:jackson-databind:2.9.7'
+    compile 'com.google.maps:google-maps-services:0.9.0'
+
+    testCompile 'junit:junit'
+}

@@ -1,0 +1,10 @@
+sender:
+  mail: mail@example.com
+  name: john
+
+smtp:
+  host: smtp.example.com
+  port: 465
+  transport: SMTPS
+  username: username
+  password: password

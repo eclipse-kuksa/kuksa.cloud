@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mail-notification-deployment
+  namespace: extensions
+spec:    
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mail-notification
+  template:
+    metadata:
+      labels:
+        app: mail-notification
+    spec:
+      containers:
+      - name: mail-notification-container
+        image: <PLACEHOLDER>
+        imagePullPolicy: Always
+        envFrom:
+        - configMapRef:
+            name: mail-notification-configmap
+        - secretRef:
+            name: mail-notification-secret
+        ports:
+          - containerPort: 8080
+            name: http
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: 200m
+          limits:
+            memory: "1024Mi"
+            cpu: 700m
+      

@@ -1,0 +1,5 @@
+rootProject.name = 'malfunction-indicator-light'
+
+include 'influxdb-rest'
+include 'mil-service'
+include 'mail-notification'
