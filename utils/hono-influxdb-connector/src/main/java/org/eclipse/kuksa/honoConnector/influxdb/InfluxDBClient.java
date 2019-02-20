@@ -13,23 +13,28 @@
  * *****************************************************************************
  */
 
-package org.eclipse.kuksa.honoInfluxConnector;
+package org.eclipse.kuksa.honoConnector.influxdb;
 
+import org.eclipse.kuksa.honoConnector.message.MessageDTO;
+import org.eclipse.kuksa.honoConnector.message.MessageHandler;
 import org.influxdb.InfluxDB;
+import org.influxdb.InfluxDBException;
 import org.influxdb.InfluxDBFactory;
 import org.influxdb.dto.Point;
+import org.influxdb.dto.Query;
+import org.influxdb.dto.QueryResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
 
-import javax.annotation.PreDestroy;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Map;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
+import java.util.function.BiConsumer;
 
-class InfluxDBClient implements MessageHandler {
+public class InfluxDBClient implements MessageHandler {
 
     /* standard logger for logging information and errors */
     private static final Logger LOGGER = LoggerFactory.getLogger(InfluxDBClient.class);
@@ -47,18 +52,42 @@ class InfluxDBClient implements MessageHandler {
      * @param dbName    name of the database
      * @throws MalformedURLException throws exception if the given url is in the wrong format
      */
-    InfluxDBClient(final String influxURL,
-                   final String dbName) throws MalformedURLException {
+    public InfluxDBClient(final String influxURL,
+                          final String dbName) throws MalformedURLException {
+        this.dbName = dbName;
         // check the given url string
         URL url = new URL(influxURL);
         influxDB = InfluxDBFactory.connect(url.toString());
+        LOGGER.info("Connected to InfluxDB at {}", influxURL);
 
-        LOGGER.info("will connect to InfluxDB server at {} and database {} ", influxURL, dbName);
+        createDatabase();
+        // consumer for possible exceptions when writing
+        BiConsumer<Iterable<Point>, Throwable> consumer = (points, throwable) -> {
+            if (throwable instanceof InfluxDBException.DatabaseNotFoundException) {
+                if (!createDatabase()) {
+                    LOGGER.error("Failed to create the database {}. Will drop pending points.", dbName);
+                    return;
+                }
+                for (Point point : points) {
+                    writePoint(point);
+                }
+            }
+        };
+        ThreadFactory factory = Executors.defaultThreadFactory();
+        influxDB.enableBatch(10, 100, TimeUnit.MILLISECONDS, factory, consumer);
+    }
 
-        //influxDB.createDatabase(dbName);
-        influxDB.enableBatch(10, 100, TimeUnit.MILLISECONDS);
+    /**
+     * Creates a new database in the influxdb instance {@link #influxDB} with the name
+     * {@link #dbName}. If the database is already present the function simply return true.
+     *
+     * @return true if database is created, false if not
+     */
+    private boolean createDatabase() {
+        String query = String.format("CREATE DATABASE \"%s\"", dbName);
+        QueryResult result = influxDB.query(new Query(query, dbName, true));
 
-        this.dbName = dbName;
+        return result != null && !result.hasError();
     }
 
     /**
@@ -70,6 +99,9 @@ class InfluxDBClient implements MessageHandler {
      */
     public void process(MessageDTO msg) {
         // check for empty messages and just drop them
+        if (msg == null) {
+            return;
+        }
         Map<String, Object> entries = msg.getEntries();
         if (entries == null || entries.isEmpty()) {
             return;
@@ -81,8 +113,11 @@ class InfluxDBClient implements MessageHandler {
         for (Map.Entry<String, Object> entry : entries.entrySet()) {
             pointBuilder.addField(entry.getKey(), entry.getValue().toString());
         }
-        Point point = pointBuilder.build();
 
+        writePoint(pointBuilder.build());
+    }
+
+    private void writePoint(Point point) {
         influxDB.write(dbName, "autogen", point);
     }
 

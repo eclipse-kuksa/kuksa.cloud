@@ -13,7 +13,7 @@
  * *****************************************************************************
  */
 
-package org.eclipse.kuksa.honoInfluxConnector;
+package org.eclipse.kuksa.honoConnector;
 
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
@@ -26,6 +26,9 @@ import org.apache.qpid.proton.message.Message;
 import org.eclipse.hono.client.HonoClient;
 import org.eclipse.hono.config.ClientConfigProperties;
 import org.eclipse.hono.util.MessageHelper;
+import org.eclipse.kuksa.honoConnector.influxdb.InfluxDBClient;
+import org.eclipse.kuksa.honoConnector.message.MessageDTO;
+import org.eclipse.kuksa.honoConnector.message.MessageHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -59,8 +62,6 @@ public class HonoConnector implements ApplicationRunner {
 
     private final Handler<Void> closeHandler;
 
-    /* current number of reconnects so far */
-    private int reconnectCount;
 
     /**
      * Creates a new client to connect to Hono Messaging and forward the received messages to a
@@ -71,7 +72,6 @@ public class HonoConnector implements ApplicationRunner {
      * @param honoUser             user to authorize with Hono Messaging
      * @param honoPassword         password to authorize with Hono Messaging
      * @param honoTrustedStorePath path to the certificate file used to connect to Hono Messaging
-     * @param reconnectAttempts    maximum number of reconnects
      * @param honoTenantId         tenant id
      */
     public HonoConnector(@Value("${qpid.router.host}") final String qpidRouterHost,
@@ -79,7 +79,6 @@ public class HonoConnector implements ApplicationRunner {
                          @Value("${hono.user}") final String honoUser,
                          @Value("${hono.password}") final String honoPassword,
                          @Value("${hono.trustedStorePath}") final String honoTrustedStorePath,
-                         @Value("${hono.reconnectAttempts}") final int reconnectAttempts,
                          @Value("${hono.tenant.id}") final String honoTenantId,
                          @Value("${influxdb.url}") final String influxURL,
                          @Value("${influxdb.db.name}") final String dbName) throws MalformedURLException {
@@ -91,16 +90,13 @@ public class HonoConnector implements ApplicationRunner {
         config.setPassword(honoPassword);
         config.setTrustStorePath(honoTrustedStorePath);
         config.setTlsEnabled(false);
-        config.setReconnectAttempts(2);
         config.setHostnameVerificationRequired(false);
 
         honoClient = HonoClient.newClient(vertx, config);
 
         options = new ProtonClientOptions();
-        options.setReconnectAttempts(reconnectAttempts);
         options.setConnectTimeout(10000);
 
-        reconnectCount = 0;
         messageHandler = new InfluxDBClient(influxURL, dbName);
 
         closeHandler = x -> reconnect();
@@ -128,6 +124,7 @@ public class HonoConnector implements ApplicationRunner {
      * parameter 'hono.reconnectAttempts' the connector won't reconnect but shutdown instead.
      */
     private void reconnect() {
+        /*
         reconnectCount++;
 
         if (reconnectCount <= options.getReconnectAttempts()) {
@@ -137,6 +134,9 @@ public class HonoConnector implements ApplicationRunner {
             LOGGER.info("Number of reconnects exceeds the user defined threshold of {} reconnects.", options.getReconnectAttempts());
             //honoClient.disconnect();
         }
+        */
+        LOGGER.info("Reconnecting to the Hono Messaging Service...");
+        connectToHono();
     }
 
     @Override

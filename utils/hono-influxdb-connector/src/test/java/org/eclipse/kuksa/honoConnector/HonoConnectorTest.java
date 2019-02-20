@@ -12,7 +12,7 @@
  * *****************************************************************************
  */
 
-package org.eclipse.kuksa.honoInfluxConnector;
+package org.eclipse.kuksa.honoConnector;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 

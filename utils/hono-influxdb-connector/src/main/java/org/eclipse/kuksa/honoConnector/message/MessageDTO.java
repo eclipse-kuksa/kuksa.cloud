@@ -13,26 +13,26 @@
  * *****************************************************************************
  */
 
-package org.eclipse.kuksa.honoInfluxConnector;
+package org.eclipse.kuksa.honoConnector.message;
 
 import java.util.Map;
 
-class MessageDTO {
+public class MessageDTO {
 
     private final String deviceID;
 
     private final Map<String, Object> entries;
 
-    MessageDTO(String deviceID, Map<String, Object> entries) {
+    public MessageDTO(String deviceID, Map<String, Object> entries) {
         this.deviceID = deviceID;
         this.entries = entries;
     }
 
-    Map<String, Object> getEntries() {
+    public Map<String, Object> getEntries() {
         return entries;
     }
 
-    String getDeviceID() {
+    public String getDeviceID() {
         return deviceID;
     }
 

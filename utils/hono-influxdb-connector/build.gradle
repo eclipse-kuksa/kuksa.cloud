@@ -1,6 +1,7 @@
 plugins {
     id 'java'
     id 'application'
+    id 'org.springframework.boot' version '2.1.2.RELEASE'
 }
 
 repositories {
@@ -10,7 +11,7 @@ repositories {
 sourceCompatibility = '1.8'
 targetCompatibility = '1.8'
 version = '0.0.2'
-mainClassName = 'org.eclipse.kuksa.honoInfluxConnector.HonoInfluxConnectorApplication'
+mainClassName = 'org.eclipse.kuksa.honoConnector.HonoInfluxConnectorApplication'
 
 dependencies {
     compile 'org.eclipse.hono:hono-client:0.8'
