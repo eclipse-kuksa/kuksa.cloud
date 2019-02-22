@@ -40,7 +40,7 @@ import java.net.MalformedURLException;
 
 
 @Component
-public class HonoConnector implements ApplicationRunner {
+class HonoConnector implements ApplicationRunner {
 
     /* standard logger for information and error output */
     private static final Logger LOGGER = LoggerFactory.getLogger(HonoConnector.class);
@@ -60,6 +60,7 @@ public class HonoConnector implements ApplicationRunner {
     /* handler of the outcome of a connection attempt to Hono Messaging */
     private final Handler<AsyncResult<HonoClient>> connectionHandler;
 
+    /* handles the event of closing the connection */
     private final Handler<Void> closeHandler;
 
 
@@ -72,16 +73,16 @@ public class HonoConnector implements ApplicationRunner {
      * @param honoUser             user to authorize with Hono Messaging
      * @param honoPassword         password to authorize with Hono Messaging
      * @param honoTrustedStorePath path to the certificate file used to connect to Hono Messaging
-     * @param honoTenantId         tenant id
+     * @param tenantId             tenant id
      */
-    public HonoConnector(@Value("${qpid.router.host}") final String qpidRouterHost,
-                         @Value("${qpid.router.port}") final int qpidRouterPort,
-                         @Value("${hono.user}") final String honoUser,
-                         @Value("${hono.password}") final String honoPassword,
-                         @Value("${hono.trustedStorePath}") final String honoTrustedStorePath,
-                         @Value("${hono.tenant.id}") final String honoTenantId,
-                         @Value("${influxdb.url}") final String influxURL,
-                         @Value("${influxdb.db.name}") final String dbName) throws MalformedURLException {
+    HonoConnector(@Value("${qpid.router.host}") final String qpidRouterHost,
+                  @Value("${qpid.router.port}") final int qpidRouterPort,
+                  @Value("${hono.user}") final String honoUser,
+                  @Value("${hono.password}") final String honoPassword,
+                  @Value("${hono.trustedStorePath}") final String honoTrustedStorePath,
+                  @Value("${hono.tenant.id}") final String tenantId,
+                  @Value("${influxdb.url}") final String influxURL,
+                  @Value("${influxdb.db.name}") final String dbName) throws MalformedURLException {
         vertx = Vertx.vertx();
         ClientConfigProperties config = new ClientConfigProperties();
         config.setHost(qpidRouterHost);
@@ -99,13 +100,14 @@ public class HonoConnector implements ApplicationRunner {
 
         messageHandler = new InfluxDBClient(influxURL, dbName);
 
+        // try to reconnect if connection closes
         closeHandler = x -> reconnect();
 
         // on connection established create a new telemetry consumer to handle incoming messages
         connectionHandler = x -> {
             if (x.succeeded()) {
                 LOGGER.info("Connected to Hono at {}:{}", qpidRouterHost, qpidRouterPort);
-                honoClient.createTelemetryConsumer(honoTenantId, this::handleTelemetryMessage, closeHandler);
+                honoClient.createTelemetryConsumer(tenantId, this::handleTelemetryMessage, closeHandler);
             } else {
                 LOGGER.error("Failed to connect to Hono.", x.cause());
                 disconnect();
@@ -113,29 +115,21 @@ public class HonoConnector implements ApplicationRunner {
         };
     }
 
+    /**
+     * Disconnects from Hono and the message handler.
+     */
     private void disconnect() {
+        LOGGER.warn("The Hono connector is closing all open connections.");
         messageHandler.close();
         vertx.close();
+        LOGGER.info("Closed all connections.");
     }
 
     /**
-     * Reconnect to the hono messaging service.
-     * If the number of reconnects exceeds the number of reconnects defined in the application.properties by the
-     * parameter 'hono.reconnectAttempts' the connector won't reconnect but shutdown instead.
+     * Reconnects to Hono using the {@link #connectToHono()} function.
      */
     private void reconnect() {
-        /*
-        reconnectCount++;
-
-        if (reconnectCount <= options.getReconnectAttempts()) {
-            LOGGER.info("Reconnecting to the Hono Messaging Service...");
-            connectToHono();
-        } else {
-            LOGGER.info("Number of reconnects exceeds the user defined threshold of {} reconnects.", options.getReconnectAttempts());
-            //honoClient.disconnect();
-        }
-        */
-        LOGGER.info("Reconnecting to the Hono Messaging Service...");
+        LOGGER.info("Reconnecting to Hono.");
         connectToHono();
     }
 
@@ -145,10 +139,15 @@ public class HonoConnector implements ApplicationRunner {
         connectToHono();
     }
 
+    /**
+     * Connects to the Hono based on the options defined in {@link #options}.
+     * The {@link #connectionHandler} is used as a callback for the connection attempt.
+     */
     private void connectToHono() {
         try {
             Future<HonoClient> future = honoClient.connect(options);
-            LOGGER.info("Started connection attempt to Hono");
+            LOGGER.info("Started connection attempt to Hono.");
+            // set handler to react to the outcome of the connection attempt
             future.setHandler(connectionHandler);
         } catch (Exception e) {
             LOGGER.error("Failed to connect to Hono.", e);
@@ -170,6 +169,7 @@ public class HonoConnector implements ApplicationRunner {
         MessageDTO messageDTO = createMessageDTO(msg);
         LOGGER.debug(messageDTO.toString());
 
+        // forward created message dto
         messageHandler.process(messageDTO);
     }
 
@@ -188,9 +188,6 @@ public class HonoConnector implements ApplicationRunner {
         } catch (DecodeException e) {
             LOGGER.warn("Failed to parse the message body to JSON.", e);
         }
-
-        //ObjectMapper mapper = new ObjectMapper();
-        //MapType type = mapper.getTypeFactory().constructMapType(HashMap.class, String.class, Object.class);
 
         return new MessageDTO(deviceId, json.getMap());
     }
