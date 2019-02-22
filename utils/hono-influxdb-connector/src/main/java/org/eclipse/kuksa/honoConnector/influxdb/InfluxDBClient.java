@@ -34,6 +34,11 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BiConsumer;
 
+/**
+ * Client that connects to an instance of influxDB and forwards message dtos
+ * as defined in {@link MessageHandler}. Transforms the message to a measurement
+ * point to write to influxDB.
+ */
 public class InfluxDBClient implements MessageHandler {
 
     /* standard logger for logging information and errors */
@@ -42,7 +47,7 @@ public class InfluxDBClient implements MessageHandler {
     /* influxDB connection wrapper */
     private final InfluxDB influxDB;
 
-    /* name of the database to write to*/
+    /* name of the database to write to */
     private final String dbName;
 
     /**
@@ -58,9 +63,8 @@ public class InfluxDBClient implements MessageHandler {
         // check the given url string
         URL url = new URL(influxURL);
         influxDB = InfluxDBFactory.connect(url.toString());
-        LOGGER.info("Connected to InfluxDB at {}", influxURL);
+        LOGGER.info("Connected to InfluxDB at {}", url.toString());
 
-        createDatabase();
         // consumer for possible exceptions when writing
         BiConsumer<Iterable<Point>, Throwable> consumer = (points, throwable) -> {
             if (throwable instanceof InfluxDBException.DatabaseNotFoundException) {
@@ -92,12 +96,13 @@ public class InfluxDBClient implements MessageHandler {
 
     /**
      * Transforms the body of the message to a database entry and writes it to the database
-     * associated with the instance by {@code influxDB}.
+     * associated with the instance by {@link #influxDB}.
      * Will drop empty messages and not write them to the database.
      *
-     * @param msg message to write to process
+     * @param msg message dto to process
      */
-    public void process(MessageDTO msg) {
+    @Override
+    public void process(final MessageDTO msg) {
         // check for empty messages and just drop them
         if (msg == null) {
             return;
@@ -117,7 +122,12 @@ public class InfluxDBClient implements MessageHandler {
         writePoint(pointBuilder.build());
     }
 
-    private void writePoint(Point point) {
+    /**
+     * Writes a single measurement point to the influxDB.
+     *
+     * @param point measurement point to write to the database
+     */
+    private void writePoint(final Point point) {
         influxDB.write(dbName, "autogen", point);
     }
 
