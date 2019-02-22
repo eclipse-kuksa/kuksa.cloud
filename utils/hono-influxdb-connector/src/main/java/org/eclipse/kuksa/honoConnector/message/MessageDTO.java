@@ -17,21 +17,43 @@ package org.eclipse.kuksa.honoConnector.message;
 
 import java.util.Map;
 
+/**
+ * Data transfer object for a Hono message {@link org.apache.qpid.proton.message.Message}.
+ */
 public class MessageDTO {
 
+    /* ID of the device sending the message */
     private final String deviceID;
 
+    /* mapping of objects within the message body */
     private final Map<String, Object> entries;
 
+    /**
+     * Creates a new message dto with the given device ID and mapping of the
+     * message content.
+     *
+     * @param deviceID device ID that sent the message
+     * @param entries  mapping of strings to the respective objects of that message
+     */
     public MessageDTO(String deviceID, Map<String, Object> entries) {
         this.deviceID = deviceID;
         this.entries = entries;
     }
 
+    /**
+     * Returns the mapping of keys to objects contained in this message.
+     *
+     * @return object mappings
+     */
     public Map<String, Object> getEntries() {
         return entries;
     }
 
+    /**
+     * Returns the device ID that sent the message.
+     *
+     * @return device ID
+     */
     public String getDeviceID() {
         return deviceID;
     }

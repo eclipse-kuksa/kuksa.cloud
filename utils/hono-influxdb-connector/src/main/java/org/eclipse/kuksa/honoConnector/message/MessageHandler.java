@@ -14,9 +14,20 @@
 
 package org.eclipse.kuksa.honoConnector.message;
 
+/**
+ * Interface to wrap the message processing of incoming messages from Hono.
+ */
 public interface MessageHandler {
 
-    void process(MessageDTO msg);
+    /**
+     * Processes the incoming message dto received from Hono.
+     *
+     * @param msg message dto to process
+     */
+    void process(final MessageDTO msg);
 
+    /**
+     * Closes the message handler. Needs to be called before exit.
+     */
     void close();
 }
