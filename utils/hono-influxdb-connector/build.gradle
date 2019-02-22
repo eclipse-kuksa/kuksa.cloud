@@ -10,7 +10,7 @@ repositories {
 
 sourceCompatibility = '1.8'
 targetCompatibility = '1.8'
-version = '0.0.2'
+version = '0.1.0'
 mainClassName = 'org.eclipse.kuksa.honoConnector.HonoInfluxConnectorApplication'
 
 dependencies {
