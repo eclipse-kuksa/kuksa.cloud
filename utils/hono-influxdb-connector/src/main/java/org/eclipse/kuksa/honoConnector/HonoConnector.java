@@ -90,7 +90,6 @@ class HonoConnector implements ApplicationRunner {
         config.setUsername(honoUser);
         config.setPassword(honoPassword);
         config.setTrustStorePath(honoTrustedStorePath);
-        config.setTlsEnabled(false);
         config.setHostnameVerificationRequired(false);
 
         honoClient = HonoClient.newClient(vertx, config);
