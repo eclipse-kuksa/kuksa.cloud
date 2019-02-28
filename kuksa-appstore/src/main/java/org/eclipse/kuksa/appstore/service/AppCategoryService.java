@@ -53,11 +53,13 @@ public class AppCategoryService {
 		return appCategoryRepository.findById(id);
 
 	}
+
 	public AppCategory findByName(String name) {
 
 		return appCategoryRepository.findByName(name);
 
 	}
+
 	public void updateAppCategory(AppCategory appCategory) {
 
 		appCategoryRepository.save(appCategory);
@@ -93,12 +95,17 @@ public class AppCategoryService {
 
 	}
 
-	public void deleteAppCategory(String appCategoryId) throws NotFoundException {
+	public void deleteAppCategory(String appCategoryId) throws NotFoundException, BadRequestException {
 		AppCategory currentAppCategory = appCategoryRepository.findById(Long.parseLong(appCategoryId));
 		if (currentAppCategory == null) {
 			throw new NotFoundException("AppCategory not found. userId: " + appCategoryId);
 		} else {
-			appCategoryRepository.delete(currentAppCategory);
+			try {
+				appCategoryRepository.delete(currentAppCategory);
+			} catch (Exception e) {
+				throw new BadRequestException(
+						"This category is being used by applications. Please update the applications's categories before deleting.");
+			}
 		}
 	}
 

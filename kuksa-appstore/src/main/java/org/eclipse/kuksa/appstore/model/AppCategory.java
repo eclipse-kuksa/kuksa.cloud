@@ -37,7 +37,7 @@ public class AppCategory {
 	@Column(name = "name")
 	private String name;
 
-	@OneToMany(fetch = FetchType.EAGER, mappedBy = "appcategory", cascade = CascadeType.REMOVE)
+	@OneToMany(fetch = FetchType.EAGER, mappedBy = "appcategory")
 	private Set<App> apps = new HashSet<App>();
 
 	public Long getId() {

@@ -88,8 +88,42 @@ Just run `AppStoreApplication.java` class.Spring boot has an embedded Tomcat ins
 
 > http://{appstore-ip}:8082/swagger-ui.html#/
 
-- Each distribution has DUMMY_SOFTWARE_MODULE that can not be installed software module. We add this DUMMY_SOFTWARE_MODULE to each distributions because of Hawkbit wants to assign at least software module to a distribution. When we want to uninstall all device's applications, we need to delete all software modules that are in the distribution exclude DUMMY_SOFTWARE_MODULE.
+- Kuksa Appstore creates UNINSTALLED_ALL software module that can not be installed to devices. While All applications are uninstalling in a distribution,
+ Appstore should assign UNINSTALLED_ALL software module to the latest distribution. Because Hawkbit wants to add at least one software module to the distribution. Appstore removes UNINSTALLED_ALL software module from the latest distribution, while installing a software module. So UNINSTALLED_ALL software module only appears when all applications were uninstalled.
+ 
+ 
+The following tables indicate how the installation and uninstallation of applications work.
 
+Initial version while installing the App1 software module
+ 
+| Distribution Version 1 |
+| :----------:|
+| App1 |
+
+Version 2 while installing the App2 software module
+ 
+| Distribution Version 2 |
+| :----------:|
+| App1 |
+| App2 |
+
+Version 3 while uninstalling the App2 software module
+ 
+| Distribution Version 3 |
+| :----------:|
+| App1 |
+
+Version 4 while uninstalling the App1 software module
+ 
+| Distribution Version 4 |
+| :----------:|
+| UNINSTALLED_ALL |
+
+Version 5 while installing the App3 software module
+ 
+| Distribution Version 5 |
+| :----------:|
+| App3 |
  
 ### Default Data for Hawkbit and Kuksa App Store 
 - Kuksa App Store repository introduces a default data for Hawkbit and App Store to test the software which adds a set of device targets, software distribution sets, software modules into Hawkbit instance as well as a set of apps and users (regular, group and OEM) into App Store. 

@@ -98,7 +98,7 @@ public class AppCategoryController {
 	@ApiOperation(notes = "Deletes an app category specified by appCategoryId parameter.", value = "Deleting an App Category", nickname = "deleteAppCategory", produces = "application/json", authorizations = @Authorization(value = "api_key"))
 	@ApiImplicitParam(name = "Authorization", value = "Token Format: 'base64(username: password)'", required = true, dataType = "String", paramType = "Header", defaultValue = "Basic Token")
 	@DeleteMapping("/appcategory/{appCategoryId}")
-	public ResponseEntity<?> deleteAppCategory(@PathVariable String appCategoryId) throws NotFoundException {
+	public ResponseEntity<?> deleteAppCategory(@PathVariable String appCategoryId) throws NotFoundException, BadRequestException {
 		LOG.debug("[deleteAppCategory]: Delete App Category request is received. appId: {}", appCategoryId);
 		appCategoryService.deleteAppCategory(appCategoryId);
 
