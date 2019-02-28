@@ -22,7 +22,8 @@ public class Utils {
 
 	private static final String IMAGE_FILE_PATH = System.getProperty("user.dir") + File.separator + "imgs"
 			+ File.separator + "app";
-
+	
+	public static final String UNINSTALLED_ALL = "UNINSTALLED_ALL";
 	public static String getImageFilePath() {
 		return IMAGE_FILE_PATH;
 	}

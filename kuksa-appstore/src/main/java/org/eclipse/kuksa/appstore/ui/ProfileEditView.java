@@ -108,7 +108,7 @@ public class ProfileEditView extends CustomComponent implements View {
 					new Notification("No selected row", "Make sure that You selected any row to delete",
 							Notification.Type.ERROR_MESSAGE).show(Page.getCurrent());
 				}
-			} catch (NotFoundException e1) {
+			} catch (NotFoundException | BadRequestException e1) {
 				// TODO Auto-generated catch block
 				new Notification("Error", e1.getMessage(), Notification.Type.ERROR_MESSAGE).show(Page.getCurrent());
 
@@ -180,7 +180,7 @@ public class ProfileEditView extends CustomComponent implements View {
 					new Notification("No selected row", "Make sure that You selected any row to delete",
 							Notification.Type.ERROR_MESSAGE).show(Page.getCurrent());
 				}
-			} catch (NotFoundException e1) {
+			} catch (NotFoundException | BadRequestException e1) {
 				// TODO Auto-generated catch block
 				new Notification("Error", e1.getMessage(), Notification.Type.ERROR_MESSAGE).show(Page.getCurrent());
 

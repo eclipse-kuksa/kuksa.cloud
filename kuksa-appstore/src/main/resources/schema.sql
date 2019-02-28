@@ -20,7 +20,7 @@ CREATE TABLE IF NOT EXISTS `app` (
     `publishdate` TIMESTAMP NOT NULL ,
     `appcategory_id` BIGINT(20) NULL DEFAULT NULL,
     PRIMARY KEY (`id`),
-    CONSTRAINT `FK_appcategory_id` FOREIGN KEY (`appcategory_id`) REFERENCES `app_category` (`id`) ON UPDATE CASCADE ON DELETE CASCADE
+    CONSTRAINT `FK_appcategory_id` FOREIGN KEY (`appcategory_id`) REFERENCES `app_category` (`id`) ON UPDATE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS `user` (
@@ -30,7 +30,7 @@ CREATE TABLE IF NOT EXISTS `user` (
     `usertype` varchar(200) NOT NULL,
     `oem_id` BIGINT(20) NULL DEFAULT NULL,
     PRIMARY KEY (`id`),
-    CONSTRAINT `FK_oem_id` FOREIGN KEY (`oem_id`) REFERENCES `oem` (`id`) ON UPDATE CASCADE ON DELETE CASCADE
+    CONSTRAINT `FK_oem_id` FOREIGN KEY (`oem_id`) REFERENCES `oem` (`id`) ON UPDATE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS `members` (

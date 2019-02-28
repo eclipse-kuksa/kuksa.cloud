@@ -383,48 +383,15 @@ public class AppService {
 		ruleNew.setMaintenanceWindow(rulemain);
 
 		List<SoftwareModule> softwareModules = new ArrayList<SoftwareModule>();
-		if (newVersion == 1) {
-			// Check DUMMY_SOFTWARE_MODULE
-			SoftwareModuleResult softwareModuleResult;
-			try {
-				softwareModuleResult = hawkbitFeignClient
-						.getSoftwaremoduleByName(Utils.createFIQLEqual("name", "DUMMY_SOFTWARE_MODULE"));
-			} catch (Exception e) {
-				throw new BadRequestException(
-						"Hawkbit connection error. Check your Hawkbit's IP in the propreties file!");
-			}
 
-			if (softwareModuleResult.getSize() == 0) {
-				// Create DUMMY_SOFTWARE_MODULE
-				List<SoftwareModule> responsesoftwareModule;
-				try {
-
-					List<SoftwareModule> softwareModuleList = new ArrayList<>();
-					softwareModuleList.add(new SoftwareModule("DUMMY_SOFTWARE_MODULE",
-							"This software module is a Dummy software module. It was created to assign empty distribution to the device. This situation is for uninstalling device's all apps.",
-							"DUMMY_SOFTWARE_MODULE_VERSION", "application", "KUKSA_APPSTORE"));
-					responsesoftwareModule = hawkbitFeignClient.createSoftwaremodules(softwareModuleList);
-				} catch (Exception e) {
-					throw new BadRequestException(
-							"Hawkbit connection error. Check your Hawkbit's IP in the propreties file!");
-				}
-				if (responsesoftwareModule.size() == 0) {
-
-					throw new BadRequestException("Dummy App could not be saved to Hawkbit and Appstore!");
-				} else {
-
-					softwareModules.add(responsesoftwareModule.get(0));
-				}
-
-			} else {
-				softwareModules.add(softwareModuleResult.getContent().get(0));
-			}
-			// Check DUMMY_SOFTWARE_MODULE
-		}
-
-		if (lastDistributionResult.getSize() > 0) {
+		if (newVersion > 1) {
 			softwareModules = lastDistributionResult.getContent().get(lastDistributionResult.getSize() - 1)
 					.getModules();
+
+			if (softwareModules.size() == 1 && softwareModules.get(0).getName().equals(Utils.UNINSTALLED_ALL)) {
+
+				softwareModules.remove(0);
+			}
 
 			if (!Utils.isAppAlreadyInstalled(currentSoftwareModuleResult.getContent().get(0), softwareModules)) {
 
@@ -541,6 +508,49 @@ public class AppService {
 		if (isAlreadyAssigned == true) {
 
 			softwareModules = Utils.UninstallApp(currentSoftwareModuleResult.getContent().get(0), softwareModules);
+
+			if (softwareModules.size() == 0) {
+
+				// Check UNINSTALLED_ALL MODULE
+				SoftwareModuleResult softwareModuleResult;
+				try {
+					softwareModuleResult = hawkbitFeignClient
+							.getSoftwaremoduleByName(Utils.createFIQLEqual("name", Utils.UNINSTALLED_ALL));
+				} catch (Exception e) {
+					throw new BadRequestException(
+							"Hawkbit connection error. Check your Hawkbit's IP in the propreties file!");
+				}
+
+				if (softwareModuleResult.getSize() == 0) {
+
+					List<SoftwareModule> responsesoftwareModule;
+					try {
+						// Create UNINSTALLED_ALL MODULE
+						List<SoftwareModule> softwareModuleList = new ArrayList<>();
+						softwareModuleList.add(new SoftwareModule(Utils.UNINSTALLED_ALL,
+								"This software module is a Dummy software module. It was created to assign empty distribution to the device. This situation is for uninstalling device's all apps.",
+								"0", "application", "KUKSA_APPSTORE"));
+						responsesoftwareModule = hawkbitFeignClient.createSoftwaremodules(softwareModuleList);
+						// Create UNINSTALLED_ALL MODULE
+					} catch (Exception e) {
+						throw new BadRequestException(
+								"Hawkbit connection error. Check your Hawkbit's IP in the propreties file!");
+					}
+					if (responsesoftwareModule.size() == 0) {
+
+						throw new BadRequestException(
+								Utils.UNINSTALLED_ALL + " Dummy App could not be saved to Hawkbit and Appstore!");
+					} else {
+
+						softwareModules.add(responsesoftwareModule.get(0));
+					}
+
+				} else {
+					softwareModules.add(softwareModuleResult.getContent().get(0));
+				}
+				// Check UNINSTALLED_ALL MODULE
+
+			}
 
 			Distribution newDistribution = new Distribution(targetDeviceName, Integer.toString(newVersion));
 			newDistribution.setName(targetDeviceName);

@@ -37,7 +37,7 @@ public class Oem {
 	@Column(name = "name")
 	private String name;
 	
-	@OneToMany(fetch = FetchType.EAGER, mappedBy = "oem", cascade = CascadeType.REMOVE)
+	@OneToMany(fetch = FetchType.EAGER, mappedBy = "oem")
 	private Set<User> users = new HashSet<User>();
 
 	public Long getId() {

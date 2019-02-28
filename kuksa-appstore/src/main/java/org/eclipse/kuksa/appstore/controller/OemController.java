@@ -100,7 +100,7 @@ public class OemController {
 	@ApiOperation(notes = "Deletes an OEM specified by oemId parameter.", value = "Deleting an OEM", nickname = "deleteOEM", produces = "application/json", authorizations = @Authorization(value = "api_key"))
 	@ApiImplicitParam(name = "Authorization", value = "Token Format: 'base64(username: password)'", required = true, dataType = "String", paramType = "Header", defaultValue = "Basic Token")
 	@DeleteMapping("/oem/{oemId}")
-	public ResponseEntity<?> deleteOEM(@PathVariable Long oemId) throws NotFoundException {
+	public ResponseEntity<?> deleteOEM(@PathVariable Long oemId) throws NotFoundException, BadRequestException {
 		LOG.debug("[deleteOEM]: Delete OEM request is received. oemId: {}", oemId);
 		oemService.deleteOem(oemId);
 

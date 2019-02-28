@@ -95,12 +95,16 @@ public class OemService {
 
 	}
 
-	public void deleteOem(Long oemId) throws NotFoundException {
+	public void deleteOem(Long oemId) throws NotFoundException, BadRequestException {
 		Oem currentOem = oemRepository.findById(oemId);
 		if (currentOem == null) {
 			throw new NotFoundException("Oem not found. userId: " + oemId);
 		} else {
-			oemRepository.delete(currentOem);
+			try {
+			oemRepository.delete(currentOem);} catch (Exception e) {
+				throw new BadRequestException(
+						"This OEM is being used by users. Please update the users's OEM before deleting.");
+			}
 		}
 	}
 
