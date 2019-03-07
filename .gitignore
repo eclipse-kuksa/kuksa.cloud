@@ -16,3 +16,4 @@ gradle-app.setting
 # Maven
 target/
 
+deployment/exportStaticIpAddresses.inc
