@@ -360,12 +360,11 @@ public class AppService {
 		SoftwareModuleResult currentSoftwareModuleResult = hawkbitFeignClient
 				.getSoftwaremoduleByName("name==" + currentApp.getName());
 		DistributionResult lastDistributionResult = hawkbitFeignClient
-				.getDistributionByName("name==" + targetDeviceName);
+				.getDistributionByName("name==" + targetDeviceName, 1, "id:DESC");
 		String version = null;
 
 		if (lastDistributionResult.getSize() > 0) {
-			version = lastDistributionResult.getContent().get(lastDistributionResult.getContent().size() - 1)
-					.getVersion();
+			version = lastDistributionResult.getContent().get(0).getVersion();
 		} else {
 			version = "0";
 		}
@@ -415,10 +414,10 @@ public class AppService {
 
 			}
 			DistributionResult newDistributionResult = hawkbitFeignClient
-					.getDistributionByName(Utils.createFIQLEqual("name", targetDeviceName));
+					.getDistributionByName(Utils.createFIQLEqual("name", targetDeviceName), 1, "id:DESC");
 			if (newDistributionResult.getSize() > 0) {
 
-				ruleNew.setId(newDistributionResult.getContent().get(newDistributionResult.getSize() - 1).getId());
+				ruleNew.setId(newDistributionResult.getContent().get(0).getId());
 			} else {
 
 				throw new BadRequestException("This app not found on Hawkbit!");
@@ -476,12 +475,11 @@ public class AppService {
 		SoftwareModuleResult currentSoftwareModuleResult = hawkbitFeignClient
 				.getSoftwaremoduleByName("name==" + currentApp.getName());
 		DistributionResult lastDistributionResult = hawkbitFeignClient
-				.getDistributionByName("name==" + targetDeviceName);
+				.getDistributionByName("name==" + targetDeviceName, 1, "id:DESC");
 		String version = null;
 
 		if (lastDistributionResult.getSize() > 0) {
-			version = lastDistributionResult.getContent().get(lastDistributionResult.getContent().size() - 1)
-					.getVersion();
+			version = lastDistributionResult.getContent().get(0).getVersion();
 		} else {
 			throw new BadRequestException("Distribution not found for the TargetDevice!");
 		}
@@ -564,10 +562,10 @@ public class AppService {
 
 			}
 			DistributionResult newDistributionResult = hawkbitFeignClient
-					.getDistributionByName(Utils.createFIQLEqual("name", targetDeviceName));
+					.getDistributionByName(Utils.createFIQLEqual("name", targetDeviceName), 1, "id:DESC");
 			if (newDistributionResult.getSize() > 0) {
 
-				ruleNew.setId(newDistributionResult.getContent().get(newDistributionResult.getSize() - 1).getId());
+				ruleNew.setId(newDistributionResult.getContent().get(0).getId());
 			} else {
 
 				throw new BadRequestException("This app not found on Hawkbit!");
