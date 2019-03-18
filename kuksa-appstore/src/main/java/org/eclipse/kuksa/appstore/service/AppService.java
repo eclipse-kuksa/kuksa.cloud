@@ -177,7 +177,7 @@ public class AppService {
 			SoftwareModuleResult softwareModuleResult;
 			try {
 				softwareModuleResult = hawkbitFeignClient
-						.getSoftwaremoduleByName(Utils.createFIQLEqual("name", currentApp.getName()));
+						.getSoftwaremoduleByName(Utils.createFIQLEqual("name", currentApp.getName())+";"+Utils.createFIQLEqual("version", currentApp.getVersion()));
 			} catch (Exception e) {
 				throw new BadRequestException(
 						"Hawkbit connection error. Check your Hawkbit's IP in the propreties file!");
@@ -213,7 +213,7 @@ public class AppService {
 			SoftwareModuleResult softwareModuleResult;
 			try {
 				softwareModuleResult = hawkbitFeignClient
-						.getSoftwaremoduleByName(Utils.createFIQLEqual("name", currentApp.getName()));
+						.getSoftwaremoduleByName(Utils.createFIQLEqual("name", currentApp.getName())+";"+Utils.createFIQLEqual("version", currentApp.getVersion()));
 			} catch (Exception e) {
 				throw new NotFoundException(
 						"Hawkbit connection error. Check your Hawkbit's IP in the propreties file!");
@@ -358,9 +358,9 @@ public class AppService {
 			throw new BadRequestException("targetDeviceName should not be empty!");
 		}
 		SoftwareModuleResult currentSoftwareModuleResult = hawkbitFeignClient
-				.getSoftwaremoduleByName("name==" + currentApp.getName());
+				.getSoftwaremoduleByName(Utils.createFIQLEqual("name", currentApp.getName())+";"+Utils.createFIQLEqual("version", currentApp.getVersion()));
 		DistributionResult lastDistributionResult = hawkbitFeignClient
-				.getDistributionByName("name==" + targetDeviceName, 1, "id:DESC");
+				.getDistributionByName(Utils.createFIQLEqual("name", targetDeviceName), 1, "id:DESC");
 		String version = null;
 
 		if (lastDistributionResult.getSize() > 0) {
@@ -473,9 +473,9 @@ public class AppService {
 			throw new BadRequestException("targetDeviceName should not be empty!");
 		}
 		SoftwareModuleResult currentSoftwareModuleResult = hawkbitFeignClient
-				.getSoftwaremoduleByName("name==" + currentApp.getName());
+				.getSoftwaremoduleByName(Utils.createFIQLEqual("name", currentApp.getName())+";"+Utils.createFIQLEqual("version", currentApp.getVersion()));
 		DistributionResult lastDistributionResult = hawkbitFeignClient
-				.getDistributionByName("name==" + targetDeviceName, 1, "id:DESC");
+				.getDistributionByName(Utils.createFIQLEqual("name", targetDeviceName), 1, "id:DESC");
 		String version = null;
 
 		if (lastDistributionResult.getSize() > 0) {
