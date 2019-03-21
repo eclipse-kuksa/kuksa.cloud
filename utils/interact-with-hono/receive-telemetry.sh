@@ -24,7 +24,7 @@ HONO_CLIENT_PASSWORD=${2:-"verysecret"}
 HONO_DISPATCH_ROUTER_ADDRESS=${3:-"127.0.0.1:5672"}
 
 
-#insert number of telmetry messages to receive
+#insert number of telemetry messages to receive
 NUMBER_OF_TELEMETRY_MESSAGE="1"
 #insert logging format of the cli-proton-python-receiver (choices=['dict', 'body', 'upstream', 'none', 'interop', 'json'])
 LOGGING_FORMAT="body"

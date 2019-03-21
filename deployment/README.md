@@ -12,7 +12,7 @@ The scripts in this directory and it's subdirectories help to setup a deployment
 
 ## Structure
 The deployment scripts are divided into the following parts:
-  1. **Eclipse hawkBit** enables the deployment of the corresponding software update components, in partilucar the update server.  
+  1. **Eclipse hawkBit** enables the deployment of the corresponding software update components, in particular the update server.
   **Note that this step requires the installation of the command line tool kompose. Installation instructions can be found at http://kompose.io/**
   2. **Eclipse Hono** enables the deployment of a messaging infrastructure. 
   3. **Kubernetes** provides functions for the Kubernetes deployment of the Kuksa cloud. 
