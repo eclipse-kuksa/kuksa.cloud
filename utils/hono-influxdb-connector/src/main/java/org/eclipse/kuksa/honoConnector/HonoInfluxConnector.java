@@ -18,10 +18,10 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class HonoInfluxConnectorApplication {
+public class HonoInfluxConnector {
 
 	public static void main(String[] args) {
 
-		SpringApplication.run(HonoInfluxConnectorApplication.class, args);
+		SpringApplication.run(HonoInfluxConnector.class, args);
 	}
 }
