@@ -211,7 +211,8 @@ public class AppEditor extends VerticalLayout implements View {
 			VaadinUI.getCurrent().addWindow(artifactFileEditorWindow);
 			artifactFileEditor.setmessageFeignClient(hawkbitFeignClient);
 			artifactFileEditor.setHawkbitFeignClient(hawkbitMultiPartFileFeignClient);
-			artifactFileEditor.editArtifactFile(Utils.getExistsSoftwareModule(softwareModuleResult.getContent()).toString());
+			artifactFileEditor
+					.editArtifactFile(Utils.getExistsSoftwareModule(softwareModuleResult.getContent()).toString());
 		});
 
 		setVisible(false);
@@ -257,7 +258,8 @@ public class AppEditor extends VerticalLayout implements View {
 
 			try {
 				softwareModuleResult = hawkbitFeignClient
-						.getSoftwaremoduleByName(Utils.createFIQLEqual("name", app.getName()));
+						.getSoftwaremoduleByName(Utils.createFIQLEqual("name", app.getName()) + ";"
+								+ Utils.createFIQLEqual("version", app.getVersion()));
 			} catch (Exception e) {
 				new Notification("Hawkbit connection error. Check your Hawkbit's IP in the propreties file!",
 						Notification.Type.ERROR_MESSAGE).show(Page.getCurrent());

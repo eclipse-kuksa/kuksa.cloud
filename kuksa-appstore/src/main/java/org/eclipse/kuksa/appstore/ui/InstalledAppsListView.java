@@ -12,29 +12,37 @@
  ******************************************************************************/
 package org.eclipse.kuksa.appstore.ui;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+
 import javax.annotation.PostConstruct;
 
-import org.eclipse.kuksa.appstore.model.App;
+import org.eclipse.kuksa.appstore.exception.AlreadyExistException;
+import org.eclipse.kuksa.appstore.exception.BadRequestException;
+import org.eclipse.kuksa.appstore.exception.NotFoundException;
+import org.eclipse.kuksa.appstore.model.hawkbit.DistributionResult;
+import org.eclipse.kuksa.appstore.model.hawkbit.SoftwareModule;
 import org.eclipse.kuksa.appstore.service.AppService;
-import org.eclipse.kuksa.appstore.ui.component.AppGridView;
+import org.eclipse.kuksa.appstore.service.UserService;
 import org.eclipse.kuksa.appstore.ui.component.NavHeader;
+import org.eclipse.kuksa.appstore.utils.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 
 import com.vaadin.addon.pagination.Pagination;
-import com.vaadin.addon.pagination.PaginationChangeListener;
-import com.vaadin.addon.pagination.PaginationResource;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
+import com.vaadin.server.FontAwesome;
+import com.vaadin.server.Page;
 import com.vaadin.server.VaadinSession;
 import com.vaadin.spring.annotation.SpringView;
-import com.vaadin.ui.Component;
-import com.vaadin.ui.CssLayout;
+import com.vaadin.ui.Button;
+import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.CustomComponent;
 import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.TextField;
+import com.vaadin.ui.Label;
+import com.vaadin.ui.ListSelect;
+import com.vaadin.ui.Notification;
 import com.vaadin.ui.VerticalLayout;
 
 @SpringView(name = InstalledAppsListView.VIEW_NAME)
@@ -44,113 +52,115 @@ public class InstalledAppsListView extends CustomComponent implements View {
 
 	public static final String TITLE_NAME = "Installed Apps";
 
-	final TextField searchText;
+	// final TextField searchText;
 
+	private final Button uninstallAppBtn = new Button("Uninstall", FontAwesome.TRASH_O);
+	private final Button selectAllAppBtn = new Button("Select All", FontAwesome.CHECK_SQUARE_O);
+	private final Button deselectAllAppBtn = new Button("Deselect All", FontAwesome.SQUARE_O);
+	ListSelect<String> sample;
 	VerticalLayout mainlayout;
-	CssLayout appslayout;
-	Component paginationComponent;
+	VerticalLayout appslayout;
 	HorizontalLayout navHeaderLayout;
 	HorizontalLayout actions;
 	@Autowired
 	AppService appService;
+	@Autowired
+	UserService userService;
+	List<String> data;
+	ComboBox<String> comboBoxDevice;
+	HorizontalLayout actionList;
 
 	@Autowired
 	public InstalledAppsListView() {
 		com.vaadin.server.Page.getCurrent().setTitle(TITLE_NAME);
-		this.searchText = new TextField();
-		appslayout = new CssLayout();
+		appslayout = new VerticalLayout();
 		mainlayout = new VerticalLayout();
+
+		uninstallAppBtn.addClickListener(e -> {
+			Set<String> selectedApps = sample.getSelectedItems();
+			List<Long> appIds = new ArrayList<>();
+			for (String appName : selectedApps) {
+				appIds.add(appService.findByName(appName).getId());
+			}
+			if (appIds.size() != 0) {
+				try {
+					appService.UninstallMultiApp(
+							comboBoxDevice.getSelectedItem().get().toString(), userService
+									.findByUserName(VaadinSession.getCurrent().getAttribute("user").toString()).getId(),
+							appIds);
+
+					listInstalledApps(comboBoxDevice.getSelectedItem().get().toString());
+
+					new Notification("Succes Unistalling", Notification.Type.TRAY_NOTIFICATION).show(Page.getCurrent());
+
+				} catch (NotFoundException e1) {
+					new Notification("Failed Unistalling", e1.getMessage(), Notification.Type.ERROR_MESSAGE)
+							.show(Page.getCurrent());
+				} catch (BadRequestException e1) {
+					new Notification("Failed Unistalling", e1.getMessage(), Notification.Type.ERROR_MESSAGE)
+							.show(Page.getCurrent());
+				} catch (AlreadyExistException e1) {
+					new Notification("Failed Unistalling", e1.getMessage(), Notification.Type.ERROR_MESSAGE)
+							.show(Page.getCurrent());
+				}
+			} else {
+				new Notification("Select at least one application to uninstall", Notification.Type.ERROR_MESSAGE)
+						.show(Page.getCurrent());
+			}
+
+		});
+		selectAllAppBtn.addClickListener(e -> {
+			for (String app : data) {
+				sample.select(app);
+			}
+		});
+		deselectAllAppBtn.addClickListener(e -> {
+			sample.deselectAll();
+		});
 	}
 
 	@PostConstruct
 	public void init() {
-		int currentpage = 1;
-		int limit = 6;
-		int total;
-		Page<App> appsList = findByText(searchText.getValue(), currentpage - 1, limit);
-		total = (int) appsList.getTotalElements();
-		appslayout = AppGridView.crateAppGridView(appsList, 2);
-
 		navHeaderLayout = new NavHeader().create(VIEW_NAME,
 				VaadinSession.getCurrent().getAttribute("isCurrentUserAdmin").toString());
 		mainlayout.addComponent(navHeaderLayout);
 
-		actions = new HorizontalLayout(searchText);
-		actions.setStyleName("v-actions");
-		searchText.setPlaceholder("Search by App Name");
-		// Listen changes made by the filter textbox, refresh data from backend
-		searchText.addValueChangeListener(event -> {
+		comboBoxDevice = new ComboBox<>();
+		try {
+			comboBoxDevice.setItems(appService.getListOfTargets());
+		} catch (BadRequestException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		comboBoxDevice.setPlaceholder("No device selected");
+		comboBoxDevice.setEmptySelectionAllowed(false);
 
-			listApps(event.getValue());
+		comboBoxDevice.setWidth("300");
+
+		HorizontalLayout actionBar = new HorizontalLayout();
+		actionBar.addComponent(selectAllAppBtn);
+		actionBar.addComponent(deselectAllAppBtn);
+		actionBar.addComponent(uninstallAppBtn);
+		appslayout.addComponent(actionBar);
+		actionList = new HorizontalLayout();
+		// actionList.addComponent(sample);
+		actionList.setWidth(50.0f, Unit.PERCENTAGE);
+		appslayout.addComponent(actionList);
+
+		listInstalledApps(null);
+
+		comboBoxDevice.addValueChangeListener(event -> {
+
+			listInstalledApps(comboBoxDevice.getSelectedItem().get().toString());
+
 		});
+
+		Label selectDeviceLabel = new Label("Select a device");
+		actions = new HorizontalLayout(selectDeviceLabel, comboBoxDevice);
+		actions.setStyleName("v-actions");
 		mainlayout.addComponent(actions);
 		mainlayout.addComponent(appslayout);
-		paginationComponent = createPaginationComponent(total, currentpage, limit);
-		mainlayout.addComponent(paginationComponent);
 		setCompositionRoot(mainlayout);
-	}
-
-	public void listApps(String text) {
-
-		int currentpage = 1;
-		int limit = 6;
-		int total;
-		Page<App> appsList = findByText(text, currentpage - 1, limit);
-		total = (int) appsList.getTotalElements();
-		CssLayout appslayoutnew = new CssLayout();
-		appslayoutnew = AppGridView.crateAppGridView(appsList, 2);
-		mainlayout.removeAllComponents();
-		mainlayout.addComponent(navHeaderLayout);
-		mainlayout.addComponent(actions);
-		mainlayout.addComponent(appslayoutnew);
-		paginationComponent = createPaginationComponent(total, currentpage, limit);
-		mainlayout.addComponent(paginationComponent);
-		setCompositionRoot(mainlayout);
-
-	}
-
-	public Component createPaginationComponent(int total, int currentpage, int limit) {
-
-		final Pagination pagination = createPagination(total, currentpage, limit);
-		pagination.setItemsPerPageVisible(false);
-		pagination.setEnabled(true);
-		pagination.setResponsive(true);
-		pagination.setTotalCount(total);
-		pagination.setCurrentPage(currentpage);
-
-		pagination.addPageChangeListener(new PaginationChangeListener() {
-			@Override
-			public void changed(PaginationResource event) {
-				Page<App> appsList = findByText(searchText.getValue(), event.pageIndex(), event.limit());
-				CssLayout appslayoutnew = new CssLayout();
-				appslayoutnew = AppGridView.crateAppGridView(appsList, 2);
-				mainlayout.removeAllComponents();
-				mainlayout.addComponent(navHeaderLayout);
-				mainlayout.addComponent(actions);
-				mainlayout.addComponent(appslayoutnew);
-				mainlayout.addComponent(paginationComponent);
-				setCompositionRoot(mainlayout);
-
-			}
-		});
-		final VerticalLayout layout = createContent(pagination);
-		return layout;
-	}
-
-	public Page<App> findByText(String text, int page, int size) {
-		Pageable pageable = new PageRequest(page, size);
-		Page<App> apps = appService.findByNameStartsWithIgnoreCaseAndInstalledusersUserName(text,
-				VaadinSession.getCurrent().getAttribute("user").toString(), pageable);
-
-		return apps;
-	}
-
-	private Pagination createPagination(long total, int page, int limit) {
-		final PaginationResource paginationResource = PaginationResource.newBuilder().setTotal(total).setPage(page)
-				.setLimit(limit).build();
-		final Pagination pagination = new Pagination(paginationResource);
-		pagination.setItemsPerPage(10, 20, 50, 100);
-		return pagination;
 	}
 
 	private VerticalLayout createContent(Pagination pagination) {
@@ -165,6 +175,36 @@ public class InstalledAppsListView extends CustomComponent implements View {
 	public void enter(ViewChangeEvent event) {
 		// TODO Auto-generated method stub
 
+	}
+
+	public void listInstalledApps(String targetDeviceName) {
+		data = new ArrayList<>();
+		DistributionResult distributionResult;
+		try {
+			if (targetDeviceName != null) {
+				distributionResult = appService.getDistributionOfTarget(targetDeviceName);
+
+				List<SoftwareModule> softwareModules = distributionResult.getContent().get(0).getModules();
+
+				for (SoftwareModule softwareModule : softwareModules) {
+					if (!softwareModule.getName().equals(Utils.UNINSTALLED_ALL)) {
+						data.add(softwareModule.getName());
+					}
+				}
+				if (data.size() == 0) {
+					new Notification("There is no installed application for this device.", Notification.Type.WARNING_MESSAGE)
+							.show(Page.getCurrent());
+				}
+			}
+			sample = new ListSelect<>("You can use Ctrl|Shift keys to select multi rows.", data);
+			sample.setWidth(100.0f, Unit.PERCENTAGE);
+			actionList.removeAllComponents();
+			actionList.addComponent(sample);
+
+		} catch (BadRequestException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 }

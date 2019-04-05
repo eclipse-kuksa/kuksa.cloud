@@ -13,6 +13,7 @@
 package org.eclipse.kuksa.appstore.ui;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.annotation.PostConstruct;
@@ -69,6 +70,7 @@ public class AppView extends CustomComponent implements View {
 	AppService appService;
 	Button purchase_install;
 	Button uninstallButton;
+
 	@PostConstruct
 	public void init() {
 		if (VaadinSession.getCurrent().getAttribute("app") != null) {
@@ -225,8 +227,10 @@ public class AppView extends CustomComponent implements View {
 					if (comboBoxDevice.getValue() != null) {
 
 						try {
-							Result<?> result = appService.UninstallApp(comboBoxDevice.getSelectedItem().get(),
-									currentUser.getId(), currentApp.getId());
+							List<Long> appIds= new ArrayList<Long>();
+							appIds.add(currentApp.getId());
+							Result<?> result = appService.UninstallMultiApp(comboBoxDevice.getSelectedItem().get(),
+									currentUser.getId(), appIds);
 
 							if (result.isSuccess()) {
 								new Notification("Succes Uninstall Action",

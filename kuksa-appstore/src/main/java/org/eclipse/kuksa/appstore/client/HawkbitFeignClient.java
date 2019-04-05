@@ -36,8 +36,7 @@ import feign.Response;
 public interface HawkbitFeignClient {
 
 	@RequestMapping(method = RequestMethod.GET, value = "/rest/v1/targets")
-	TargetResult getTargetsByDes(@RequestParam(value = "q") String key,
-			@RequestParam(value = "sort") String sort);
+	TargetResult getTargetsByDes(@RequestParam(value = "q") String key, @RequestParam(value = "sort") String sort);
 
 	@RequestMapping(value = "/rest/v1/targets", method = RequestMethod.GET)
 	TargetResult getTargets();
@@ -50,7 +49,8 @@ public interface HawkbitFeignClient {
 	AssignedResult sendApptoDevice(@PathVariable("i") String i, Rule ruleinput);
 
 	@RequestMapping(value = "/rest/v1/distributionsets", method = RequestMethod.GET)
-	DistributionResult getDistributionByName(@RequestParam(value = "q") String key);
+	DistributionResult getDistributionByName(@RequestParam(value = "q") String key,
+			@RequestParam(value = "limit") int limit, @RequestParam(value = "sort") String sort);
 
 	@RequestMapping(method = RequestMethod.GET, value = "/rest/v1/softwaremodules")
 	SoftwareModuleResult getSoftwaremoduleByName(@RequestParam(value = "q") String key);
