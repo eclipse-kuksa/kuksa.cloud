@@ -42,7 +42,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import com.vaadin.server.VaadinSession;
-import com.vaadin.ui.Notification;
 
 import feign.Response;
 
@@ -127,7 +126,11 @@ public class AppService {
 		return appRepository.findById(id);
 
 	}
+	public App findByName(String name) {
 
+		return appRepository.findByName(name);
+
+	}
 	public Result<?> updateApp(String appId, App app)
 			throws NotFoundException, BadRequestException, AlreadyExistException {
 
@@ -177,7 +180,8 @@ public class AppService {
 			SoftwareModuleResult softwareModuleResult;
 			try {
 				softwareModuleResult = hawkbitFeignClient
-						.getSoftwaremoduleByName(Utils.createFIQLEqual("name", currentApp.getName()));
+						.getSoftwaremoduleByName(Utils.createFIQLEqual("name", currentApp.getName()) + ";"
+								+ Utils.createFIQLEqual("version", currentApp.getVersion()));
 			} catch (Exception e) {
 				throw new BadRequestException(
 						"Hawkbit connection error. Check your Hawkbit's IP in the propreties file!");
@@ -213,7 +217,8 @@ public class AppService {
 			SoftwareModuleResult softwareModuleResult;
 			try {
 				softwareModuleResult = hawkbitFeignClient
-						.getSoftwaremoduleByName(Utils.createFIQLEqual("name", currentApp.getName()));
+						.getSoftwaremoduleByName(Utils.createFIQLEqual("name", currentApp.getName()) + ";"
+								+ Utils.createFIQLEqual("version", currentApp.getVersion()));
 			} catch (Exception e) {
 				throw new NotFoundException(
 						"Hawkbit connection error. Check your Hawkbit's IP in the propreties file!");
@@ -358,14 +363,14 @@ public class AppService {
 			throw new BadRequestException("targetDeviceName should not be empty!");
 		}
 		SoftwareModuleResult currentSoftwareModuleResult = hawkbitFeignClient
-				.getSoftwaremoduleByName("name==" + currentApp.getName());
+				.getSoftwaremoduleByName(Utils.createFIQLEqual("name", currentApp.getName()) + ";"
+						+ Utils.createFIQLEqual("version", currentApp.getVersion()));
 		DistributionResult lastDistributionResult = hawkbitFeignClient
-				.getDistributionByName("name==" + targetDeviceName);
+				.getDistributionByName(Utils.createFIQLEqual("name", targetDeviceName), 1, "id:DESC");
 		String version = null;
 
 		if (lastDistributionResult.getSize() > 0) {
-			version = lastDistributionResult.getContent().get(lastDistributionResult.getContent().size() - 1)
-					.getVersion();
+			version = lastDistributionResult.getContent().get(0).getVersion();
 		} else {
 			version = "0";
 		}
@@ -415,10 +420,10 @@ public class AppService {
 
 			}
 			DistributionResult newDistributionResult = hawkbitFeignClient
-					.getDistributionByName(Utils.createFIQLEqual("name", targetDeviceName));
+					.getDistributionByName(Utils.createFIQLEqual("name", targetDeviceName), 1, "id:DESC");
 			if (newDistributionResult.getSize() > 0) {
 
-				ruleNew.setId(newDistributionResult.getContent().get(newDistributionResult.getSize() - 1).getId());
+				ruleNew.setId(newDistributionResult.getContent().get(0).getId());
 			} else {
 
 				throw new BadRequestException("This app not found on Hawkbit!");
@@ -453,42 +458,17 @@ public class AppService {
 
 	}
 
-	public Result<?> UninstallApp(String targetDeviceName, Long userId, Long appId)
+	public Result<?> UninstallMultiApp(String targetDeviceName, Long userId, List<Long> appIds)
 			throws NotFoundException, BadRequestException, AlreadyExistException {
 
-		App currentApp = appRepository.findById(appId);
-		if (currentApp == null) {
-			throw new NotFoundException("App not found. appId: " + appId);
-		}
 		User currentUser = userRepository.findById(userId);
 		if (currentUser == null) {
 			throw new NotFoundException("User not found. userId: " + userId);
-		}
-
-		if (appRepository.findByIdAndInstalledusersId(appId, userId) == null) {
-			throw new BadRequestException("This App is not installed right now on the device!");
-
 		}
 		if (targetDeviceName == null) {
 
 			throw new BadRequestException("targetDeviceName should not be empty!");
 		}
-		SoftwareModuleResult currentSoftwareModuleResult = hawkbitFeignClient
-				.getSoftwaremoduleByName("name==" + currentApp.getName());
-		DistributionResult lastDistributionResult = hawkbitFeignClient
-				.getDistributionByName("name==" + targetDeviceName);
-		String version = null;
-
-		if (lastDistributionResult.getSize() > 0) {
-			version = lastDistributionResult.getContent().get(lastDistributionResult.getContent().size() - 1)
-					.getVersion();
-		} else {
-			throw new BadRequestException("Distribution not found for the TargetDevice!");
-		}
-
-		int newVersion = Integer.parseInt(version) + 1;
-		boolean isAlreadyAssigned = false;
-
 		Rule ruleNew = new Rule();
 		ruleNew.setForcetime("1530893371603");
 		ruleNew.setType("timeforced");
@@ -498,94 +478,130 @@ public class AppService {
 		rulemain.setTimezone("+00:00");
 		ruleNew.setMaintenanceWindow(rulemain);
 
+		int newVersion=0;
+
 		List<SoftwareModule> softwareModules = new ArrayList<SoftwareModule>();
 
-		softwareModules = lastDistributionResult.getContent().get(lastDistributionResult.getSize() - 1).getModules();
 
-		isAlreadyAssigned = Utils.isAppAlreadyInstalled(currentSoftwareModuleResult.getContent().get(0),
-				softwareModules);
+		DistributionResult lastDistributionResult = hawkbitFeignClient
+				.getDistributionByName(Utils.createFIQLEqual("name", targetDeviceName), 1, "id:DESC");
+		softwareModules = lastDistributionResult.getContent().get(lastDistributionResult.getSize() - 1)
+				.getModules();
+		String version = null;
 
-		if (isAlreadyAssigned == true) {
+		if (lastDistributionResult.getSize() > 0) {
+			version = lastDistributionResult.getContent().get(0).getVersion();
+		} else {
+			throw new BadRequestException("Distribution not found for the TargetDevice!");
+		}
+		newVersion = Integer.parseInt(version) + 1;
+		for (Long appId : appIds) {
 
-			softwareModules = Utils.UninstallApp(currentSoftwareModuleResult.getContent().get(0), softwareModules);
+			App currentApp = appRepository.findById(appId);
+			if (currentApp == null) {
+				throw new NotFoundException("App not found. appId: " + appId);
+			}
 
-			if (softwareModules.size() == 0) {
+			/*if (appRepository.findByIdAndInstalledusersId(appId, userId) == null) {
+				throw new BadRequestException("This App is not installed right now on the device!");
 
-				// Check UNINSTALLED_ALL MODULE
-				SoftwareModuleResult softwareModuleResult;
+			}*/
+			SoftwareModuleResult currentSoftwareModuleResult = hawkbitFeignClient
+					.getSoftwaremoduleByName(Utils.createFIQLEqual("name", currentApp.getName()) + ";"
+							+ Utils.createFIQLEqual("version", currentApp.getVersion()));
+
+			boolean isAlreadyAssigned = false;
+
+			isAlreadyAssigned = Utils.isAppAlreadyInstalled(currentSoftwareModuleResult.getContent().get(0),
+					softwareModules);
+
+			if (isAlreadyAssigned == true) {
+
+				softwareModules = Utils.UninstallApp(currentSoftwareModuleResult.getContent().get(0), softwareModules);
+
+			} else {
+
+				throw new BadRequestException("This App is not installed right now on the device!");
+
+			}
+		}
+
+		if (softwareModules.size() == 0) {
+
+			// Check UNINSTALLED_ALL MODULE
+			SoftwareModuleResult softwareModuleResult;
+			try {
+				softwareModuleResult = hawkbitFeignClient
+						.getSoftwaremoduleByName(Utils.createFIQLEqual("name", Utils.UNINSTALLED_ALL));
+			} catch (Exception e) {
+				throw new BadRequestException(
+						"Hawkbit connection error. Check your Hawkbit's IP in the propreties file!");
+			}
+
+			if (softwareModuleResult.getSize() == 0) {
+
+				List<SoftwareModule> responsesoftwareModule;
 				try {
-					softwareModuleResult = hawkbitFeignClient
-							.getSoftwaremoduleByName(Utils.createFIQLEqual("name", Utils.UNINSTALLED_ALL));
+					// Create UNINSTALLED_ALL MODULE
+					List<SoftwareModule> softwareModuleList = new ArrayList<>();
+					softwareModuleList.add(new SoftwareModule(Utils.UNINSTALLED_ALL,
+							"This software module is a Dummy software module. It was created to assign empty distribution to the device. This situation is for uninstalling device's all apps.",
+							"0", "application", "KUKSA_APPSTORE"));
+					responsesoftwareModule = hawkbitFeignClient.createSoftwaremodules(softwareModuleList);
+					// Create UNINSTALLED_ALL MODULE
 				} catch (Exception e) {
 					throw new BadRequestException(
 							"Hawkbit connection error. Check your Hawkbit's IP in the propreties file!");
 				}
+				if (responsesoftwareModule.size() == 0) {
 
-				if (softwareModuleResult.getSize() == 0) {
-
-					List<SoftwareModule> responsesoftwareModule;
-					try {
-						// Create UNINSTALLED_ALL MODULE
-						List<SoftwareModule> softwareModuleList = new ArrayList<>();
-						softwareModuleList.add(new SoftwareModule(Utils.UNINSTALLED_ALL,
-								"This software module is a Dummy software module. It was created to assign empty distribution to the device. This situation is for uninstalling device's all apps.",
-								"0", "application", "KUKSA_APPSTORE"));
-						responsesoftwareModule = hawkbitFeignClient.createSoftwaremodules(softwareModuleList);
-						// Create UNINSTALLED_ALL MODULE
-					} catch (Exception e) {
-						throw new BadRequestException(
-								"Hawkbit connection error. Check your Hawkbit's IP in the propreties file!");
-					}
-					if (responsesoftwareModule.size() == 0) {
-
-						throw new BadRequestException(
-								Utils.UNINSTALLED_ALL + " Dummy App could not be saved to Hawkbit and Appstore!");
-					} else {
-
-						softwareModules.add(responsesoftwareModule.get(0));
-					}
-
+					throw new BadRequestException(
+							Utils.UNINSTALLED_ALL + " Dummy App could not be saved to Hawkbit and Appstore!");
 				} else {
-					softwareModules.add(softwareModuleResult.getContent().get(0));
+
+					softwareModules.add(responsesoftwareModule.get(0));
 				}
-				// Check UNINSTALLED_ALL MODULE
 
-			}
-
-			Distribution newDistribution = new Distribution(targetDeviceName, Integer.toString(newVersion));
-			newDistribution.setName(targetDeviceName);
-			newDistribution.setDescription(currentApp.getDescription());
-			newDistribution.setType("app");
-			newDistribution.setModules(softwareModules);
-			Response responseCreateDistribution = hawkbitFeignClient
-					.createDistributionSets(Arrays.asList(newDistribution));
-			if (responseCreateDistribution.status() != HttpStatus.CREATED.value()) {
-				throw new BadRequestException("Fail Creating Distribution");
-
-			}
-			DistributionResult newDistributionResult = hawkbitFeignClient
-					.getDistributionByName(Utils.createFIQLEqual("name", targetDeviceName));
-			if (newDistributionResult.getSize() > 0) {
-
-				ruleNew.setId(newDistributionResult.getContent().get(newDistributionResult.getSize() - 1).getId());
 			} else {
-
-				throw new BadRequestException("This app not found on Hawkbit!");
+				softwareModules.add(softwareModuleResult.getContent().get(0));
 			}
+			// Check UNINSTALLED_ALL MODULE
+
+		}
+
+		Distribution newDistribution = new Distribution(targetDeviceName, Integer.toString(newVersion));
+		newDistribution.setName(targetDeviceName);
+		newDistribution.setDescription("This distribution is created by Appstore for" + targetDeviceName);
+		newDistribution.setType("app");
+		newDistribution.setModules(softwareModules);
+		Response responseCreateDistribution = hawkbitFeignClient.createDistributionSets(Arrays.asList(newDistribution));
+		if (responseCreateDistribution.status() != HttpStatus.CREATED.value()) {
+			throw new BadRequestException("Fail Creating Distribution");
+
+		}
+		DistributionResult newDistributionResult = hawkbitFeignClient
+				.getDistributionByName(Utils.createFIQLEqual("name", targetDeviceName), 1, "id:DESC");
+		if (newDistributionResult.getSize() > 0) {
+
+			ruleNew.setId(newDistributionResult.getContent().get(0).getId());
 		} else {
 
-			throw new BadRequestException("This App is not installed right now on the device!");
-
+			throw new BadRequestException("This app not found on Hawkbit!");
 		}
 
 		AssignedResult response = hawkbitFeignClient.sendApptoDevice(targetDeviceName, ruleNew);
 		if (response.getAssigned() > 0) {
 
-			List<User> list = currentApp.getInstalledusers();
-			if (Utils.isUserAlreadyOwner(currentUser, list)) {
+			for (Long appId : appIds) {
 
-				currentApp.setInstalledusers(Utils.removeOwnerUser(currentUser, list));
-				updateApp(currentApp.getId().toString(), currentApp);
+				App currentApp = appRepository.findById(appId);
+
+				List<User> list = currentApp.getInstalledusers();
+				if (Utils.isUserAlreadyOwner(currentUser, list)) {
+
+					currentApp.setInstalledusers(Utils.removeOwnerUser(currentUser, list));
+					updateApp(currentApp.getId().toString(), currentApp);
+				}
 			}
 			return Result.success(HttpStatus.OK);
 		} else if (response.getAlreadyAssigned() > 0) {
@@ -636,4 +652,13 @@ public class AppService {
 		return listOfTargets;
 
 	}
+
+	public DistributionResult getDistributionOfTarget(String targetDeviceName) throws BadRequestException {
+
+		DistributionResult lastDistributionResult = hawkbitFeignClient
+				.getDistributionByName(Utils.createFIQLEqual("name", targetDeviceName), 1, "id:DESC");
+
+		return lastDistributionResult;
+	}
+
 }
