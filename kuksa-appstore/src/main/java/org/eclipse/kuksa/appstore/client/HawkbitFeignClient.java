@@ -32,7 +32,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import feign.Response;
 
-@FeignClient(name = "hawkbit-get-targets", url = "http://${hawkbit.host}:${hawkbit.port}", configuration = HawkbitFeignConfig.class)
+@FeignClient(name = "hawkbit-get-targets", url = "${hawkbit.url}", configuration = HawkbitFeignConfig.class)
 public interface HawkbitFeignClient {
 
 	@RequestMapping(method = RequestMethod.GET, value = "/rest/v1/targets")

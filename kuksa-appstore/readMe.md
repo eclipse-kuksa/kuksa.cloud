@@ -55,10 +55,9 @@ Just run `AppStoreApplication.java` class.Spring boot has an embedded Tomcat ins
  - Please note that the H2 database is stored in 'C:/data/sample' file which is defined in spring.datasource.url property in application.properties. This path and file name can be changed according to hosting file system before starting Kuksa App Store in previous step.
 
 
-- Update hawkbit update server IP, port and credential properly in src\main\resources\application.properties file:
+- Update hawkbit update server url and credential properly in src\main\resources\application.properties file:
 
-> hawkbit.host= {hawkbit-ip}  //default ip is localhost  
-> hawkbit.port= {hawkbit-port} //default port is 8080  
+> hawkbit.url= http://{hawkbit-ip}:{hawkbit-port} //default ip is localhost and default port is 8080
 > hawkbit.username= {hawkbit-user-name} // default user name is admin  
 > hawkbit.password= {hawkbit-pwd} // default password is admin 
  
@@ -80,7 +79,7 @@ Just run `AppStoreApplication.java` class.Spring boot has an embedded Tomcat ins
 
 - If you want to add default users and apps to your DB. You can use data.txt that is resource file (it is optional).
 
-- The property hawkbit.host in application.properties is set to localhost in the repository. It should be changed to the IP address of Hawkbit Update Server used.
+- The property hawkbit.url in application.properties is set to localhost and 8080 in the repository. It should be changed to the IP address and port of Hawkbit Update Server used.
 
 - Default debug mode in application.properties is set to false. This can be enabled/disabled by application.properties file.
 
