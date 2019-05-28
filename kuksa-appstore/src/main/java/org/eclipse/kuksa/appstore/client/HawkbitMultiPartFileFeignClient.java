@@ -22,7 +22,7 @@ import org.springframework.web.multipart.MultipartFile;
 import feign.Param;
 import feign.Response;
 
-@FeignClient(name = "hawkbit-upload-softwaremodules", url = "http://${hawkbit.host}:${hawkbit.port}", configuration = HawkbitMultiPartFileFeignConfig.class)
+@FeignClient(name = "hawkbit-upload-softwaremodules", url = "${hawkbit.url}", configuration = HawkbitMultiPartFileFeignConfig.class)
 public interface HawkbitMultiPartFileFeignClient {
 
 	@RequestMapping(value = "rest/v1/softwaremodules/{softwareModuleId}/artifacts", method = RequestMethod.POST)
