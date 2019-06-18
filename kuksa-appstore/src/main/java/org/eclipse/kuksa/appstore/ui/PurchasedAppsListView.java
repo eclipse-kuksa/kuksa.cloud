@@ -134,7 +134,7 @@ public class PurchasedAppsListView extends CustomComponent implements View {
 		Page<App> apps;
 		try {
 			apps = appService.findUsersApps(currentUser.getId().toString(),
-					appService.getListOfOem(appService.getListOfTargets()), pageable);
+					appService.getListOfOem(appService.getListOfTargets(currentUser.getId())), pageable);
 		} catch (BadRequestException e) {
 			new Notification(e.getMessage(), Notification.Type.ERROR_MESSAGE).show(com.vaadin.server.Page.getCurrent());
 			return null;

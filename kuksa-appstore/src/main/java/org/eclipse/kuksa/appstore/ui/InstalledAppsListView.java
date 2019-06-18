@@ -127,7 +127,8 @@ public class InstalledAppsListView extends CustomComponent implements View {
 
 		comboBoxDevice = new ComboBox<>();
 		try {
-			comboBoxDevice.setItems(appService.getListOfTargets());
+			comboBoxDevice.setItems(appService.getListOfTargets(
+					userService.findByUserName(VaadinSession.getCurrent().getAttribute("user").toString()).getId()));
 		} catch (BadRequestException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -183,17 +184,19 @@ public class InstalledAppsListView extends CustomComponent implements View {
 		try {
 			if (targetDeviceName != null) {
 				distributionResult = appService.getDistributionOfTarget(targetDeviceName);
+				if (distributionResult.getSize() > 0) {
 
-				List<SoftwareModule> softwareModules = distributionResult.getContent().get(0).getModules();
+					List<SoftwareModule> softwareModules = distributionResult.getContent().get(0).getModules();
 
-				for (SoftwareModule softwareModule : softwareModules) {
-					if (!softwareModule.getName().equals(Utils.UNINSTALLED_ALL)) {
-						data.add(softwareModule.getName());
+					for (SoftwareModule softwareModule : softwareModules) {
+						if (!softwareModule.getName().equals(Utils.UNINSTALLED_ALL)) {
+							data.add(softwareModule.getName());
+						}
 					}
-				}
-				if (data.size() == 0) {
-					new Notification("There is no installed application for this device.", Notification.Type.WARNING_MESSAGE)
-							.show(Page.getCurrent());
+					if (data.size() == 0) {
+						new Notification("There is no installed application for this device.",
+								Notification.Type.WARNING_MESSAGE).show(Page.getCurrent());
+					}
 				}
 			}
 			sample = new ListSelect<>("You can use Ctrl|Shift keys to select multi rows.", data);
