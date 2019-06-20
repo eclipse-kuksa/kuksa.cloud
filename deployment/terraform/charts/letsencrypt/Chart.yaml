@@ -1,0 +1,10 @@
+apiVersion: v1
+name: letsencrypt
+description: Letsencrypt Cluster Issuer
+version: "0.1.0"
+keywords:
+  - kuksa
+  - keycloak
+home: https://www.eclipse.org/kuksa/
+sources:
+  - https://github.com/eclipse/kuksa.cloud
