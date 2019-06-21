@@ -12,6 +12,7 @@
  ******************************************************************************/
 package org.eclipse.kuksa.appstore.controller;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.validation.Valid;
@@ -203,5 +204,29 @@ public class AppController {
 
 		LOG.debug("[purchaseApp]: purchaseApp request is processed successfully. purchaseApp: {}", appId);
 		return new ResponseEntity<>(appService.purchaseApp(userId, appId), HttpStatus.OK);
+	}
+
+	@ApiOperation(notes = "This process is used to install an App specified by appId to the given device for user specified by userId .", value = "Install an App", nickname = "InstallApp", produces = "application/json", authorizations = @Authorization(value = "api_key"))
+	@ApiImplicitParam(name = "Authorization", value = "Token Format: 'base64(username: password)'", required = true, dataType = "String", paramType = "Header", defaultValue = "Basic Token")
+	@PostMapping(value = "/app/{appId}/install/{userId}")
+	public ResponseEntity<?> InstallApp(@PathVariable Long userId, @PathVariable Long appId,
+			@RequestBody String deviceName) throws NotFoundException, BadRequestException, AlreadyExistException {
+
+		LOG.debug("[InstallApp]: InstallApp request is processed successfully. InstallApp: {}", appId, userId,
+				deviceName);
+		return new ResponseEntity<>(appService.InstallApp(deviceName, userId, appId), HttpStatus.OK);
+	}
+
+	@ApiOperation(notes = "This process is used to uninstall an App specified by appId from the given device for user specified by userId.", value = "Uninstall an App", nickname = "UninstallApp", produces = "application/json", authorizations = @Authorization(value = "api_key"))
+	@ApiImplicitParam(name = "Authorization", value = "Token Format: 'base64(username: password)'", required = true, dataType = "String", paramType = "Header", defaultValue = "Basic Token")
+	@DeleteMapping(value = "/app/{appId}/uninstall/{userId}")
+	public ResponseEntity<?> UninstallApp(@PathVariable Long userId, @PathVariable Long appId,
+			@RequestBody String deviceName) throws NotFoundException, BadRequestException, AlreadyExistException {
+
+		LOG.debug("[UninstallApp]: UninstallApp request is processed successfully. UninstallApp: {}", appId, userId,
+				deviceName);
+		List<Long> appIds = new ArrayList<Long>();
+		appIds.add(appId);
+		return new ResponseEntity<>(appService.UninstallMultiApp(deviceName, userId, appIds), HttpStatus.OK);
 	}
 }

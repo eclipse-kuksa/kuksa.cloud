@@ -350,7 +350,7 @@ public class AppService {
 		if (currentUser == null) {
 			throw new NotFoundException("User not found. userId: " + userId);
 		}
-		List<String> listOfTargets = getListOfTargets();
+		List<String> listOfTargets = getListOfTargets(userId);
 		boolean isOwner = userService.isUsersAppOwner(currentUser.getId().toString(), currentApp.getId().toString(),
 				getListOfOem(listOfTargets));
 
@@ -633,10 +633,10 @@ public class AppService {
 		return listOfOem;
 	}
 
-	public List<String> getListOfTargets() throws BadRequestException {
+	public List<String> getListOfTargets(Long userId) throws BadRequestException {
 		List<String> listOfTargets = new ArrayList<>();
 
-		String dis = VaadinSession.getCurrent().getAttribute("user").toString();
+		String dis = userRepository.findById(userId).getUsername();
 		dis = "" + "*" + dis + "*";
 		dis = "description==" + dis;
 		List<Target> deviceList = new ArrayList<>();

@@ -153,7 +153,7 @@ public class AppView extends CustomComponent implements View {
 		List<String> listOfTargets;
 		boolean isOwner;
 		try {
-			listOfTargets = appService.getListOfTargets();
+			listOfTargets = appService.getListOfTargets(currentUser.getId());
 
 			isOwner = userService.isUsersAppOwner(currentUser.getId().toString(), currentApp.getId().toString(),
 					appService.getListOfOem(listOfTargets));
