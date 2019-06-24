@@ -12,18 +12,22 @@
  ******************************************************************************/
 package org.eclipse.kuksa.appstore.configuration;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 
 import feign.auth.BasicAuthRequestInterceptor;
-import feign.codec.Encoder;
 
 public class HawkbitFeignConfig {
 
+	@Value("${hawkbit.username}")
+	private String username;
+
+	@Value("${hawkbit.password}")
+	private String password;
+
 	@Bean
 	public BasicAuthRequestInterceptor basicAuthRequestInterceptor() {
-		return new BasicAuthRequestInterceptor("admin", "admin");
+		return new BasicAuthRequestInterceptor(username, password);
 	}
-
 
 }
