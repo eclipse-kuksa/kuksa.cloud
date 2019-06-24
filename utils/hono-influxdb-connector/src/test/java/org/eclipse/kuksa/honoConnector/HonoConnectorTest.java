@@ -12,16 +12,27 @@
  * *****************************************************************************
  */
 
-package org.eclipse.kuksa.honoInfluxConnector;
+package org.eclipse.kuksa.honoConnector;
 
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
-@SpringBootApplication
-public class HonoInfluxConnectorApplication {
+import org.junit.Test;
 
-	public static void main(String[] args) {
+import java.io.IOException;
+import java.util.Map;
 
-		SpringApplication.run(HonoInfluxConnectorApplication.class, args);
-	}
+public class HonoConnectorTest {
+
+    @Test
+    public void testJSONParsing() throws IOException {
+
+        String content = "{\"temp\": 5}";
+
+        // parse JSON
+        Map<String, String> entries =
+                new ObjectMapper().readValue( content, Map.class);
+
+        System.out.print(entries);
+    }
+
 }

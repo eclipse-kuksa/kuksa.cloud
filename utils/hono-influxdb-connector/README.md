@@ -14,66 +14,36 @@ Contributors:
 
 # Hono-InfluxDB-Connector
 
-## General information
-
 This project contains a Spring-Boot Application that connects a running Hono instance with a running InfluxDB instance
-so that messages received by Hono can be stored in InfluxDB. This is especially usefull if one wants
+so that messages received by Hono can be stored in InfluxDB. This is especially useful if one wants
 to easily create a visualization of some measurements eg with Grafana.
 
-To start the application run
+## Build 
 
-`mvn spring-boot:run`
+To build the Hono-InfluxDB-Connector navigate to its directory.
 
-from the command line.
+`cd utils/hono-influxdb-connector`
 
-To configure the connection details you can either change the file
+This project is build using Gradle and has been tested with [Gradle v5.0](https://github.com/gradle/gradle/releases/tag/v5.0.0).
+To compile the project simply run.
 
-`src/main/resources/application.properties`
-
-or provide environment variables for the configuration parameters (its standard Spring behavior but currently untested).
+`gradle build`
 
 ## Configuration
 
-This section describes how to configure the hono-influxdb-connector to operate on the idial.institute hono instance.
+To configure the connector either edit the [application.properties](src/main/resources/application.properties) file or set the respective environment variables.
+If an environment variable is set it will overwrite the .properties value.
+The table below lists all configuration parameter available.
 
-**Install dependencies**
+| properties            | environment variable  | description                                      |
+|-----------------------|-----------------------|--------------------------------------------------|
+| influxdb.url          | INFLUXDB_URL          | url of the influxDB instance to connect to       |
+| influxdb.db.name      | INFLUXDB_DB_NAME      | name fo the database to write to                 |
+| qpid.router.host      | QPID_ROUTER_HOST      | url to the instance of the qpid dispatch router  |
+| qpid.router.port      | QPID_ROUTER_PORT      | port to the instance of the qpid dispatch router |
+| hono.tenant.id        | HONO_TENANT_ID        | tenant id used by Hono                           |
+| hono.user             | HONO_USER             | username to authenticate with Hono               |
+| hono.password         | HONO_PASSWORD         | password to authenticate with Hono               |
+| hono.trustedStorePath | HONO_TRUSTEDSTOREPATH | path to the .pem file to connect to Hono         |
 
-```
-apt install maven
-```
-
-**Modify properties**
-
-Edit `src/main/resources/application.properties`
-
-and change the content to
-
-<!--- TODO to be changed to Azure Subscription --->
-
-```
-influxdb.url=http://idial.institute:8086
-influxdb.db.name=devices
-qpid.router.host=idial.institute
-qpid.router.port=15671
-hono.tenant.id=DEFAULT_TENANT
-hono.user=user1@HONO
-hono.password=pw
-hono.trustedStorePath=trusted-certs.pem
-hono.reconnectAttempts=100
-```
-
-Depending on the used Eclipse Hono version, it may be further necessary to replace the `src/main/resources/trusted-certs.pem` with a suitable certificate (cf. https://www.eclipse.org/hono/download/)
-
-**Start the consumer**
-
-Enter `mvn spring-boot:run`
-
-or (if you prefer to execute the consumer as background task)
-
-`screen mvn spring-boot:run`
-
-## Known issues
-
-- The connector reconnects to Hono as often as defined in the `hono.reconnectAttempts` defined in the properties.
-Still though sometimes the connector is unable to reconnect.
-In this case the connector has to be restarted (there is currently no way to reconnect it otherwise).
+The default Hono username, password and .pem file for the different Hono versions can be found on the [Hono website](https://www.eclipse.org/hono/).
