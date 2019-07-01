@@ -25,9 +25,37 @@ To build the Hono-InfluxDB-Connector navigate to its directory.
 `cd utils/hono-influxdb-connector`
 
 This project is build using Gradle and has been tested with [Gradle v5.0](https://github.com/gradle/gradle/releases/tag/v5.0.0).
-To compile the project simply run.
 
-`gradle build`
+To build with Gradle, create a Docker image and push the image to a Docker registry, 
+run
+
+```bash
+./build.sh \
+    <Hostname of the Docker registry> \
+    <Username to log into the Docker registry> \
+    <Password to log into the Docker registry>
+```
+
+## Deployment
+
+To deploy in a Kubernetes cluster, run
+
+```bash
+./deploy.sh \
+    <Cluster-internal URL of InfluxDB, typically http://influxdb.hono:8086> \
+    <Cluster-internal hostname of QPID dispatch router, typically hono-dispatch-router-ext.hono> \
+    <Cluster-internal port of QPID dispatch router, typically 5671> \
+    <Hono user, typically consumer@HONO> \
+    <Password of Hono user> \
+    <Path to truststore, typically ./src/main/resources/trusted-certs.pem> \
+    <Whether or not to verify the hostname for TLS connection to Hono, should be true> \
+    <Connections between Hono and InfluxDB, e.g. DEFAULT_TENANT:devices,otherTenant:nameOfOtherInfluxDatabase> \
+    <Name of the Kubernetes secret to store the Docker registry credentials in> \
+    <Hostname of the Docker registry> \
+    <Username to log into the Docker registry> \
+    <Password to log into the Docker registry> \
+    <E-mail address to log into the Docker registry>
+```
 
 ## Configuration
 

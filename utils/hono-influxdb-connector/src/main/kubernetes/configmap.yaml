@@ -4,12 +4,16 @@
 # terms and conditions of the Eclipse Distribution License v1.0 which
 # accompanies this distribution, and is available at
 # http://www.eclipse.org/org/documents/edl-v10.php
-influxdb.url=http://localhost:8086
-qpid.router.host=localhost
-qpid.router.port=15671
-hono.user=user1@HONO
-hono.password=pw
-hono.trustedStorePath=trusted-certs.pem
-hono.verifyHostname=false
-hono.connections[0].tenantId=DEFAULT_TENANT
-hono.connections[0].influxDatabaseName=devices
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: hono-influxdb-connector-configmap
+  namespace: hono
+data: 
+  INFLUXDB_URL: ""
+  QPID_ROUTER_HOST: ""
+  QPID_ROUTER_PORT: "5671"
+  HONO_USER: ""
+  HONO_PASSWORD: ""
+  HONO_TRUSTEDSTOREPATH: /etc/hono/trusted-certs.pem
+  HONO_VERIFYHOSTNAME: "true"

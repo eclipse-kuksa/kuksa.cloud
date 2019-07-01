@@ -1,0 +1,42 @@
+# Copyright Bosch Software Innovations GmbH [and others], 2019. Part of the Eclipse Kuksa Project.
+#
+# All rights reserved. This configuration file is provided to you under the
+# terms and conditions of the Eclipse Distribution License v1.0 which
+# accompanies this distribution, and is available at
+# http://www.eclipse.org/org/documents/edl-v10.php
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: hono-influxdb-connector
+  namespace: hono
+  labels:
+    app: hono-influxdb-connector
+    version: "<VERSION>"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: hono-influxdb-connector
+  template:
+    metadata:
+      labels:
+        app: hono-influxdb-connector
+        version: "<VERSION>"
+    spec:
+      containers:
+      - image: <DOCKER_IMAGE>:<DOCKER_VERSION>
+        name: hono-influxdb-connector
+        envFrom:
+        - configMapRef:
+            name: hono-influxdb-connector-configmap
+        volumeMounts:
+        - mountPath: /etc/hono
+          name: config
+          readOnly: true
+      volumes:
+      - name: config
+        secret:
+          secretName: hono-influxdb-connector-conf
+      imagePullSecrets:
+      - name: docker-secret
