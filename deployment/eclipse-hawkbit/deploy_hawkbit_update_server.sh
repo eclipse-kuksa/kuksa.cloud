@@ -1,6 +1,7 @@
+#!/bin/bash
 #
 # ******************************************************************************
-# Copyright (c) 2019 Bosch Software Innovations GmbH.
+# Copyright (c) 2019 Bosch Software Innovations GmbH [and others].
 #
 # All rights reserved. This program and the accompanying materials
 # are made available under the terms of the Eclipse Public License v2.0
@@ -9,7 +10,6 @@
 #
 # *****************************************************************************
 #
-#!/bin/bash
 
 # Make the script fail if a command fails
 set -e
@@ -17,7 +17,7 @@ set -e
 SCRIPTPATH=$(dirname "$(readlink -f "$0")")
 NAMESPACE=hawkbit
 
-. $SCRIPTPATH/../utils/allIncludes.inc
+. $SCRIPTPATH/../kubernetes/includes/allIncludes.inc
 
 echo
 echo "##########################################################"
@@ -47,22 +47,6 @@ echo "##### Convert docker compose file to kubernetes resource files #####"
 # Note that the following command requires the installation of the command line tool kompose.
 # Installation instructions can be found at http://kompose.io/
 kompose convert
-
-echo
-echo "##### Replace relevant parts in kubernetes resource files #####"
-
-sed -i 's/spec:/spec:\n  type: LoadBalancer/' hawkbit-service.yaml
-
-echo 
-echo "##### Configure static IP addresses ######"
-IP_ADDRESSES_FILE=`getIpAddressesFile`
-if [[ -f $IP_ADDRESSES_FILE ]]; then
-	echo "Loading IP addresses from $IP_ADDRESSES_FILE ..."
-	. $IP_ADDRESSES_FILE
-	configureStaticIpAddress "hawkbit-service.yaml" "hawkbit"	
-else
-	echo "No static IP addresses will be configured because file is missing: $IP_ADDRESSES_FILE"
-fi
 
 echo
 echo "########## Deployment ##########"

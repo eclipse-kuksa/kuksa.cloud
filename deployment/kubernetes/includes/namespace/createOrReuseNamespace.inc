@@ -1,6 +1,6 @@
 #
 # ******************************************************************************
-# Copyright (c) 2019 Bosch Software Innovations GmbH.
+# Copyright (c) 2019 Bosch Software Innovations GmbH [and others].
 #
 # All rights reserved. This program and the accompanying materials
 # are made available under the terms of the Eclipse Public License v2.0
@@ -10,9 +10,12 @@
 # *****************************************************************************
 #
 
-# Creates the name of the file that contains static IP addresses
-# based on SCRIPTPATH.
-
-function getIpAddressesFile() {
-	echo $(readlink -f $SCRIPTPATH/../exportStaticIpAddresses.inc)
+function createOrReuseNamespace() {
+	local NAMESPACE=$1
+	
+	if [[ "" == "$(kubectl get namespace $NAMESPACE --ignore-not-found=true)" ]]; then
+		kubectl create namespace $NAMESPACE
+	else
+		echo "The namespace $NAMESPACE exists already and will be re-used."
+	fi
 }
