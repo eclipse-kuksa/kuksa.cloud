@@ -24,6 +24,7 @@ Contributors:
 * **ONGOING** Scripts to setup the overall cloud architecture
   * allocate a static IP address and DNS names
   * obtain TLS certificates from [Let's encrypt](https://letsencrypt.org/) via [cert-manager](https://docs.cert-manager.io/en/latest/)
+  * perform TLS termination using [Ambassador](https://getambassador.io/)
 
 More information on deployment / usage is given in each modules' subdirectories.
 
