@@ -1,0 +1,59 @@
+######################################################################
+# Copyright (c) 2019 Bosch Software Innovations GmbH [and others]
+#
+# This program and the accompanying materials are made
+# available under the terms of the Eclipse Public License 2.0
+# which is available at https://www.eclipse.org/legal/epl-2.0/
+#
+# SPDX-License-Identifier: EPL-2.0
+########################################################################
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: kuksa-appstore
+    version: "<VERSION>"
+  name: kuksa-appstore
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kuksa-appstore
+  template:
+    metadata:
+      labels:
+        app: kuksa-appstore
+        version: "<VERSION>"
+    spec:
+      containers:
+      - name: appstore
+        image: <DOCKER_REGISTRY_SERVER>/<DOCKER_IMAGE_NAME>:<VERSION>
+        ports:
+        - containerPort: 8080
+          name: http
+          protocol: TCP
+        env:
+        - name: SPRING_CONFIG_LOCATION
+          value: file:///etc/kuksa/
+        volumeMounts:
+        - mountPath: /var/lib/kuksa/appstore-h2-database
+          name: appstore-h2-database
+        - mountPath: /etc/kuksa
+          name: conf
+          readOnly: true
+        resources:
+          requests:
+            memory: "400Mi"
+          limits:
+            memory: "1Gi"
+        imagePullPolicy: Always
+      imagePullSecrets:
+      - name: <DOCKER_REGISTRY_SECRET>
+      volumes:
+      - name: appstore-h2-database
+        persistentVolumeClaim:
+          claimName: appstore-h2-database
+      - name: conf
+        secret:
+          secretName: kuksa-appstore-conf
+      
