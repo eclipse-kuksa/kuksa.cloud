@@ -25,10 +25,7 @@ repositories {
 
 dependencies {
     compile 'org.springframework.boot:spring-boot-starter-web:2.1.0.RELEASE'
-    compile('org.simplejavamail:simple-java-mail:5.0.8') {
-        exclude group: 'com.sun.mail', module: 'javax.mail'
-    }
-    compile 'com.sun.mail:jakarta.mail:1.6.3'
+    compile 'org.simplejavamail:simple-java-mail:5.2.0'
 
     testCompile 'junit:junit'
 }
