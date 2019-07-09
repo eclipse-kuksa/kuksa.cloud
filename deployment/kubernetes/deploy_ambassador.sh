@@ -51,18 +51,25 @@ sed -i "s/<DNS_ZONE_NAME>/$DNS_ZONE_NAME/" $RESOURCE_DESCRIPTOR
 sed -i "s/<GATEWAY_IP_ADDRESS>/$GATEWAY_IP_ADDRESS/" $RESOURCE_DESCRIPTOR
 
 echo
-echo "########## Install ambassador ##########"
-INSTALLED_AMBASSADOR_CHART_VERSION="$(kubectl get deployments ambassador -o yaml --ignore-not-found=true \
-	| yq .metadata.labels \
-	| grep helm.sh/chart \
-	| tr -d '\"' \
-	| sed -e 's/  helm.sh\/chart: ambassador-//')"
-echo "existing version: $INSTALLED_AMBASSADOR_CHART_VERSION"
+echo "########## Install Ambassador ##########"
+
+INSTALLED_AMBASSADOR_DEPLOYMENT="$(kubectl get deployments ambassador -o yaml --ignore-not-found=true)"
+
+if [[ "" != $INSTALLED_AMBASSADOR_DEPLOYMENT ]]; then
+	INSTALLED_AMBASSADOR_CHART_VERSION="$(kubectl get deployments ambassador -o yaml --ignore-not-found=true \
+		| yq r - metadata.labels \
+		| grep helm.sh/chart \
+		| sed -e 's/helm.sh\/chart: ambassador-//')"
+	echo "Version of Ambassador chart: $INSTALLED_AMBASSADOR_CHART_VERSION"
+else
+	INSTALLED_AMBASSADOR_CHART_VERSION=""
+	echo "Did not find an Ambassador deployment."
+fi
 
 if [[ "$INSTALLED_AMBASSADOR_CHART_VERSION" == "$AMBASSADOR_CHART_VERSION" ]]; then
 	echo "Ambassador is up-to-date"
-elif [[ "" != "$INSTALLED_CERT_MANAGER_CHART_VERSION" ]]; then
-	echo "Upgrading ambassador using local tiller ..."
+elif [[ "" != "$INSTALLED_AMBASSADOR_CHART_VERSION" ]]; then
+	echo "Upgrading Ambassador using local tiller ..."
 	tiller --storage=secret &
 	export HELM_HOST=:44134
 	helm repo update \
@@ -75,7 +82,7 @@ elif [[ "" != "$INSTALLED_CERT_MANAGER_CHART_VERSION" ]]; then
 		stable/ambassador \
 	&& kill "$(jobs -p %tiller)"
 else
-	echo "Installing ambassador using local tiller ..."
+	echo "Installing Ambassador using local tiller ..."
 	tiller --storage=secret &
 	export HELM_HOST=:44134
 	helm repo update \
@@ -93,7 +100,7 @@ else
 fi
 
 echo
-echo "########## Deploy ambassador service ##########"
+echo "########## Deploy Ambassador service ##########"
 
 kubectl apply -f $RESOURCE_DESCRIPTOR
 

@@ -43,7 +43,6 @@ function customizeClusterIssuer() {
 	
 	echo "Creating resource descriptor $CUSTOM_RESOURCE ..."
 	cp $RESOURCE_TEMPLATE $CUSTOM_RESOURCE
-	
 	sed -i "s/<EMAIL_ADDRESS_FOR_LETS_ENCRYPT>/$EMAIL_ADDRESS_FOR_LETS_ENCRYPT/" $CUSTOM_RESOURCE
 	sed -i "s/<AZURE_SUBSCRIPTION_ID>/$AZURE_SUBSCRIPTION_ID/" $CUSTOM_RESOURCE
 	sed -i "s/<AZURE_AD_TENANT_ID>/$AZURE_AD_TENANT_ID/" $CUSTOM_RESOURCE
@@ -97,10 +96,20 @@ mkdir -p $CERT_RESOURCES
 createCertificateDescriptor "gateway" $NAMESPACE_TO_STORE_CERTIFICATES_IN
 
 echo "### Install cert-manager ###"
-INSTALLED_CERT_MANAGER_CHART_VERSION="$(kubectl get deployments -n cert-manager cert-manager -o yaml --ignore-not-found=true \
-	| yq .metadata.labels.chart \
+#check whether cert-manager is already deployed
+CERT_MANAGER_DEPLOYEMENT="$(kubectl get deployments -n cert-manager cert-manager -o yaml --ignore-not-found=true)"
+
+if [[ "" != "$CERT_MANAGER_DEPLOYEMENT" ]]; then
+	INSTALLED_CERT_MANAGER_CHART_VERSION="$(kubectl get deployments -n cert-manager cert-manager -o yaml --ignore-not-found=true \
+	| yq r - metadata.labels.chart \
 	| tr -d '\"' \
 	| sed -e 's/cert-manager-v//')"
+	echo "Found cert-manager deployment with chart version $INSTALLED_CERT_MANAGER_CHART_VERSION and chart version to install is $CERT_MANAGER_CHART_VERSION"
+else
+	INSTALLED_CERT_MANAGER_CHART_VERSION=""
+	echo "Did not find a deployment for the cert-manager."
+fi
+
 
 if [[ "$INSTALLED_CERT_MANAGER_CHART_VERSION" == "$CERT_MANAGER_CHART_VERSION" ]]; then
 	echo "cert-manager is up-to-date"
@@ -114,7 +123,7 @@ elif [[ "" != "$INSTALLED_CERT_MANAGER_CHART_VERSION" ]]; then
 	tiller --storage=secret &
 	export HELM_HOST=:44134
 	kubectl apply \
-		     -f https://raw.githubusercontent.com/jetstack/cert-manager/release-$CERT_MANAGER_VERSION/deploy/manifests/00-crds.yaml \
+		     -f https://raw.githubusercontent.com/jetstack/cert-manager/v$CERT_MANAGER_VERSION/deploy/manifests/00-crds.yaml \
 	    && echo "Waiting for custom resource definitions to be available ..." \
 	    && until [[ "5" == "$(kubectl get CustomResourceDefinitions | grep 'certmanager.k8s.io' | wc -l)" ]]; do echo "Waiting ..."; sleep 3; done \
 		&& helm repo update \
