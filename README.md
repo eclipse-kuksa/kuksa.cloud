@@ -22,6 +22,9 @@ Contributors:
 * HonoInfluxDBConnector: A Spring-Boot application that connects a running Eclipse Hono instance with a running InfluxDB instance so that messages received by Hono can be stored in InfluxDB. This is especially useful if one wants to easily create a visualization of some measurements eg with Grafana.
 * AppStore: A Spring-Boot application that connects a running Eclipse HawkBit instance and provides a GUI to manage vehicle (and eventually cloud) applications
 * **ONGOING** Scripts to setup the overall cloud architecture
+  * allocate a static IP address and DNS names
+  * obtain TLS certificates from [Let's encrypt](https://letsencrypt.org/) via [cert-manager](https://docs.cert-manager.io/en/latest/)
+  * perform TLS termination using [Ambassador](https://getambassador.io/)
 
 More information on deployment / usage is given in each modules' subdirectories.
 

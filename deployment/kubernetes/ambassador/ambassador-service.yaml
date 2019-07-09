@@ -1,0 +1,211 @@
+#
+# ******************************************************************************
+# Copyright (c) 2019 Bosch Software Innovations GmbH [and others].
+#
+# All rights reserved. This program and the accompanying materials
+# are made available under the terms of the Eclipse Public License v2.0
+# which accompanies this distribution, and is available at
+# https://www.eclipse.org/org/documents/epl-2.0/index.php
+#
+# *****************************************************************************
+#
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ambassador
+  annotations:
+    getambassador.io/config: |
+      ---
+      apiVersion: ambassador/v1
+      kind: Module
+      name: ambassador
+      config:
+        service_port: 8080
+      ---
+      apiVersion: ambassador/v1
+      kind: Module
+      name: tls
+      config:
+        server:
+          enabled: true
+      ---
+      # Hono
+      apiVersion: ambassador/v1
+      kind: TCPMapping
+      name: grafana-mapping
+      port: 3000
+      host: grafana.<CLUSTER_NAME>.<DNS_ZONE_NAME>
+      service: grafana.hono.svc.cluster.local:3000
+      ---
+      apiVersion: ambassador/v1
+      kind: TCPMapping
+      name: hono-adapter-amqp-vertx-mapping
+      port: 5671
+      host: hono-adapter-amqp-vertx.<CLUSTER_NAME>.<DNS_ZONE_NAME>
+      service: hono-adapter-amqp-vertx.hono.svc.cluster.local:5671
+      tls: true
+      ---
+      apiVersion: ambassador/v1
+      kind: TCPMapping
+      name: hono-adapter-http-vertx-mapping
+      port: 8443
+      host: hono-adapter-http-vertx.<CLUSTER_NAME>.<DNS_ZONE_NAME>
+      service: hono-adapter-http-vertx.hono.svc.cluster.local:8443
+      tls: true
+      ---
+      apiVersion: ambassador/v1
+      kind: TCPMapping
+      name: hono-adapter-kura-mapping
+      port: 8883
+      host: hono-adapter-kura.<CLUSTER_NAME>.<DNS_ZONE_NAME>
+      service: hono-adapter-kura.hono.svc.cluster.local:8883
+      tls: true
+      --- 
+      apiVersion: ambassador/v1
+      kind: TCPMapping
+      name: hono-adapter-mqtt-vertx-mapping
+      port: 8883
+      host: hono-adapter-mqtt-vertx.<CLUSTER_NAME>.<DNS_ZONE_NAME>
+      service: hono-adapter-mqtt-vertx.hono.svc.cluster.local:8883
+      tls: true
+      ---
+      apiVersion: ambassador/v1
+      kind: TCPMapping
+      name: hono-dispatch-router-mapping
+      port: 5671
+      host: hono-dispatch-router.<CLUSTER_NAME>.<DNS_ZONE_NAME>
+      service: hono-dispatch-router-ext.hono.svc.cluster.local:5671
+      tls: true
+      ---
+      apiVersion: ambassador/v1
+      kind: TCPMapping
+      name: hono-service-device-registry-mapping-5671
+      port: 5671
+      host: hono-service-device-registry.<CLUSTER_NAME>.<DNS_ZONE_NAME>
+      service: hono-service-device-registry.hono.svc.cluster.local:5671
+      tls: true
+      ---
+      apiVersion: ambassador/v1
+      kind: TCPMapping
+      name: hono-service-device-registry-mapping-8443
+      port: 8443
+      host: hono-service-device-registry.<CLUSTER_NAME>.<DNS_ZONE_NAME>
+      service: hono-service-device-registry.hono.svc.cluster.local:8443
+      tls: true
+      ---
+      apiVersion: ambassador/v1
+      kind: TCPMapping
+      name: hono-service-messaging-mapping
+      port: 5671
+      host: hono-service-messaging.<CLUSTER_NAME>.<DNS_ZONE_NAME>
+      service: hono-service-messaging.hono.svc.cluster.local:5671
+      tls: true
+      ---
+      apiVersion: ambassador/v1
+      kind: TCPMapping
+      name: influxdb-admin-ui-mapping
+      port: 8083
+      host: influxdb.<CLUSTER_NAME>.<DNS_ZONE_NAME>
+      service: influxdb.hono.svc.cluster.local:8083
+      ---
+      apiVersion: ambassador/v1
+      kind: TCPMapping
+      name: influxdb-http-api-mapping
+      port: 8086
+      host: influxdb.<CLUSTER_NAME>.<DNS_ZONE_NAME>
+      service: influxdb.hono.svc.cluster.local:8086
+      ---
+      # hawkBit
+      apiVersion: ambassador/v1
+      kind: TCPMapping
+      name: hawkbit-mapping
+      port: 8443
+      host: hawkbit.<CLUSTER_NAME>.<DNS_ZONE_NAME>
+      service: hawkbit.hawkbit.svc.cluster.local:8080
+      ---
+      # kuksa
+      apiVersion: ambassador/v1
+      kind: TCPMapping
+      name: kuksa-appstore-mapping
+      port: 8443
+      host: kuksa-appstore.<CLUSTER_NAME>.<DNS_ZONE_NAME>
+      service: kuksa-appstore.kuksa.svc.cluster.local:8080
+      ---
+      apiVersion: ambassador/v1
+      kind: TCPMapping
+      name: traccar-https-mapping
+      port: 8443
+      host: traccar.<CLUSTER_NAME>.<DNS_ZONE_NAME>
+      service: traccar.kuksa.svc.cluster.local:8082
+      ---
+      apiVersion: ambassador/v1
+      kind: TCPMapping
+      name: traccar-client-mapping
+      port: 5055
+      host: traccar.<CLUSTER_NAME>.<DNS_ZONE_NAME>
+      service: traccar.kuksa.svc.cluster.local:5055
+      ---
+      # extension
+      apiVersion: ambassador/v1
+      kind: TCPMapping
+      name: influxdb-rest-service-mapping
+      port: 8443
+      host: influxdb-rest-service.<CLUSTER_NAME>.<DNS_ZONE_NAME>
+      service: influxdb-rest-service.extension.svc.cluster.local:8080
+      ---
+      apiVersion: ambassador/v1
+      kind: TCPMapping
+      name: mail-notification-mapping
+      port: 8443
+      host: mail-notification.<CLUSTER_NAME>.<DNS_ZONE_NAME>
+      service: mail-notification-service.extension.svc.cluster.local:8080
+      ---
+      apiVersion: ambassador/v1
+      kind: TLSContext
+      name: gateway-context
+      hosts:
+      # Hono
+      - grafana.<CLUSTER_NAME>.<DNS_ZONE_NAME>
+      - hono-adapter-amqp-vertx.<CLUSTER_NAME>.<DNS_ZONE_NAME>
+      - hono-adapter-http-vertx.<CLUSTER_NAME>.<DNS_ZONE_NAME>
+      - hono-adapter-kura.<CLUSTER_NAME>.<DNS_ZONE_NAME>
+      - hono-adapter-mqtt-vertx.<CLUSTER_NAME>.<DNS_ZONE_NAME>
+      - hono-dispatch-router.<CLUSTER_NAME>.<DNS_ZONE_NAME>
+      - hono-service-auth.<CLUSTER_NAME>.<DNS_ZONE_NAME>
+      - hono-service-device-registry.<CLUSTER_NAME>.<DNS_ZONE_NAME>
+      - hono-service-messaging.<CLUSTER_NAME>.<DNS_ZONE_NAME>
+      - influxdb.<CLUSTER_NAME>.<DNS_ZONE_NAME>
+      # hawkBit
+      - hawkbit.<CLUSTER_NAME>.<DNS_ZONE_NAME>
+      # kuksa
+      - kuksa-appstore.<CLUSTER_NAME>.<DNS_ZONE_NAME>
+      - traccar.<CLUSTER_NAME>.<DNS_ZONE_NAME>
+      # extension
+      - influxdb-rest-service.<CLUSTER_NAME>.<DNS_ZONE_NAME>
+      - mail-notification.<CLUSTER_NAME>.<DNS_ZONE_NAME>
+      # Ambassador (Helm chart version 2.0.1) is only able to hand out
+      # a single TLS certificate for all TLSContexts.
+      secret: gateway-tls
+spec:
+  type: LoadBalancer
+  loadBalancerIP: <GATEWAY_IP_ADDRESS>
+  externalTrafficPolicy: Local
+  ports:
+   - name: https-grafana
+     port: 3000
+   - name: traccar-client
+     port: 5055
+   - name: amqps
+     port: 5671
+   - name: https-influxdb-admin-ui
+     port: 8083
+   - name: https-influxdb-api
+     port: 8086
+   - name: https
+     port: 8443
+   - name: mqtts
+     port: 8883
+  selector:
+    app.kubernetes.io/instance: ambassador
+    app.kubernetes.io/name: ambassador

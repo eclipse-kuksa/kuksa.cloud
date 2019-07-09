@@ -1,6 +1,6 @@
 #
 # ******************************************************************************
-# Copyright (c) 2019 Bosch Software Innovations GmbH.
+# Copyright (c) 2019 Bosch Software Innovations GmbH [and others].
 #
 # All rights reserved. This program and the accompanying materials
 # are made available under the terms of the Eclipse Public License v2.0
@@ -9,6 +9,7 @@
 #
 # *****************************************************************************
 #
+
 function createOrReuseDockerRegistrySecret() {
 	local NAME_OF_SECRET=$1
 	local NAMESPACE=$2

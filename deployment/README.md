@@ -12,8 +12,9 @@ The scripts in this directory and it's subdirectories help to setup a deployment
 
 ## Structure
 The deployment scripts are divided into the following parts:
-  1. **Eclipse hawkBit** enables the deployment of the corresponding software update components, in particular the update server.
+  1. **Azure** for Azure-specific configuration that provides the basis of Kubernetes.
+  2. **Eclipse hawkBit** enables the deployment of the corresponding software update components, in particular the update server.
   **Note that this step requires the installation of the command line tool kompose. Installation instructions can be found at http://kompose.io/**
-  2. **Eclipse Hono** enables the deployment of a messaging infrastructure. 
-  3. **Kubernetes** provides functions for the Kubernetes deployment of the Kuksa cloud. 
-  4. **Utils** scripts that are included by other parts of the deployment infrastructure (e.g. handling static IP-addresses for the services). It is possible to set static IP-addresses and DNS entries for deployed services. For more details on that configuration see the `Readme.md` file in the `utils` directory.
+  3. **Eclipse Hono** enables the deployment of a messaging infrastructure. 
+  4. **Kubernetes** provides functions for the Kubernetes deployment of the Kuksa cloud. 
+  5. **Utils** scripts that are included by other parts of the deployment infrastructure (e.g. handling static IP-addresses for the services). It is possible to set static IP-addresses and DNS entries for deployed services. For more details on that configuration see the `Readme.md` file in the `utils` directory.

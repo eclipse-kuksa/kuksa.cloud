@@ -2,6 +2,12 @@
 .idea/
 *.iml
 
+# Eclipse
+.project
+.classpath
+.settings
+utils/hono-influxdb-connector/bin
+
 # Java
 *.class
 *.jar
@@ -10,6 +16,7 @@
 .gradle/
 build/
 gradle/
+.gradle/
 gradlew
 gradlew.bat
 gradle-app.setting
