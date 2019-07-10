@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: influxdb-rest-deployment
+  namespace: extensions
+spec:    
+  replicas: 1
+  selector:
+    matchLabels:
+      app: influxdb-rest
+  template:
+    metadata:
+      labels:
+        app: influxdb-rest
+    spec:
+      containers:
+      - name: influxdb-rest-container
+        image: <PLACEHOLDER>
+        imagePullPolicy: Always
+        envFrom:
+        - configMapRef:
+            name: influxdb-rest-configmap
+        ports:
+          - containerPort: 8080
+            name: http
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: 200m
+          limits:
+            memory: "2048Mi"
+            cpu: 700m
+      

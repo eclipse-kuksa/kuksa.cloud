@@ -1,0 +1,14 @@
+apiVersion: v1
+kind:  ConfigMap
+metadata:
+  name: mil-service-configmap
+  namespace: extensions
+data:
+  INFLUXDB_REST_URL: <PLACEHOLDER>
+  INFLUXDB_REST_P: <PLACEHOLDER>
+  INFLUXDB_REST_DEVICEID: <PLACEHOLDER>
+  MAIL_URL: <PLACEHOLDER>
+  MAIL_P: <PLACEHOLDER>
+  RECEIVER_MAIL: <PLACEHOLDER>
+  MAPS_API_KEY: <PLACEHOLDER>
+  

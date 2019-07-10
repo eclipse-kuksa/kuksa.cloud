@@ -1,0 +1,31 @@
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:2.1.0.RELEASE")
+    }
+}
+
+apply plugin: 'java'
+apply plugin: 'application'
+apply plugin: 'org.springframework.boot'
+apply plugin: 'io.spring.dependency-management'
+
+bootJar {
+    baseName = 'mail-notification'
+    version = '0.2.0'
+}
+
+mainClassName = "org.eclipse.kuksa.notification.mail.Application"
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile 'org.springframework.boot:spring-boot-starter-web:2.1.0.RELEASE'
+    compile 'org.simplejavamail:simple-java-mail:5.2.0'
+
+    testCompile 'junit:junit'
+}
