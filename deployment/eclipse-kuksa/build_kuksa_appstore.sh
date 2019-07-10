@@ -15,13 +15,12 @@ set -e
 
 SCRIPTPATH=$(dirname "$(readlink -f "$0")")
 
-DOCKER_REGISTRY_SECRET=$1
-DOCKER_REGISTRY_SERVER=$2
-DOCKER_REGISTRY_USERNAME=$3
-DOCKER_REGISTRY_PASSWORD=$4
-DOCKER_REGISTRY_EMAIL=$5
+DOCKER_REGISTRY_SERVER=$1
+DOCKER_REGISTRY_USERNAME=$2
+DOCKER_REGISTRY_PASSWORD=$3
+DOCKER_REGISTRY_EMAIL=$4
 
-APPSTORE_PATH=$SCRIPTPATH/kuksa.cloud/kuksa-appstore
+APPSTORE_PATH=$SCRIPTPATH/../../kuksa-appstore
 DOCKER_IMAGE_NAME="kuksa-appstore"
 
 . $SCRIPTPATH/../kubernetes/includes/allIncludes.inc
@@ -29,7 +28,7 @@ DOCKER_IMAGE_NAME="kuksa-appstore"
 echo
 echo "##############################################################"
 echo "##############################################################"
-echo "############### Eclipse Kuksa Cloud deployment ###############"
+echo "############ Eclipse Kuksa Cloud app-store build #############"
 echo "##############################################################"
 echo "##############################################################"
 
@@ -38,15 +37,11 @@ echo "########## Initialization ##########"
 
 cd $SCRIPTPATH
 
-echo 
-echo "##### Check out repository #####"
-git clone https://github.com/eclipse/kuksa.cloud.git
+echo
+echo "########## Build and push Docker image  ##########"
 
 echo
-echo "########## Build and push docker image  ##########"
-
-echo
-echo "##### Build with Maven #####"
+echo "##### Build app-store with Maven #####"
 
 cd $APPSTORE_PATH
 mvn clean verify
@@ -56,7 +51,7 @@ VERSION="$(xq .project.version pom.xml | tr -d '"')"
 cp $APPSTORE_PATH/target/kuksa.appstore-$VERSION.jar $APPSTORE_PATH/target/kuksa-appstore.jar
 
 echo
-echo "##### Build major docker image #####"
+echo "##### Build major Docker image #####"
 cp $SCRIPTPATH/kuksa-appstore/Dockerfile $APPSTORE_PATH/target/
 docker build \
 	--tag $DOCKER_IMAGE_NAME:$VERSION \
@@ -64,7 +59,7 @@ docker build \
 docker tag $DOCKER_IMAGE_NAME:$VERSION $DOCKER_IMAGE_NAME:latest
 
 echo
-echo "##### Push major docker image to Azure docker registry #####"
+echo "##### Push major docker image to Docker registry #####"
 docker login \
 	--username $DOCKER_REGISTRY_USERNAME \
 	--password $DOCKER_REGISTRY_PASSWORD \
@@ -77,8 +72,3 @@ echo  "########## Final cleanup ##########"
 
 cd $SCRIPTPATH
 ls -lah
-
-echo
-echo "##### Delete kuksa.cloud folder #####"
-
-rm -rf $SCRIPTPATH/kuksa.cloud

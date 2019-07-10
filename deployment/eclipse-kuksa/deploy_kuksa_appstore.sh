@@ -20,14 +20,15 @@ APPSTORE_PASSWORD=$2
 HAWKBIT_URL=$3
 HAWKBIT_USERNAME=$4
 HAWKBIT_PASSWORD=$5
-DOCKER_REGISTRY_SECRET=$6
-DOCKER_REGISTRY_SERVER=$7
-DOCKER_REGISTRY_USERNAME=$8
-DOCKER_REGISTRY_PASSWORD=$9
-DOCKER_REGISTRY_EMAIL=${10}
+DOCKER_REGISTRY_SERVER=$6
+DOCKER_REGISTRY_USERNAME=$7
+DOCKER_REGISTRY_PASSWORD=$8
+DOCKER_REGISTRY_EMAIL=${9}
 
 VAADIN_PRODUCTION_MODE_ENABLED=true
 
+#the docker registry secret is created by this script
+DOCKER_REGISTRY_SECRET="docker-secret"
 NAMESPACE=kuksa
 DOCKER_IMAGE_NAME="kuksa-appstore"
 VERSION="0.0.1-SNAPSHOT"
@@ -49,7 +50,7 @@ SERVICE_DESCRIPTOR=$TARGET_DIR/kuksa-appstore-service.yaml
 echo
 echo "##############################################################"
 echo "##############################################################"
-echo "############### Eclipse Kuksa Cloud deployment ###############"
+echo "########## Eclipse Kuksa Cloud app-store deployment ##########"
 echo "##############################################################"
 echo "##############################################################"
 
@@ -111,8 +112,5 @@ echo  "########## Final cleanup ##########"
 
 cd $SCRIPTPATH
 ls -lah
-
-echo
-echo "##### Delete kuksa folder #####"
 
 rm -rf $TARGET_DIR

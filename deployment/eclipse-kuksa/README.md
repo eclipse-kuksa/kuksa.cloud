@@ -19,8 +19,7 @@ https://www.eclipse.org/org/documents/epl-2.0/index.php
 * Purpose:
   * Build a Docker image for the Eclipse Kuksa Appstore and push it to a Docker registry
 * Options:
-  * `DOCKER_REGISTRY_SECRET`: Name of the secret to access to custom Docker registry. **Note that the secret is created during the build and deploy process within the namespace `extension`.**
-  * `DOCKER_REGISTRY_SERVER`: Address of the Docker registry server, preferrably running on Microsoft Azure.
+  * `DOCKER_REGISTRY_SERVER`: Address of the Docker registry server, e.g. running on Microsoft Azure.
   * `DOCKER_REGISTRY_USERNAME`: Username to sign in to the Docker registry.
   * `DOCKER_REGISTRY_PASSWORD`: Password to sign in to the Docker registry.
   * `DOCKER_REGISTRY_EMAIL`: Email to sign in to the Docker registry.
@@ -48,15 +47,16 @@ https://www.eclipse.org/org/documents/epl-2.0/index.php
     hawkbit.
   * `HAWKBIT_PASSWORD`: The password to be used by the appstore to authenticate with 
     hawkbit.
-  * `DOCKER_REGISTRY_SECRET`: Name of the secret to access to custom Docker registry. **Note that the secret is created during the build and deploy process within the namespace `extension`.**
-  * `DOCKER_REGISTRY_SERVER`: Address of the Docker registry server, preferrably running on Microsoft Azure.
+  * `DOCKER_REGISTRY_SERVER`: Address of the Docker registry server, e.g. running on Microsoft Azure.
   * `DOCKER_REGISTRY_USERNAME`: Username to sign in to the Docker registry.
   * `DOCKER_REGISTRY_PASSWORD`: Password to sign in to the Docker registry.
   * `DOCKER_REGISTRY_EMAIL`: Email to sign in to the Docker registry.
+  * `DOCKER_REGISTRY_SECRET`: Name of the secret to access to custom Docker registry. **Note that the secret is created during the deploy process within the namespace `extension`.**
+  
 * Notes:
   * Production mode is enabled for Vaadin.
   * H2 console is disabled.
-  * The h2 database is persisted via a persistent volume claim.
+  * The H2 database is persisted via a persistent volume claim.
   * The service uses a ClusterIP so it is only available behind the Ambassador gateway.
 
 ## Deploy Traccar Server
