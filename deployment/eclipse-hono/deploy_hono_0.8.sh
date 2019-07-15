@@ -111,6 +111,38 @@ sed -i 's/\"distribution\": \"balanced\"/\"distribution\": \"multicast\"/' qdrou
 
 cat qdrouterd-with-broker.json
 
+
+echo
+echo "##### Add InfluxDB persistent volume claim #####"
+cp $SCRIPTPATH/deployments/hono-influxdb-pvc.yaml $DESCRIPTORS_PATH/influx/influxdb-pvc.yaml
+# The first commands 1h;2,$H;$!d;g; read the entire file into memory,
+# to permit the following multi-line expression to operate on the
+# entire file, see https://unix.stackexchange.com/a/235016
+sed -i "1h;2,\$H;\$!d;g;s#- emptyDir: {}\n        name: influxdb-storage#- name: influxdb-storage\n        persistentVolumeClaim:\n          claimName: influxdb-storage#" $DESCRIPTORS_PATH/influx/influxdb-deployment.yaml
+
+
+echo
+echo "##### Add Grafana persistent volume claim #####"
+cp $SCRIPTPATH/deployments/hono-grafana-pvc.yaml $DESCRIPTORS_PATH/grafana/grafana-pvc.yaml
+# The first commands 1h;2,$H;$!d;g; read the entire file into memory,
+# to permit the following multi-line expression to operate on the
+# entire file, see https://unix.stackexchange.com/a/235016
+sed -i "1h;2,\$H;\$!d;g;s#- name: grafana-data\n        emptyDir: {}#- name: grafana-data\n        persistentVolumeClaim:\n          claimName: grafana-data#" $DESCRIPTORS_PATH/grafana/grafana-deployment.yaml
+# Permit Grafana to access the volume with its user with UID 472.
+# The user's UID is taken from 
+# https://grafana.com/docs/installation/docker/#migration-from-a-previous-version-of-the-docker-container-to-5-1-or-later
+# See also https://github.com/grafana/grafana-docker/issues/167#issuecomment-401807893
+sed -i "s/volumes:/securityContext:\n        fsGroup: 472\n      volumes:/" $DESCRIPTORS_PATH/grafana/grafana-deployment.yaml
+
+
+echo
+echo "##### Add additional dashboards to Grafana #####"
+# Note that changes to this dashboard cannot be saved in Grafana. The dashboard needs to be updated in Git.
+ROVER_DASHBOARD_FILE=$KUBERNETES_PATH/grafana/dashboard-definitions/grafana-rover-dashboard.json
+cp $SCRIPTPATH/deployments/hono-grafana-rover-dashboard.json $ROVER_DASHBOARD_FILE  
+sed -i 's/${DS_HONO_DATA}/hono_data/' $ROVER_DASHBOARD_FILE
+
+
 echo
 echo  "########## Kubernetes deployment ##########"
 

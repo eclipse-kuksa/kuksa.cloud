@@ -35,6 +35,9 @@ https://www.eclipse.org/org/documents/epl-2.0/index.php
       * This leads to the problem that multiple consumers receive messages sent via Eclipse Hono in a round robin manner.
       * To enable all consumers to receive all messages, the routing pattern is changed to `multicast`.
       * See https://qpid.apache.org/releases/qpid-dispatch-1.0.1/book/index.html#_message_routing for more information
+    * Add persistent volume claim for InfluxDB
+    * Add persistent volume claim for Grafana
+    * Add Rover Dashboard for Grafana
   * Deployment of Kubernetes resources
   * Final cleanup
     * Delete the compressed binaries
