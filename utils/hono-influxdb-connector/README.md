@@ -66,10 +66,8 @@ The table below lists all configuration parameter available.
 |properties                              |environment variable                 |description                                                 |
 |:---------------------------------------|:------------------------------------|:-----------------------------------------------------------|
 |influxdb.url                            |INFLUXDB_URL                         |url of the influxDB instance to connect to                  |
-|influxdb.db.name                        |INFLUXDB_DB_NAME                     |name fo the database to write to                            |
 |qpid.router.host                        |QPID_ROUTER_HOST                     |url to the instance of the qpid dispatch router             |
 |qpid.router.port                        |QPID_ROUTER_PORT                     |port to the instance of the qpid dispatch router            |
-|hono.tenant.id                          |HONO_TENANT_ID                       |tenant id used by Hono                                      |
 |hono.user                               |HONO_USER                            |username to authenticate with Hono                          |
 |hono.password                           |HONO_PASSWORD                        |password to authenticate with Hono                          |
 |hono.trustedStorePath                   |HONO_TRUSTEDSTOREPATH                |path to the .pem file to connect to Hono                    |

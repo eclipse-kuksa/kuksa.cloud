@@ -63,7 +63,7 @@ public class InfluxDBClient implements MessageHandler {
         // check the given url string
         URL url = new URL(influxURL);
         influxDB = InfluxDBFactory.connect(url.toString());
-        LOGGER.info("Connected to InfluxDB at {}", url.toString());
+        LOGGER.info("Connected to InfluxDB at {} with database name {}", url.toString(), dbName);
 
         // consumer for possible exceptions when writing
         BiConsumer<Iterable<Point>, Throwable> consumer = (points, throwable) -> {
@@ -116,9 +116,9 @@ public class InfluxDBClient implements MessageHandler {
 		writePoint(point);
     }
 
-	public static Point createPoint(long timestamMs, final String deviceID, final Map<String, Object> entries) {
+	public static Point createPoint(long timestampMs, final String deviceID, final Map<String, Object> entries) {
 		final Point.Builder pointBuilder = Point.measurement(deviceID)
-                .time(timestamMs, TimeUnit.MILLISECONDS);
+                .time(timestampMs, TimeUnit.MILLISECONDS);
 		entries.forEach(addFields(pointBuilder));
         return pointBuilder.build();
 	}
