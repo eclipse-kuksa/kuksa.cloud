@@ -9,6 +9,5 @@ FROM openjdk:8-jre-alpine
 ARG VERSION
 
 COPY build/libs/hono-influxdb-connector-${VERSION}.jar /hono-influxdb-connector.jar
-COPY src/main/resources/trusted-certs.pem /
 
 ENTRYPOINT ["java","-jar", "hono-influxdb-connector.jar"]

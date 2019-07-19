@@ -30,6 +30,8 @@ spec:
         envFrom:
         - configMapRef:
             name: hono-influxdb-connector-configmap
+        - secretRef:
+            name: hono-influxdb-connector-secret
         volumeMounts:
         - mountPath: /etc/hono
           name: config
