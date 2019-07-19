@@ -1,0 +1,19 @@
+# Copyright Bosch Software Innovations GmbH [and others], 2019. Part of the Eclipse Kuksa Project.
+#
+# All rights reserved. This configuration file is provided to you under the
+# terms and conditions of the Eclipse Distribution License v1.0 which
+# accompanies this distribution, and is available at
+# http://www.eclipse.org/org/documents/edl-v10.php
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: hono-influxdb-connector-configmap
+  namespace: hono
+data: 
+  INFLUXDB_URL: ""
+  QPID_ROUTER_HOST: ""
+  QPID_ROUTER_PORT: "5671"
+  HONO_TRUSTEDSTOREPATH: /etc/hono/trusted-certs.pem
+  HONO_VERIFYHOSTNAME: "true"
+  HONO_CONNECTIONS_0_TENANTID: "DEFAULT_TENANT"
+  HONO_CONNECTIONS_0_INFLUXDATABASENAME: "devices"

@@ -14,17 +14,17 @@
 
 package org.eclipse.kuksa.honoConnector;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.eclipse.kuksa.honoConnector.config.ConfigProperties;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 
-@RunWith(SpringRunner.class)
-@SpringBootTest
-public class HonoInfluxConnectorApplicationTests {
+@SpringBootApplication
+@EnableConfigurationProperties(ConfigProperties.class)
+public class HonoInfluxConnectorApplication {
 
-	@Test
-	public void contextLoads() {
+	public static void main(String[] args) {
+
+		SpringApplication.run(HonoInfluxConnectorApplication.class, args);
 	}
-
 }

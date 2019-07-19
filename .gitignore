@@ -24,4 +24,10 @@ gradle-app.setting
 # Maven
 target/
 
+# Eclipse
+bin/
+.settings/
+.project
+.classpath
+
 deployment/exportStaticIpAddresses.inc

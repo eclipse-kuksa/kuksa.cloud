@@ -4,12 +4,10 @@
 # terms and conditions of the Eclipse Distribution License v1.0 which
 # accompanies this distribution, and is available at
 # http://www.eclipse.org/org/documents/edl-v10.php
-influxdb.url=http://localhost:8086
-qpid.router.host=localhost
-qpid.router.port=15671
-hono.user=user1@HONO
-hono.password=pw
-hono.trustedStorePath=trusted-certs.pem
-hono.verifyHostname=false
-hono.connections[0].tenantId=DEFAULT_TENANT
-hono.connections[0].influxDatabaseName=devices
+FROM openjdk:8-jre-alpine
+
+ARG VERSION
+
+COPY build/libs/hono-influxdb-connector-${VERSION}.jar /hono-influxdb-connector.jar
+
+ENTRYPOINT ["java","-jar", "hono-influxdb-connector.jar"]

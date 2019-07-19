@@ -63,7 +63,7 @@ public class InfluxDBClient implements MessageHandler {
         // check the given url string
         URL url = new URL(influxURL);
         influxDB = InfluxDBFactory.connect(url.toString());
-        LOGGER.info("Connected to InfluxDB at {}", url.toString());
+        LOGGER.info("Connected to InfluxDB at {} with database name {}", url.toString(), dbName);
 
         // consumer for possible exceptions when writing
         BiConsumer<Iterable<Point>, Throwable> consumer = (points, throwable) -> {
@@ -107,20 +107,33 @@ public class InfluxDBClient implements MessageHandler {
         if (msg == null) {
             return;
         }
-        Map<String, Object> entries = msg.getEntries();
+        final Map<String, Object> entries = msg.getEntries();
         if (entries == null || entries.isEmpty()) {
             return;
         }
-
-        Point.Builder pointBuilder = Point.measurement(msg.getDeviceID())
-                .time(System.currentTimeMillis(), TimeUnit.MILLISECONDS);
-
-        for (Map.Entry<String, Object> entry : entries.entrySet()) {
-            pointBuilder.addField(entry.getKey(), entry.getValue().toString());
-        }
-
-        writePoint(pointBuilder.build());
+        
+        final Point point = createPoint(System.currentTimeMillis(), msg.getDeviceID(), entries);
+		writePoint(point);
     }
+
+	public static Point createPoint(long timestampMs, final String deviceID, final Map<String, Object> entries) {
+		final Point.Builder pointBuilder = Point.measurement(deviceID)
+                .time(timestampMs, TimeUnit.MILLISECONDS);
+		entries.forEach(addFields(pointBuilder));
+        return pointBuilder.build();
+	}
+
+	private static BiConsumer<String, Object> addFields(final Point.Builder pointBuilder) {
+		return (key, value) -> {
+			if(value instanceof Boolean) {
+				pointBuilder.addField(key, (Boolean)value);
+			} else if(value instanceof Number) {
+				pointBuilder.addField(key, ((Number)value).doubleValue());
+			} else {
+				pointBuilder.addField(key, value.toString());
+			}
+		};
+	}
 
     /**
      * Writes a single measurement point to the influxDB.
