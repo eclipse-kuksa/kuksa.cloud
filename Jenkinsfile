@@ -18,11 +18,11 @@ pipeline {
             }
         }
     }
-    post {
+    /* post {
         failure {
-            /* mail to: 'kuksa-dev@eclipse.org',
+            mail to: 'kuksa-dev@eclipse.org',
                 subject: "Failed Jenkins Pipeline: ${currentBuild.fullDisplayName}",
-                body: "Something is wrong with ${env.BUILD_URL}" */
+                body: "Something is wrong with ${env.BUILD_URL}"
         }
-    }
+    }*/
 }
