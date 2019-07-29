@@ -20,9 +20,7 @@ pipeline {
     }
     post {
         failure {
-            /* mail to: 'kuksa-dev@eclipse.org',
-                subject: "Failed Jenkins Pipeline: ${currentBuild.fullDisplayName}",
-                body: "Something is wrong with ${env.BUILD_URL}" */
+            sh 'echo failure'
         }
     }
 }
