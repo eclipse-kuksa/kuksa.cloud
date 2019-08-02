@@ -128,11 +128,11 @@ public class AppController {
 	@ApiImplicitParam(name = "Authorization", value = "Token Format: 'base64(username: password)'", required = true, dataType = "String", paramType = "Header", defaultValue = "Basic Token")
 	@GetMapping(value = "/app/purchased/user/{userId}")
 	public ResponseEntity<?> getPurchasedAppsbyUserId(@PathVariable Long userId, Pageable pageable)
-			throws NotFoundException {
+			throws NotFoundException, BadRequestException {
 
-		Page<App> apps = appService.findByNameStartsWithIgnoreCaseAndInstalledusersId("", userId, pageable);
+		Page<App> apps = appService.findUsersApps(userId.toString(), appService.getListOfOem(appService.getListOfTargets(userId)), pageable);
 
-		LOG.debug("[getUserApssbyUserId]: getUserApssbyUserId request is processed successfully. Device: {}", userId);
+		LOG.debug("[getPurchasedAppsbyUserId]: getPurchasedAppsbyUserId request is processed successfully. Device: {}", userId);
 
 		return new ResponseEntity<>(apps, HttpStatus.OK);
 
@@ -141,12 +141,12 @@ public class AppController {
 	@ApiOperation(notes = "Returns User's installed Apps by userId and name parameter. The name parameter ensures to search by App Name.", value = "Getting User's installed Apps.", nickname = "getUserApssbyUserId", produces = "application/json", authorizations = @Authorization(value = "api_key"))
 	@ApiImplicitParam(name = "Authorization", value = "Token Format: 'base64(username: password)'", required = true, dataType = "String", paramType = "Header", defaultValue = "Basic Token")
 	@GetMapping(value = "/app/installed/user/{userId}")
-	public ResponseEntity<?> getUserApssbyUserId(@PathVariable Long userId, Pageable pageable)
+	public ResponseEntity<?> getUsersInstalledAppsbyUserId(@PathVariable Long userId, Pageable pageable)
 			throws NotFoundException {
 
 		Page<App> apps = appService.findByInstalledusersId(userId, pageable);
 
-		LOG.debug("[getUserApssbyUserId]: getUserApssbyUserId request is processed successfully. userId: {}", userId);
+		LOG.debug("[getUsersInstalledAppsbyUserId]: getUsersInstalledAppsbyUserId request is processed successfully. userId: {}", userId);
 
 		return new ResponseEntity<>(apps, HttpStatus.OK);
 
@@ -155,13 +155,13 @@ public class AppController {
 	@ApiOperation(notes = "Returns User's installed Apps by userId and name parameter. The name parameter ensures to search by App Name.", value = "Getting User's installed Apps by name.", nickname = "getUserApssbyUserIdAndName", produces = "application/json", authorizations = @Authorization(value = "api_key"))
 	@ApiImplicitParam(name = "Authorization", value = "Token Format: 'base64(username: password)'", required = true, dataType = "String", paramType = "Header", defaultValue = "Basic Token")
 	@GetMapping(value = "/app/installed/user/{userId}/{name}")
-	public ResponseEntity<?> getUserApssbyUserIdAndName(@PathVariable Long userId, @PathVariable String name,
+	public ResponseEntity<?> getUsersInstalledAppsbyUserIdAndName(@PathVariable Long userId, @PathVariable String name,
 			Pageable pageable) throws NotFoundException {
 
 		Page<App> apps = appService.findByNameStartsWithIgnoreCaseAndInstalledusersId(name, userId, pageable);
 
 		LOG.debug(
-				"[getUserApssbyUserIdAndName]: getUserApssbyUserIdAndName request is processed successfully. userId: {}",
+				"[getUsersInstalledAppsbyUserIdAndName]: getUsersInstalledAppsbyUserIdAndName request is processed successfully. userId: {}",
 				userId);
 
 		return new ResponseEntity<>(apps, HttpStatus.OK);
