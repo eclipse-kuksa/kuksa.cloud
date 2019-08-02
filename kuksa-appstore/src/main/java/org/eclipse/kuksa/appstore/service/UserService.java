@@ -34,6 +34,8 @@ public class UserService {
 
 	@Autowired
 	UserRepository userRepository;
+	@Autowired
+	AppService appService;
 
 	public Result<?> createUser(String username, String password, UserType usertype, Oem oem, Set<User> members)
 			throws AlreadyExistException, BadRequestException {
@@ -46,10 +48,7 @@ public class UserService {
 
 		} else if (userRepository.findByUsername(username) != null) {
 			throw new AlreadyExistException("User name already exist. username: " + username);
-		} /*
-			 * else if (usertype == UserType.GroupAdmin && oem == null) { throw new
-			 * BadRequestException("Oem should be given. "); }
-			 */ else {
+		} else {
 			userRepository.save(newUser);
 		}
 		return Result.success(HttpStatus.CREATED, userRepository.findByUsername(username));
@@ -83,11 +82,7 @@ public class UserService {
 
 			throw new BadRequestException("Username or password should not contains space character!");
 
-		} /*
-			 * else if (userObject.getUserType() == UserType.GroupAdmin &&
-			 * userObject.getOem() == null) { throw new
-			 * BadRequestException("Oem should be given. "); }
-			 */ else if (!currentUser.getUsername().equals(userObject.getUsername())) {
+		} else if (!currentUser.getUsername().equals(userObject.getUsername())) {
 			if (userRepository.findByUsername(userObject.getUsername()) != null) {
 				throw new AlreadyExistException(
 						"New User name already exist. New username: " + userObject.getUsername());
@@ -162,10 +157,9 @@ public class UserService {
 
 	}
 
-	public boolean isUsersAppOwner(String userId, String appId, List<String> oemList) {
+	public boolean isUsersAppOwner(String userId, Long appId, List<String> oemList) {
 
-		int count = userRepository.isUsersAppOwner(userId, appId, oemList);
-		if (count > 0) {
+		if (appService.createUsersAppList(userId, oemList).contains(appId)) {
 			return true;
 		}
 		return false;

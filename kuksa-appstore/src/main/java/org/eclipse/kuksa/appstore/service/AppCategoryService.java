@@ -122,7 +122,7 @@ public class AppCategoryService {
 	public List<String> getAllId() {
 
 		List<String> list = new ArrayList<>();
-		for (BigInteger component : appCategoryRepository.getAllId()) {
+		for (Long component : appCategoryRepository.getAllId()) {
 			list.add(component.toString());
 		}
 		return list;

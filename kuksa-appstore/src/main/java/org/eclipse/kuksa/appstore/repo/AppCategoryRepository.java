@@ -29,8 +29,8 @@ public interface AppCategoryRepository extends CrudRepository<AppCategory, Strin
 
 	AppCategory findByName(String name);
 
-	@Query(nativeQuery = true, value = "select u.id from app_category u")
-	List<BigInteger> getAllId();
+	@Query(nativeQuery = true, value = "select u.id from appcategory u")
+	List<Long> getAllId();
 
 	List<AppCategory> findByNameStartsWithIgnoreCase(String name);
 

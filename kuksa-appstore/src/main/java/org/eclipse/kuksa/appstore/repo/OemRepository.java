@@ -22,14 +22,23 @@ import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+
 @Repository
 public interface OemRepository extends CrudRepository<Oem, String> {
 	Oem findById(Long id);
+
 	Oem findByName(String name);
+
 	Oem findByNameIgnoreCase(String name);
+
 	List<Oem> findByNameStartsWithIgnoreCase(String name);
+
 	List<Oem> findAll();
+
 	Page<Oem> findAll(Pageable pageable);
+
 	@Query(nativeQuery = true, value = "select o.id from oem o")
-	List<BigInteger> getAllId();
+	List<Long> getAllId();
+
+	List<Oem> findIdByNameIn(List<String> oemNameList);
 }

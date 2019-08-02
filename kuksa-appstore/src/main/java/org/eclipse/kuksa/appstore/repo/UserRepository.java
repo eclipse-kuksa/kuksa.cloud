@@ -40,23 +40,12 @@ public interface UserRepository extends CrudRepository<User, String> {
 	List<User> findAll();
 
 	List<User> findByIdNotIn(List<Long> notInList);
+
 	@Modifying
 	@Transactional
 	@Query(nativeQuery = true, value = "delete from MEMBERS where user=?1")
 	void deleteAllMembers(String userId);
 
-	@Query(nativeQuery = true, value = "select count(*) from ( "
-			+ " WITH RECURSIVE T(N) AS ( " +
-				"select member from members  where member = ?1 " +
-					"UNION ALL " +
-				"SELECT user FROM members  ,T where member = N " +
-				") " +
-				"select USERAPPS.appid from T inner join USERAPPS on T.N=USERAPPS.userid " +
-					"UNION " +
-				"select USERAPPS.appid from  USERAPPS where USERAPPS.userid = ?1 " +
-					"UNION " +
-				"select USERAPPS.appid from USERAPPS where USERAPPS.userid in (select id from USER where USER.OEM_ID in (select ID from OEM where name in ?3))"
-		+ " ) where appid = ?2")
-	int isUsersAppOwner(String userId, String appId, List<String> oemList);
+	List<User> findByOemIdIn(List<Long> oemIdList);
 
 }

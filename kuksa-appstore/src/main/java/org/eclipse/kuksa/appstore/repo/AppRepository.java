@@ -50,18 +50,18 @@ public interface AppRepository extends CrudRepository<App, String> {
 
 	Page<App> findByNameStartsWithIgnoreCaseAndAppcategoryId(String name, Long id, Pageable pageable);
 
-	@Query(nativeQuery = true, value = "select * from app where id in ( "
-			+ " WITH RECURSIVE T(N) AS ( " +
-				"select member from members  where member = ?1 " +
-					"UNION ALL " +
-				"SELECT user FROM members  ,T where member = N " +
-				") " +
-				"select USERAPPS.appid from T inner join USERAPPS on T.N=USERAPPS.userid " +
-					"UNION " +
-				"select USERAPPS.appid from  USERAPPS where USERAPPS.userid = ?1 " +
-					"UNION " +
-				"select USERAPPS.appid from USERAPPS where USERAPPS.userid in ( select id from USER where USER.OEM_ID in (select ID from OEM where name in ?2) ) )")
-	Page<App> findUsersApps(String userId, List<String> oemList, Pageable pageable);
+	@Query(nativeQuery = true, value = "select id from app where id in ( "
+			+ " WITH RECURSIVE T(N) AS ( "
+				+ "select member from members  where member = ?1 "
+					+ "UNION ALL "
+				+ "SELECT user FROM members  ,T where member = N " + ") "
+			+ "select USERAPPS.appid from T inner join USERAPPS on T.N=USERAPPS.userid "
+				+ "UNION "
+			+ "select USERAPPS.appid from  USERAPPS where USERAPPS.userid = ?1 )")
+	List<Long> findUsersAppsIdFromUsersRelationship(String userId);
+
+	@Query("SELECT a FROM App a WHERE a.id IN ?1 ")
+	Page<App> findUsersApps(List<Long> appIdList1, Pageable pageable);
 
 	App findByIdAndInstalledusersId(Long id, Long userid);
 }

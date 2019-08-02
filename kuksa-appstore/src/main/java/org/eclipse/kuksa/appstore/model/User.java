@@ -12,6 +12,7 @@
  ******************************************************************************/
 package org.eclipse.kuksa.appstore.model;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.Set;
 
@@ -29,13 +30,14 @@ import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
+import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Null;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
-public class User {
+@Table(name = "user")
+public class User implements Serializable {
 
 	public User(Long id, String username, String password, UserType userType, Oem oem, Set<User> members) {
 		this.password = password;
@@ -76,7 +78,6 @@ public class User {
 
 	@ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.REMOVE)
 	@JoinTable(name = "members", joinColumns = @JoinColumn(name = "user", referencedColumnName = "id"), inverseJoinColumns = @JoinColumn(name = "member", referencedColumnName = "id"))
-	@ElementCollection
 	private Set<User> members;
 
 	public User() {
@@ -125,19 +126,20 @@ public class User {
 
 	@JsonIgnore
 	public List<App> getUserapps() {
-		return installedapps;
+		return userapps;
 	}
 
 	public void setUserapps(List<App> userapps) {
 		this.userapps = userapps;
 	}
+
 	public Oem getOem() {
 		return oem;
 	}
 
 	public void setOem(Oem oem) {
 		this.oem = oem;
-	}	
+	}
 
 	public Set<User> getMembers() {
 		return members;

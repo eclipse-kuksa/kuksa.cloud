@@ -21,6 +21,7 @@ import org.eclipse.kuksa.appstore.exception.AlreadyExistException;
 import org.eclipse.kuksa.appstore.exception.BadRequestException;
 import org.eclipse.kuksa.appstore.exception.NotFoundException;
 import org.eclipse.kuksa.appstore.model.App;
+import org.eclipse.kuksa.appstore.model.Oem;
 import org.eclipse.kuksa.appstore.model.User;
 import org.eclipse.kuksa.appstore.model.hawkbit.AssignedResult;
 import org.eclipse.kuksa.appstore.model.hawkbit.Distribution;
@@ -33,6 +34,7 @@ import org.eclipse.kuksa.appstore.model.hawkbit.SoftwareModuleResult;
 import org.eclipse.kuksa.appstore.model.hawkbit.Target;
 import org.eclipse.kuksa.appstore.repo.AppCategoryRepository;
 import org.eclipse.kuksa.appstore.repo.AppRepository;
+import org.eclipse.kuksa.appstore.repo.OemRepository;
 import org.eclipse.kuksa.appstore.repo.UserRepository;
 import org.eclipse.kuksa.appstore.utils.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,8 +42,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-
-import com.vaadin.server.VaadinSession;
 
 import feign.Response;
 
@@ -51,6 +51,8 @@ public class AppService {
 	AppRepository appRepository;
 	@Autowired
 	UserRepository userRepository;
+	@Autowired
+	OemRepository oemRepository;
 	@Autowired
 	AppCategoryRepository appCategoryRepository;
 	@Autowired
@@ -126,11 +128,13 @@ public class AppService {
 		return appRepository.findById(id);
 
 	}
+
 	public App findByName(String name) {
 
 		return appRepository.findByName(name);
 
 	}
+
 	public Result<?> updateApp(String appId, App app)
 			throws NotFoundException, BadRequestException, AlreadyExistException {
 
@@ -313,9 +317,40 @@ public class AppService {
 
 	}
 
+	public List<Long> createUsersAppList(String userId, List<String> oemList) {
+
+		List<Oem> listOem = new ArrayList<>();
+		List<User> listUser = new ArrayList<>();
+		if (oemList.size() > 0) {
+			listOem = oemRepository.findIdByNameIn(oemList);
+
+			List<Long> listOemId = new ArrayList<>();
+			for (int i = 0; i < listOem.size(); i++) {
+				listOemId.add(listOem.get(i).getId());
+			}
+
+			listUser = userRepository.findByOemIdIn(listOemId);
+		}
+		List<App> listUsersApp = new ArrayList<>();
+		List<Long> listUsersAppId = new ArrayList<>();
+		for (int i = 0; i < listUser.size(); i++) {
+
+			listUsersApp.addAll(listUser.get(i).getUserapps());
+		}
+		for (int i = 0; i < listUsersApp.size(); i++) {
+
+			listUsersAppId.add(listUsersApp.get(i).getId());
+		}
+		List<Long> listUsersAppIdFromRelationQuery = new ArrayList<>();
+		listUsersAppIdFromRelationQuery = appRepository.findUsersAppsIdFromUsersRelationship(userId);
+		listUsersAppId.addAll(listUsersAppIdFromRelationQuery);
+		return listUsersAppId;
+
+	}
+
 	public Page<App> findUsersApps(String userId, List<String> oemList, Pageable pageable) {
 
-		return appRepository.findUsersApps(userId, oemList, pageable);
+		return appRepository.findUsersApps(createUsersAppList(userId, oemList), pageable);
 
 	}
 
@@ -351,7 +386,7 @@ public class AppService {
 			throw new NotFoundException("User not found. userId: " + userId);
 		}
 		List<String> listOfTargets = getListOfTargets(userId);
-		boolean isOwner = userService.isUsersAppOwner(currentUser.getId().toString(), currentApp.getId().toString(),
+		boolean isOwner = userService.isUsersAppOwner(currentUser.getId().toString(), currentApp.getId(),
 				getListOfOem(listOfTargets));
 
 		if (!isOwner) {
@@ -478,15 +513,16 @@ public class AppService {
 		rulemain.setTimezone("+00:00");
 		ruleNew.setMaintenanceWindow(rulemain);
 
-		int newVersion=0;
+		int newVersion = 0;
 
 		List<SoftwareModule> softwareModules = new ArrayList<SoftwareModule>();
 
-
 		DistributionResult lastDistributionResult = hawkbitFeignClient
 				.getDistributionByName(Utils.createFIQLEqual("name", targetDeviceName), 1, "id:DESC");
-		softwareModules = lastDistributionResult.getContent().get(lastDistributionResult.getSize() - 1)
-				.getModules();
+		if (lastDistributionResult.getSize() == 0) {
+			throw new BadRequestException("This application is already not installed to the selected device!");
+		}
+		softwareModules = lastDistributionResult.getContent().get(lastDistributionResult.getSize() - 1).getModules();
 		String version = null;
 
 		if (lastDistributionResult.getSize() > 0) {
@@ -501,11 +537,6 @@ public class AppService {
 			if (currentApp == null) {
 				throw new NotFoundException("App not found. appId: " + appId);
 			}
-
-			/*if (appRepository.findByIdAndInstalledusersId(appId, userId) == null) {
-				throw new BadRequestException("This App is not installed right now on the device!");
-
-			}*/
 			SoftwareModuleResult currentSoftwareModuleResult = hawkbitFeignClient
 					.getSoftwaremoduleByName(Utils.createFIQLEqual("name", currentApp.getName()) + ";"
 							+ Utils.createFIQLEqual("version", currentApp.getVersion()));
