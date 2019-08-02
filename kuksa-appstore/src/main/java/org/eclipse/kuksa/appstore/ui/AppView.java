@@ -155,7 +155,7 @@ public class AppView extends CustomComponent implements View {
 		try {
 			listOfTargets = appService.getListOfTargets(currentUser.getId());
 
-			isOwner = userService.isUsersAppOwner(currentUser.getId().toString(), currentApp.getId().toString(),
+			isOwner = userService.isUsersAppOwner(currentUser.getId().toString(), currentApp.getId(),
 					appService.getListOfOem(listOfTargets));
 		} catch (BadRequestException e1) {
 			new Notification(e1.getMessage(), Notification.Type.ERROR_MESSAGE)
@@ -206,7 +206,7 @@ public class AppView extends CustomComponent implements View {
 
 						} catch (AlreadyExistException e) {
 							new Notification(e.getMessage(), Notification.Type.ERROR_MESSAGE)
-							.show(com.vaadin.server.Page.getCurrent());
+									.show(com.vaadin.server.Page.getCurrent());
 						}
 
 					} else {
@@ -227,7 +227,7 @@ public class AppView extends CustomComponent implements View {
 					if (comboBoxDevice.getValue() != null) {
 
 						try {
-							List<Long> appIds= new ArrayList<Long>();
+							List<Long> appIds = new ArrayList<Long>();
 							appIds.add(currentApp.getId());
 							Result<?> result = appService.UninstallMultiApp(comboBoxDevice.getSelectedItem().get(),
 									currentUser.getId(), appIds);
@@ -252,7 +252,7 @@ public class AppView extends CustomComponent implements View {
 
 						} catch (AlreadyExistException e) {
 							new Notification(e.getMessage(), Notification.Type.ERROR_MESSAGE)
-							.show(com.vaadin.server.Page.getCurrent());
+									.show(com.vaadin.server.Page.getCurrent());
 						}
 
 					} else {

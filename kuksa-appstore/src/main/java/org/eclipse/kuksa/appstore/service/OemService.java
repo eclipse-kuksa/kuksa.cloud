@@ -121,7 +121,7 @@ public class OemService {
 	public List<String> getAllId() {
 
 		List<String> list = new ArrayList<>();
-		for (BigInteger component : oemRepository.getAllId()) {
+		for (Long component : oemRepository.getAllId()) {
 			list.add(component.toString());
 		}
 		return list;

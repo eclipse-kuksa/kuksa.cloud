@@ -4,7 +4,7 @@ CREATE TABLE IF NOT EXISTS `oem` (
   PRIMARY KEY (`id`)
 );
 
-CREATE TABLE IF NOT EXISTS `app_category` (
+CREATE TABLE IF NOT EXISTS `appcategory` (
 	`id` BIGINT(20) NOT NULL AUTO_INCREMENT,
 	`name` VARCHAR(200) NOT NULL,
 	PRIMARY KEY (`id`)
@@ -20,7 +20,7 @@ CREATE TABLE IF NOT EXISTS `app` (
     `publishdate` TIMESTAMP NOT NULL ,
     `appcategory_id` BIGINT(20) NULL DEFAULT NULL,
     PRIMARY KEY (`id`),
-    CONSTRAINT `FK_appcategory_id` FOREIGN KEY (`appcategory_id`) REFERENCES `app_category` (`id`) ON UPDATE CASCADE
+    CONSTRAINT `FK_appcategory_id` FOREIGN KEY (`appcategory_id`) REFERENCES `appcategory` (`id`) ON UPDATE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS `user` (
