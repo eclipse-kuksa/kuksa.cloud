@@ -32,7 +32,7 @@ spec:
           sh 'mkdir release && mkdir release/utils && mkdir release/examples && mkdir release/utils/hono-influxdb-connector && mkdir release/examples/malfunction-indicator-light'
           dir('utils/hono-influxdb-connector') {
               sh 'gradle build'
-              sh 'curl -o build/libs/hono-influxdb-connector.jar -F file=@build/libs/hono-influxdb-connector-0.2.2.jar http://build.eclipse.org:31338/sign'
+              sh 'curl -o build/libs/hono-influxdb-connector.jar -F file=@build/libs/hono-influxdb-connector-0.2.1.jar http://build.eclipse.org:31338/sign'
               sh 'cp build/libs/hono-influxdb-connector.jar ../../release/utils/hono-influxdb-connector/hono-influxdb-connector.jar'
           }
           dir('examples/malfunction-indicator-light') {
