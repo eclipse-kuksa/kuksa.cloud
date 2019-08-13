@@ -30,7 +30,7 @@ To build with Gradle, create a Docker image and push the image to a Docker regis
 run
 
 ```bash
-./build.sh \
+./pushImage.sh \
     <Hostname of the Docker registry> \
     <Username to log into the Docker registry> \
     <Password to log into the Docker registry>
@@ -38,7 +38,9 @@ run
 
 ## Deployment
 
-To deploy in a Kubernetes cluster, run
+To deploy in a Kubernetes cluster, run in 
+
+`deployment/eclipse-kuksa/utils/hono-influxdb-connector`
 
 ```bash
 ./deploy.sh \
