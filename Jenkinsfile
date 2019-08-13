@@ -33,7 +33,7 @@ spec:
           dir('utils/hono-influxdb-connector') {
               sh 'gradle build'
               sh 'curl -o ../../release/utils/hono-influxdb-connector/hono-influxdb-connector.jar -F file=@build/libs/hono-influxdb-connector-0.2.1.jar http://build.eclipse.org:31338/sign'
-              sh 'cp pushImage.sh ../../release/utils/hono-influxdb-connector/pushImage.sh'
+              sh 'cp pushImage.sh ../../release/utils/hono-influxdb-connector/pushImage.sh && cp README.md ../../release/utils/hono-influxdb-connector/README.md'
           }
           dir('examples/malfunction-indicator-light') {
             dir('influxdb-rest') {
@@ -54,7 +54,7 @@ spec:
             }
           }
           sh 'cp -r deployment release/deployment'
-          sh 'cp -r utils/interact-with-hono release/utils/deployment'
+          sh 'cp -r utils/interact-with-hono release/utils/interact-with-hono'
           sh 'tar -cvf kuksa-cloud-release.tar release'
           archiveArtifacts 'kuksa-cloud-release.tar'
         }
