@@ -6,8 +6,6 @@
 # http://www.eclipse.org/org/documents/edl-v10.php
 FROM openjdk:8-jre-alpine
 
-ARG VERSION
-
-COPY build/libs/hono-influxdb-connector-${VERSION}.jar /hono-influxdb-connector.jar
+COPY hono-influxdb-connector.jar /hono-influxdb-connector.jar
 
 ENTRYPOINT ["java","-jar", "hono-influxdb-connector.jar"]
