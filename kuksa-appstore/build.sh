@@ -28,6 +28,5 @@ echo "##### Build app-store with Maven #####"
 
 mvn clean verify
 
-# Needs the xq command, see https://github.com/kislyuk/xq
 VERSION="$(mvn -q -Dexec.executable=echo -Dexec.args='${project.version}' --non-recursive exec:exec)"
 cp target/kuksa.appstore-$VERSION.jar kuksa-appstore.jar
