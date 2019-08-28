@@ -236,5 +236,6 @@ If You run load_test_data.sh ; It will do following steps to Hawkbit and AppStor
 | 10     | org6      | 9     | app9 |
 
  
+# Note
 
- 
+As stated at the [Appmanager notes](https://github.com/eclipse/kuksa.invehicle/tree/master/kuksa-appmanager#note), your Appstore User ID must be mentioned in a target's description field in your Eclipse Hawkbit instance if you want to _connect_ an Appstore user with a registered target device. Multiple users can access the same target if they are all mentioned in the target's description box with comma separations like `user1, user2`.
