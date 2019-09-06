@@ -14,9 +14,9 @@ apply plugin: 'io.spring.dependency-management'
 
 bootJar {
     baseName = 'indicator-light-service'
-    version = '0.1.0'
 }
 
+version = '0.1.0'
 mainClassName = "org.eclipse.kuksa.mil.service.Application"
 
 repositories {
