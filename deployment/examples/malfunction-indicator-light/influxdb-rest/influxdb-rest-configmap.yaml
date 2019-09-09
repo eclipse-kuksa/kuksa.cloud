@@ -1,0 +1,9 @@
+apiVersion: v1
+kind:  ConfigMap
+metadata:
+  name: influxdb-rest-configmap
+  namespace: extensions
+data:
+  INFLUXDB_URL: "<INFLUXDB_URL_PLACEHOLDER>"
+  INFLUXDB_PORT: "<INFLUXDB_PORT_PLACEHOLDER>"
+  INFLUXDB_DB_NAME: "<INFLUXDB_DB_NAME_PLACEHOLDER>"

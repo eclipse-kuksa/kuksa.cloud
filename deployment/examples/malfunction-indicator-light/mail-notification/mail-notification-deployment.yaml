@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
       - name: mail-notification-container
-        image: <PLACEHOLDER>
+        image: <DOCKER_REGISTRY_SERVER>/<DOCKER_IMAGE_NAME>:<VERSION>
         imagePullPolicy: Always
         envFrom:
         - configMapRef:
@@ -32,4 +32,6 @@ spec:
           limits:
             memory: "1024Mi"
             cpu: 700m
+      imagePullSecrets:
+      - name: <DOCKER_REGISTRY_SECRET>
       
