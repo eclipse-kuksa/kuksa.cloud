@@ -16,9 +16,9 @@ set -e
 DOCKER_REGISTRY_SERVER=$1
 DOCKER_REGISTRY_USERNAME=$2
 DOCKER_REGISTRY_PASSWORD=$3
+VERSION=${4:-0.1.0}
 
 DOCKER_IMAGE_NAME="kuksa-appstore"
-VERSION="latest"
 
 echo
 echo "##############################################################"
