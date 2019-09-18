@@ -35,9 +35,9 @@ public class AppCategoryService {
 
 	public Result<?> createAppCategory(AppCategory appCategory) throws AlreadyExistException, BadRequestException {
 
-		if (appCategory.getName() == null || appCategory.getName().equals("") || appCategory.getName().contains(" ")) {
+		if (appCategory.getName().contains(" ")) {
 
-			throw new BadRequestException("Name is mandatory field!");
+			throw new BadRequestException("Name should not contain whitespace!");
 
 		} else if (appCategoryRepository.findByNameStartsWithIgnoreCase(appCategory.getName()).size() > 0) {
 			throw new AlreadyExistException("AppCategory name already exist. name: " + appCategory.getName());

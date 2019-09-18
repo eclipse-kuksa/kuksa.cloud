@@ -34,6 +34,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import io.swagger.annotations.Api;
@@ -51,15 +52,15 @@ public class AppCategoryController {
 
 	@ApiOperation(notes = "Returns an App Category specified by appCategoryId.", value = "Getting an App Category", nickname = "getAppCategorybyId", produces = "application/json", authorizations = @Authorization(value = "api_key"))
 	@ApiImplicitParam(name = "Authorization", value = "Token Format: 'base64(username: password)'", required = true, dataType = "String", paramType = "Header", defaultValue = "Basic Token")
-	@GetMapping(value = "/appcategory/{appCategoryId}")
-	public ResponseEntity<?> getAppCategorybyId(@PathVariable String appCategoryId) throws NotFoundException {
+	@GetMapping(value = "/appcategory", params="id")
+	public ResponseEntity<?> getAppCategorybyId(@RequestParam("id") String id) throws NotFoundException {
 
-		AppCategory appCategory = appCategoryService.findById(Long.parseLong(appCategoryId));
+		AppCategory appCategory = appCategoryService.findById(Long.parseLong(id));
 		if (appCategory != null) {
-			LOG.debug("[getAppCategorybyId]: getAppCategorybyId request is processed successfully. appCategoryId: {}", appCategoryId);
+			LOG.debug("[getAppCategorybyId]: getAppCategorybyId request is processed successfully. id: {}", id);
 			return new ResponseEntity<>(appCategory, HttpStatus.OK);
 		} else {
-			LOG.debug("[getAppCategorybyId]: getAppCategorybyId request is received. appCategoryId: {}", appCategoryId);
+			LOG.debug("[getAppCategorybyId]: getAppCategorybyId request is received. id: {}", id);
 			throw new NotFoundException("AppCategory not found!");
 		}
 
@@ -121,4 +122,19 @@ public class AppCategoryController {
 		}
 	}
 	
+	@ApiOperation(notes = "Returns an App Category specified by appCategoryName.", value = "Getting an App Category", nickname = "getAppCategorybyName", produces = "application/json", authorizations = @Authorization(value = "api_key"))
+	@ApiImplicitParam(name = "Authorization", value = "Token Format: 'base64(username: password)'", required = true, dataType = "String", paramType = "Header", defaultValue = "Basic Token")
+	@GetMapping(value = "/appcategory", params="name")
+	public ResponseEntity<?> getAppCategoryByName(@RequestParam("name") String name) throws NotFoundException {
+
+		AppCategory appCategory = appCategoryService.findByName(name);
+		if (appCategory != null) {
+			LOG.debug("[getAppCategoryByName]: getAppCategoryByName request is processed successfully. name: {}", name);
+			return new ResponseEntity<>(appCategory, HttpStatus.OK);
+		} else {
+			LOG.debug("[getAppCategoryByName]: getAppCategoryByName request is received. name: {}", name);
+			throw new NotFoundException("AppCategory not found!");
+		}
+
+	}
 }

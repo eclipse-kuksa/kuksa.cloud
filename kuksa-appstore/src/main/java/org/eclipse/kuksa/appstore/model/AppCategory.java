@@ -24,6 +24,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.validation.constraints.NotEmpty;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -37,6 +38,7 @@ public class AppCategory {
 	private Long id;
 
 	@Column(name = "name")
+	@NotEmpty(message="Name is mandatory field!")
 	private String name;
 
 	@OneToMany(fetch = FetchType.EAGER, mappedBy = "appcategory")
