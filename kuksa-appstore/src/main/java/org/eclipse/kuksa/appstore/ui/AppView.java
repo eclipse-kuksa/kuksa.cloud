@@ -30,6 +30,7 @@ import org.eclipse.kuksa.appstore.service.UserService;
 import org.eclipse.kuksa.appstore.ui.component.NavHeader;
 import org.eclipse.kuksa.appstore.utils.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.annotation.Secured;
 
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
@@ -49,6 +50,7 @@ import com.vaadin.ui.Label;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.VerticalLayout;
 
+@Secured({"ROLE_USER", "ROLE_ADMIN"})
 @SpringView(name = AppView.VIEW_NAME)
 public class AppView extends CustomComponent implements View {
 

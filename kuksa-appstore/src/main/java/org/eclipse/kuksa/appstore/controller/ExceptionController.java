@@ -29,7 +29,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 
-@ControllerAdvice(basePackages = "org.eclipse.kuksa.appstore.controller")
+@ControllerAdvice(basePackages = "com.netas.appstore.controller")
 public class ExceptionController {
 
     private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());

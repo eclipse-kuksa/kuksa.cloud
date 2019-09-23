@@ -27,6 +27,7 @@ import org.eclipse.kuksa.appstore.service.OemService;
 import org.eclipse.kuksa.appstore.service.UserService;
 import org.eclipse.kuksa.appstore.ui.component.NavHeader;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.util.StringUtils;
 
 import com.vaadin.navigator.View;
@@ -47,6 +48,7 @@ import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window;
 import com.vaadin.ui.renderers.ImageRenderer;
 
+@Secured("ROLE_ADMIN")
 @SpringView(name = UserEditView.VIEW_NAME)
 public class UserEditView extends CustomComponent implements View {
 
@@ -96,9 +98,8 @@ public class UserEditView extends CustomComponent implements View {
 				VaadinSession.getCurrent().getAttribute("isCurrentUserAdmin").toString()), actions, gridLayout);
 		grid.setWidth("100%");
 		grid.setHeightMode(HeightMode.UNDEFINED);
-		grid.setColumns("id", "username", "password", "userType");
+		grid.setColumns("username", "userType");
 		grid.getColumn("username").setCaption("User Name");
-		grid.getColumn("password").setCaption("Password");
 		grid.getColumn("userType").setCaption("User Type");
 		addEditColumn("Edit");
 
@@ -109,12 +110,11 @@ public class UserEditView extends CustomComponent implements View {
 		addNewBtn.addClickListener(e -> {
 			userEditorWindow.center();
 			VaadinUI.getCurrent().addWindow(userEditorWindow);
-			userEditor.editUser(new org.eclipse.kuksa.appstore.model.User(null, "", "", UserType.Normal, null, null));
+			userEditor.editUser(new org.eclipse.kuksa.appstore.model.User(null, "", UserType.Normal, null, null));
 		});
 
 		userEditor.save.addClickListener(e -> {
-			if (userEditor.user.getUsername() != null && !userEditor.user.getUsername().isEmpty()
-					&& userEditor.user.getPassword() != null && !userEditor.user.getPassword().isEmpty()) {
+			if (userEditor.user.getUsername() != null && !userEditor.user.getUsername().isEmpty()) {
 				if (userEditor.user.getUserType() != UserType.GroupAdmin && userEditor.user.getOem() != null) {
 
 					userEditor.user.setOem(null);
@@ -154,8 +154,7 @@ public class UserEditView extends CustomComponent implements View {
 
 				} else {
 					try {
-						userService.createUser(userEditor.user.getUsername(), userEditor.user.getPassword(),
-								userEditor.user.getUserType(), userEditor.user.getOem(), userEditor.user.getMembers());
+						userService.createUser(userEditor.user.getUsername(), userEditor.user.getUserType(), userEditor.user.getOem(), userEditor.user.getMembers());
 						listUsers(null);
 
 						VaadinUI.getCurrent().removeWindow(userEditorWindow);

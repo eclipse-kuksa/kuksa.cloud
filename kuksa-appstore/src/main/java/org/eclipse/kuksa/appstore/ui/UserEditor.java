@@ -46,7 +46,6 @@ public class UserEditor extends VerticalLayout implements View {
 	private OemService oemService;
 	public User user;
 	public TextField username = new TextField("Username");
-	public TextField password = new TextField("Password");
 	public ComboBox<String> comboBoxUserType = new ComboBox<>("User Type");
 	public ComboBox<String> comboBoxOem = new ComboBox<>("Select an Oem");
 	/* Action buttons */
@@ -72,7 +71,7 @@ public class UserEditor extends VerticalLayout implements View {
 		comboBoxUserType.setEmptySelectionAllowed(false);
 		comboBoxUserType.setTextInputAllowed(false);
 		// upload
-		vlayout.addComponents(username, password, comboBoxUserType, comboBoxOem);
+		vlayout.addComponents(username, comboBoxUserType, comboBoxOem);
 		mainLayout.addComponent(vlayout);
 
 		vlayout = new HorizontalLayout();

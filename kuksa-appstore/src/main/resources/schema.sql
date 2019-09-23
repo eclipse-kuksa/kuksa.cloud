@@ -26,7 +26,6 @@ CREATE TABLE IF NOT EXISTS `app` (
 CREATE TABLE IF NOT EXISTS `user` (
     `id` bigint(20) NOT NULL auto_increment,
     `user_name` varchar(200) NOT NULL,
-    `password` varchar(200) NOT NULL,
     `usertype` varchar(200) NOT NULL,
     `oem_id` BIGINT(20) NULL DEFAULT NULL,
     PRIMARY KEY (`id`),

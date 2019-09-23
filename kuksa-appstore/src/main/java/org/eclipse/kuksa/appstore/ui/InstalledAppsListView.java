@@ -28,6 +28,7 @@ import org.eclipse.kuksa.appstore.service.UserService;
 import org.eclipse.kuksa.appstore.ui.component.NavHeader;
 import org.eclipse.kuksa.appstore.utils.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.annotation.Secured;
 
 import com.vaadin.addon.pagination.Pagination;
 import com.vaadin.navigator.View;
@@ -45,6 +46,7 @@ import com.vaadin.ui.ListSelect;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.VerticalLayout;
 
+@Secured({"ROLE_USER", "ROLE_ADMIN"})
 @SpringView(name = InstalledAppsListView.VIEW_NAME)
 public class InstalledAppsListView extends CustomComponent implements View {
 

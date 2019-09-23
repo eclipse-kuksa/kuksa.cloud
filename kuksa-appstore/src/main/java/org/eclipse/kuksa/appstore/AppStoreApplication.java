@@ -53,11 +53,5 @@ public class AppStoreApplication {
 	@EventListener(ApplicationReadyEvent.class)
 	public void EventListenerExecute() throws AlreadyExistException, BadRequestException {
 		
-		if(userservice.findByUserName(username)==null) {			
-			userservice.createUser(username, password, UserType.SystemAdmin, null, null);
-			LOG.debug("[EventListenerExecute]: The user is added. : {}", username);
-		}else {
-			LOG.debug("[EventListenerExecute]: The user already exists. : {}", username);			
-		}
 	}
 }

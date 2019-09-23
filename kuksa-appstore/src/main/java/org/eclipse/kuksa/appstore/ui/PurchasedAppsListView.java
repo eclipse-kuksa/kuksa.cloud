@@ -25,6 +25,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.annotation.Secured;
 
 import com.vaadin.addon.pagination.Pagination;
 import com.vaadin.addon.pagination.PaginationChangeListener;
@@ -40,6 +41,7 @@ import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.VerticalLayout;
 
+@Secured({"ROLE_USER", "ROLE_ADMIN"})
 @SpringView(name = PurchasedAppsListView.VIEW_NAME)
 public class PurchasedAppsListView extends CustomComponent implements View {
 

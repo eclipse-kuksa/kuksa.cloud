@@ -60,6 +60,13 @@ Just run `AppStoreApplication.java` class.Spring boot has an embedded Tomcat ins
 > hawkbit.url= http://{hawkbit-ip}:{hawkbit-port} //default ip is localhost and default port is 8080
 > hawkbit.username= {hawkbit-user-name} // default user name is admin  
 > hawkbit.password= {hawkbit-pwd} // default password is admin 
+
+- Update Keycloak authentication server url and credential properly in src\main\resources\application.properties file:
+
+> keycloak.realm= demo // keycloak realm name
+> keycloak.resource= demo // keycloak client name
+> keycloak.auth-server-url= http://217.78.106.103:8022/auth/ // keycloak server url
+> keycloak.credentials.secret= 460650c2-6b4a-4ef4-99cb-eef2b8664d2a // keycloak client credential secret key
  
 - Build Kuksa App Store jar file:
 

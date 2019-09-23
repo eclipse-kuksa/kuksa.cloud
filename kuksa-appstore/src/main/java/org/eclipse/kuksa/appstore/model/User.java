@@ -39,8 +39,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 @Table(name = "user")
 public class User implements Serializable {
 
-	public User(Long id, String username, String password, UserType userType, Oem oem, Set<User> members) {
-		this.password = password;
+	public User(Long id, String username, UserType userType, Oem oem, Set<User> members) {
 		this.username = username;
 		this.userType = userType;
 		this.id = id;
@@ -56,10 +55,6 @@ public class User implements Serializable {
 	@NotNull
 	@Column(name = "user_name")
 	private String username;
-
-	@NotNull
-	@Column(name = "password")
-	private String password;
 
 	@Enumerated(EnumType.STRING)
 	@NotNull
@@ -97,14 +92,6 @@ public class User implements Serializable {
 
 	public void setUsername(String username) {
 		this.username = username;
-	}
-
-	public String getPassword() {
-		return password;
-	}
-
-	public void setPassword(String password) {
-		this.password = password;
 	}
 
 	public UserType getUserType() {
