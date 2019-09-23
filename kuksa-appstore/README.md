@@ -67,6 +67,8 @@ Just run `AppStoreApplication.java` class.Spring boot has an embedded Tomcat ins
 > keycloak.resource= demo // keycloak client name
 > keycloak.auth-server-url= http://217.78.106.103:8022/auth/ // keycloak server url
 > keycloak.credentials.secret= 460650c2-6b4a-4ef4-99cb-eef2b8664d2a // keycloak client credential secret key
+
+- src\main\resources\realm-export.json // Import this file to your Keycloak server to upload Keycloak real and client configuration.
  
 - Build Kuksa App Store jar file:
 
