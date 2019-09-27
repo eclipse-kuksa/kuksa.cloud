@@ -17,6 +17,7 @@ SCRIPTPATH=$(dirname "$(readlink -f "$0")")
 DOCKER_REGISTRY_SERVER=$1
 DOCKER_REGISTRY_USERNAME=$2
 DOCKER_REGISTRY_PASSWORD=$3
+VERSION=${4:-"0.1.0"}
 
 echo
 echo "##############################################################"
@@ -26,9 +27,9 @@ echo "##############################################################"
 echo "##############################################################"
 
 cd influxdb-rest
-. ./pushImage.sh $DOCKER_REGISTRY_SERVER $DOCKER_REGISTRY_USERNAME $DOCKER_REGISTRY_PASSWORD
+. ./pushImage.sh $DOCKER_REGISTRY_SERVER $DOCKER_REGISTRY_USERNAME $DOCKER_REGISTRY_PASSWORD $VERSION
 cd ../mail-notification
-. ./pushImage.sh $DOCKER_REGISTRY_SERVER $DOCKER_REGISTRY_USERNAME $DOCKER_REGISTRY_PASSWORD
+. ./pushImage.sh $DOCKER_REGISTRY_SERVER $DOCKER_REGISTRY_USERNAME $DOCKER_REGISTRY_PASSWORD $VERSION
 cd ../mil-service
-. ./pushImage.sh $DOCKER_REGISTRY_SERVER $DOCKER_REGISTRY_USERNAME $DOCKER_REGISTRY_PASSWORD
+. ./pushImage.sh $DOCKER_REGISTRY_SERVER $DOCKER_REGISTRY_USERNAME $DOCKER_REGISTRY_PASSWORD $VERSION
 

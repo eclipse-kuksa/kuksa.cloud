@@ -17,9 +17,9 @@ SCRIPTPATH=$(dirname "$(readlink -f "$0")")
 DOCKER_REGISTRY_SERVER=$1
 DOCKER_REGISTRY_USERNAME=$2
 DOCKER_REGISTRY_PASSWORD=$3
+VERSION=${4:-"0.1.0"}
 
-DOCKER_IMAGE_NAME="indicator-light-service"
-VERSION="$(gradle properties -q | grep 'version:' | awk '{print $2}')"
+DOCKER_IMAGE_NAME="mil-service"
 
 echo
 echo "##############################################################"

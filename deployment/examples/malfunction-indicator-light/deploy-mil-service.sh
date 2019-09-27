@@ -31,7 +31,7 @@ DOCKER_REGISTRY_EMAIL=${11}
 #the docker registry secret is created by this script
 DOCKER_REGISTRY_SECRET="docker-secret"
 NAMESPACE=extensions
-DOCKER_IMAGE_NAME="indicator-light-service"
+DOCKER_IMAGE_NAME="mil-service"
 VERSION="0.1.0"
 
 TARGET_DIR=$SCRIPTPATH/mil-service/target
