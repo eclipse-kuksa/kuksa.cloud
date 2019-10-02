@@ -28,6 +28,9 @@ public class MessageDTO {
     /* mapping of objects within the message body */
     private final Map<String, Object> entries;
 
+    /* name of the attribute which is treated as timestamp for the InfluxDb */
+    public static final String TIMESTAMP_ATTRIBUTE_NAME = "time";
+
     /**
      * Creates a new message dto with the given device ID and mapping of the
      * message content.
