@@ -29,6 +29,7 @@ import org.eclipse.kuksa.appstore.service.AppService;
 import org.eclipse.kuksa.appstore.ui.component.NavHeader;
 import org.eclipse.kuksa.appstore.utils.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.util.StringUtils;
 
 import com.vaadin.navigator.View;
@@ -51,6 +52,7 @@ import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window;
 import com.vaadin.ui.renderers.ImageRenderer;
 
+@Secured("ROLE_ADMIN")
 @SpringView(name = AppEditView.VIEW_NAME)
 public class AppEditView extends CustomComponent implements View {
 

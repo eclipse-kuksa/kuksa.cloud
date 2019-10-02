@@ -27,6 +27,7 @@ import org.eclipse.kuksa.appstore.service.OemService;
 import org.eclipse.kuksa.appstore.service.UserService;
 import org.eclipse.kuksa.appstore.ui.component.NavHeader;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.annotation.Secured;
 
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
@@ -51,6 +52,7 @@ import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.components.grid.EditorSaveEvent;
 import com.vaadin.ui.renderers.TextRenderer;
 
+@Secured({ "ROLE_USER", "ROLE_ADMIN" })
 @SpringView(name = ProfileEditView.VIEW_NAME)
 public class ProfileEditView extends CustomComponent implements View {
 
@@ -58,10 +60,6 @@ public class ProfileEditView extends CustomComponent implements View {
 	public static final String TITLE_NAME = "My Profile";
 	final Grid<AppCategory> gridAppCategory = new Grid<>();
 	final Grid<Oem> gridOem = new Grid<>();
-	private PasswordField currentPassword = new PasswordField("Current Password");
-	private PasswordField newPassword = new PasswordField("New Password");
-	private PasswordField repeatNewPassword = new PasswordField("Repeat New Password");
-	private Button save = new Button("Save");
 	@Autowired
 	UserService userService;
 	@Autowired
@@ -248,56 +246,6 @@ public class ProfileEditView extends CustomComponent implements View {
 		HorizontalLayout subHorizontalLayout = new HorizontalLayout();
 		mainLayout.addComponent(subHorizontalLayout);
 		setCompositionRoot(mainLayout);
-
-		currentPassword.setPlaceholder("Current Password");
-		newPassword.setPlaceholder("New Password");
-		repeatNewPassword.setPlaceholder("Repeat New Password");
-		Panel panelPassword = new Panel("Change Password");
-		panelPassword.setSizeUndefined(); // Shrink to fit content
-		// Create the content
-		FormLayout content = new FormLayout();
-		content.addComponent(currentPassword);
-		content.addComponent(newPassword);
-		content.addComponent(repeatNewPassword);
-		content.addComponent(save);
-		content.setSizeUndefined(); // Shrink to fit
-		content.setMargin(true);
-		panelPassword.setContent(content);
-		mainLayout.addComponent(panelPassword);
-
-		save.addClickListener(new ClickListener() {
-
-			@Override
-			public void buttonClick(ClickEvent event) {
-				User currentUser = userService
-						.findByUserName(VaadinSession.getCurrent().getAttribute("user").toString());
-
-				if (!currentPassword.getValue().equals(currentUser.getPassword())) {
-
-					new Notification("Wrong Password!", "Current Password Wrong!", Notification.Type.ERROR_MESSAGE)
-							.show(Page.getCurrent());
-				} else if (!newPassword.getValue().equals(repeatNewPassword.getValue())) {
-					new Notification("Conflict Password!", "Repeat Password is not equal with New Password!",
-							Notification.Type.ERROR_MESSAGE).show(Page.getCurrent());
-				} else if (newPassword.getValue().equals(currentPassword.getValue())) {
-					new Notification("Same Password!", "New Password is equal with Old Password!",
-							Notification.Type.ERROR_MESSAGE).show(Page.getCurrent());
-				} else {
-					currentUser.setPassword(newPassword.getValue());
-					try {
-						Result<?> result = userService.updateUser(currentUser.getId().toString(), currentUser);
-						if (result.isSuccess()) {
-							new Notification("Succes Updating", "Your Password has been updated",
-									Notification.Type.TRAY_NOTIFICATION).show(Page.getCurrent());
-						}
-					} catch (NotFoundException | BadRequestException | AlreadyExistException e) {
-						// TODO Auto-generated catch block
-						new Notification("Error", e.getMessage(), Notification.Type.ERROR_MESSAGE)
-								.show(Page.getCurrent());
-					}
-				}
-			}
-		});
 
 		///// categoryPanel
 		Panel categoryPanel = new Panel("Application Category");

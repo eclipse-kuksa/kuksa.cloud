@@ -50,6 +50,7 @@ public class AppCategoryController {
 	@Autowired
 	AppCategoryService appCategoryService;
 
+	@Secured({ "ROLE_USER", "ROLE_ADMIN" })
 	@ApiOperation(notes = "Returns an App Category specified by appCategoryId.", value = "Getting an App Category", nickname = "getAppCategorybyId", produces = "application/json", authorizations = @Authorization(value = "api_key"))
 	@ApiImplicitParam(name = "Authorization", value = "Token Format: 'base64(username: password)'", required = true, dataType = "String", paramType = "Header", defaultValue = "Basic Token")
 	@GetMapping(value = "/appcategory", params="id")
@@ -66,6 +67,7 @@ public class AppCategoryController {
 
 	}
 
+	@Secured("ROLE_ADMIN")
 	@ApiOperation(notes = "Creates an App Category defined in the request JSON body. Id field should not implemented in post request JSON body because of that it is already given by server.", value = "Creating an App Category", nickname = "createAppCategory", produces = "application/json", authorizations = @Authorization(value = "api_key"))
 	@ApiImplicitParam(name = "Authorization", value = "Token Format: 'base64(username: password)'", required = true, dataType = "String", paramType = "Header", defaultValue = "Basic Token")
 	@PostMapping("/appcategory")
@@ -80,6 +82,7 @@ public class AppCategoryController {
 		}
 	}
 
+	@Secured("ROLE_ADMIN")
 	@ApiOperation(notes = "Updates an App Category defined in the request JSON body.", value = "Updating an App Category", nickname = "updateAppCategory", produces = "application/json", authorizations = @Authorization(value = "api_key"))
 	@ApiImplicitParam(name = "Authorization", value = "Token Format: 'base64(username: password)'", required = true, dataType = "String", paramType = "Header", defaultValue = "Basic Token")
 	@PutMapping("/appcategory/{appCategoryId}")
@@ -96,6 +99,7 @@ public class AppCategoryController {
 		}
 	}
 
+	@Secured("ROLE_ADMIN")
 	@ApiOperation(notes = "Deletes an app category specified by appCategoryId parameter.", value = "Deleting an App Category", nickname = "deleteAppCategory", produces = "application/json", authorizations = @Authorization(value = "api_key"))
 	@ApiImplicitParam(name = "Authorization", value = "Token Format: 'base64(username: password)'", required = true, dataType = "String", paramType = "Header", defaultValue = "Basic Token")
 	@DeleteMapping("/appcategory/{appCategoryId}")
@@ -107,6 +111,7 @@ public class AppCategoryController {
 		return new ResponseEntity<>(null, HttpStatus.OK);
 	}
 
+	@Secured({ "ROLE_USER", "ROLE_ADMIN" })
 	@ApiOperation(notes = "Returns all app category.", value = "Getting all App Category", nickname = "getAllAppCategory", produces = "application/json", authorizations = @Authorization(value = "api_key"))
 	@ApiImplicitParam(name = "Authorization", value = "Token Format: 'base64(username: password)'", required = true, dataType = "String", paramType = "Header", defaultValue = "Basic Token")
 	@GetMapping(value = "/appcategory")
@@ -121,7 +126,8 @@ public class AppCategoryController {
 			throw new NotFoundException("App Categories not found!");
 		}
 	}
-	
+
+	@Secured({ "ROLE_USER", "ROLE_ADMIN" })
 	@ApiOperation(notes = "Returns an App Category specified by appCategoryName.", value = "Getting an App Category", nickname = "getAppCategorybyName", produces = "application/json", authorizations = @Authorization(value = "api_key"))
 	@ApiImplicitParam(name = "Authorization", value = "Token Format: 'base64(username: password)'", required = true, dataType = "String", paramType = "Header", defaultValue = "Basic Token")
 	@GetMapping(value = "/appcategory", params="name")

@@ -15,121 +15,92 @@ package org.eclipse.kuksa.appstore.ui;
 import org.eclipse.kuksa.appstore.model.User;
 import org.eclipse.kuksa.appstore.model.UserType;
 import org.eclipse.kuksa.appstore.repo.UserRepository;
+import org.keycloak.KeycloakPrincipal;
+import org.keycloak.adapters.spi.KeycloakAccount;
+import org.keycloak.adapters.springsecurity.account.KeycloakRole;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+import org.vaadin.spring.security.VaadinSecurity;
+import org.vaadin.spring.security.util.SecurityExceptionUtils;
 
 import com.vaadin.annotations.Theme;
-import com.vaadin.server.Page;
-import com.vaadin.server.Page.UriFragmentChangedEvent;
-import com.vaadin.server.Page.UriFragmentChangedListener;
+import com.vaadin.server.DefaultErrorHandler;
 import com.vaadin.server.VaadinRequest;
+import com.vaadin.server.VaadinSession;
 import com.vaadin.spring.annotation.SpringUI;
-import com.vaadin.spring.annotation.SpringViewDisplay;
-import com.vaadin.ui.Alignment;
+import com.vaadin.spring.navigator.SpringNavigator;
+import com.vaadin.spring.navigator.SpringViewProvider;
+import com.vaadin.ui.Notification;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 
 @SpringUI
-@SpringViewDisplay
 @Theme("mytheme")
+@SuppressWarnings("serial")
 public class VaadinUI extends UI {
-
 	@Autowired
-	private final UserRepository userRepository;
-
+	ApplicationContext applicationContext;
 	@Autowired
-	public VaadinUI(UserRepository userRepository) {
-
-		this.userRepository = userRepository;
-
-	}
+	VaadinSecurity vaadinSecurity;
+	@Autowired
+	SpringViewProvider springViewProvider;
+	@Autowired
+	SpringNavigator navigator;
+	@Autowired
+	UserRepository userRepository;
 
 	@Override
 	protected void init(VaadinRequest request) {
-		// build layout
+		getPage().setTitle("Kuksa Appstore");
 
-		VerticalLayout mainLayout = new VerticalLayout();
-
-		LoginView loginView = new LoginView();
-
-		mainLayout.addComponent(loginView);
-
-		mainLayout.setComponentAlignment(loginView, Alignment.MIDDLE_CENTER);
-		mainLayout.setSizeFull();
-		setContent(mainLayout);
-
-		Page.getCurrent().addUriFragmentChangedListener(new UriFragmentChangedListener() {
-
+		setErrorHandler(new DefaultErrorHandler() {
 			@Override
-			public void uriFragmentChanged(UriFragmentChangedEvent event) {
-				router(event.getUriFragment());
+			public void error(com.vaadin.server.ErrorEvent event) {
+				if (SecurityExceptionUtils.isAccessDeniedException(event.getThrowable())) {
+					Notification.show("Sorry, you don't have access to do that.");
+				} else {
+					super.error(event);
+				}
 			}
 		});
+		VerticalLayout layout = new VerticalLayout();
 
-		router("");
-	}
+		navigator.init(this, layout);
 
-	private void router(String route) {
-		if (getSession().getAttribute("user") != null) {
-			User loggedUser = userRepository.findByUsername(getSession().getAttribute("user").toString());
+		springViewProvider.setAccessDeniedViewClass(AccessDeniedView.class);
+		navigator.addProvider(springViewProvider);
+		navigator.setErrorView(ErrorView.class);
 
-			getNavigator().addView(AppEditView.VIEW_NAME, AppEditView.class);
-			getNavigator().addView(AppsListView.VIEW_NAME, AppsListView.class);
-			getNavigator().addView(AppView.VIEW_NAME, AppView.class);
-			getNavigator().addView(InstalledAppsListView.VIEW_NAME, InstalledAppsListView.class);
-			getNavigator().addView(UserEditView.VIEW_NAME, UserEditView.class);
-			getNavigator().addView(SignUpView.VIEW_NAME, SignUpView.class);
-			getNavigator().addView(ProfileEditView.VIEW_NAME, ProfileEditView.class);
-			getNavigator().addView(PurchasedAppsListView.VIEW_NAME, PurchasedAppsListView.class);
-			if (route.equals("!appedit")) {
-				if (loggedUser.getUserType() == UserType.SystemAdmin) {
+		KeycloakPrincipal userPrincipal = (KeycloakPrincipal) vaadinSecurity.getAuthentication().getPrincipal();
 
-					Page.getCurrent().setUriFragment("!" + AppEditView.VIEW_NAME);
-				} else {
-
-					Page.getCurrent().setUriFragment("!" + AppsListView.VIEW_NAME);
-				}
-
-			} else if (route.equals("!applist")) {
-				Page.getCurrent().setUriFragment("!" + AppsListView.VIEW_NAME);
-			} else if (route.equals("!app")) {
-				Page.getCurrent().setUriFragment("!" + AppView.VIEW_NAME);
-			} else if (route.equals("!installedapps")) {
-				Page.getCurrent().setUriFragment("!" + InstalledAppsListView.VIEW_NAME);
-			} else if (route.equals("!purchasedapps")) {
-				Page.getCurrent().setUriFragment("!" + PurchasedAppsListView.VIEW_NAME);
-			} else if (route.equals("!profile")) {
-				Page.getCurrent().setUriFragment("!" + ProfileEditView.VIEW_NAME);
-			} else if (route.equals("!useredit")) {
-
-				if (loggedUser.getUserType() == UserType.SystemAdmin) {
-
-					Page.getCurrent().setUriFragment("!" + UserEditView.VIEW_NAME);
-				} else {
-
-					Page.getCurrent().setUriFragment("!" + AppsListView.VIEW_NAME);
-				}
-
-			} else {
-
-				String gotopage;
-
-				gotopage = Page.getCurrent().getUriFragment();
-
-				if (gotopage == null) {
-					gotopage = "!applist";
-
-				}
-				Page.getCurrent().setUriFragment(gotopage);
-
-			}
-
+		UserType usertype;
+		if (vaadinSecurity.getAuthentication().getAuthorities().contains(new KeycloakRole("ROLE_ADMIN"))) {
+			usertype = UserType.SystemAdmin;
 		} else {
-			if (route.equals("!signup")) {
-				Page.getCurrent().setUriFragment("!" + SignUpView.VIEW_NAME);
-			} else {
-				Page.getCurrent().setUriFragment("!" + LoginView.VIEW_NAME);
-			}
+			usertype = UserType.Normal;
 		}
+
+		User loggedUser = userRepository.findByUsername(userPrincipal.getName());
+		if (loggedUser != null) {
+			loggedUser.setUserType(usertype);
+		} else {
+			User newUser = new User(null, userPrincipal.getName(), usertype, null, null);
+			loggedUser = newUser;
+		}
+		userRepository.save(loggedUser);
+		VaadinSession.getCurrent().setAttribute("user", loggedUser.getUsername());
+		VaadinSession.getCurrent().setAttribute("isCurrentUserAdmin", loggedUser.getUserType());
+
+		if (loggedUser.getUserType() == UserType.SystemAdmin) {
+
+			navigator.navigateTo(AppEditView.VIEW_NAME);
+		} else {
+
+			navigator.navigateTo(AppsListView.VIEW_NAME);
+		}
+
+		setContent(layout);
+
 	}
 
 }

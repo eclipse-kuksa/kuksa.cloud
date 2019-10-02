@@ -37,14 +37,13 @@ public class UserService {
 	@Autowired
 	AppService appService;
 
-	public Result<?> createUser(String username, String password, UserType usertype, Oem oem, Set<User> members)
+	public Result<?> createUser(String username, UserType usertype, Oem oem, Set<User> members)
 			throws AlreadyExistException, BadRequestException {
 
-		User newUser = new User(null, username, password, usertype, oem, members);
-		if (username == null || password == null || username.equals("") || password.equals("") || username.contains(" ")
-				|| password.contains(" ")) {
+		User newUser = new User(null, username, usertype, oem, members);
+		if (username == null || username.equals("") || username.contains(" ")) {
 
-			throw new BadRequestException("Username and password are mandatory field!");
+			throw new BadRequestException("Username is mandatory field!");
 
 		} else if (userRepository.findByUsername(username) != null) {
 			throw new AlreadyExistException("User name already exist. username: " + username);
@@ -73,14 +72,6 @@ public class UserService {
 		} else if (userObject.getUsername() == null || userObject.getUsername().equals("")) {
 
 			throw new BadRequestException("Username is mandatory field!");
-
-		} else if (userObject.getPassword() == null || userObject.getPassword().equals("")) {
-
-			throw new BadRequestException("Password is mandatory field!");
-
-		} else if (userObject.getUsername().contains(" ") || userObject.getPassword().contains(" ")) {
-
-			throw new BadRequestException("Username or password should not contains space character!");
 
 		} else if (!currentUser.getUsername().equals(userObject.getUsername())) {
 			if (userRepository.findByUsername(userObject.getUsername()) != null) {
@@ -113,12 +104,6 @@ public class UserService {
 		} else {
 			userRepository.delete(currentUser);
 		}
-	}
-
-	public User findByUserNameAndPassword(String username, String password) {
-
-		return userRepository.findByUsernameAndPassword(username, password);
-
 	}
 
 	public User findById(String id) {

@@ -12,20 +12,18 @@
  ******************************************************************************/
 package org.eclipse.kuksa.appstore.ui;
 
-import java.util.List;
-
 import javax.annotation.PostConstruct;
 
 import org.eclipse.kuksa.appstore.model.App;
 import org.eclipse.kuksa.appstore.service.AppCategoryService;
 import org.eclipse.kuksa.appstore.service.AppService;
 import org.eclipse.kuksa.appstore.ui.component.AppGridView;
-import org.eclipse.kuksa.appstore.ui.component.AppViewBox;
 import org.eclipse.kuksa.appstore.ui.component.NavHeader;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.annotation.Secured;
 
 import com.vaadin.addon.pagination.Pagination;
 import com.vaadin.addon.pagination.PaginationChangeListener;
@@ -43,6 +41,7 @@ import com.vaadin.ui.ItemCaptionGenerator;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.VerticalLayout;
 
+@Secured({"ROLE_USER", "ROLE_ADMIN"})
 @SpringView(name = AppsListView.VIEW_NAME)
 public class AppsListView extends CustomComponent implements View {
 

@@ -28,6 +28,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -52,6 +53,7 @@ public class UserController {
 	@Autowired
 	AppService appService;
 
+	@Secured({"ROLE_USER", "ROLE_ADMIN"})
 	@ApiOperation(notes = "Returns the User specified by the userId parameter. The response includes all details about the User.", value = "Getting an User", nickname = "getUserbyId", produces = "application/json", authorizations = @Authorization(value = "api_key"))
 	@ApiImplicitParam(name = "Authorization", value = "Token Format: 'base64(username: password)'", required = true, dataType = "String", paramType = "Header", defaultValue = "Basic Token")
 	@GetMapping(value = "/user/{userId}")
@@ -68,12 +70,13 @@ public class UserController {
 
 	}
 
+	@Secured("ROLE_ADMIN")
 	@ApiOperation(notes = "Creates an User defined in the request JSON body. Id field should not implemented in post request JSON body because of that it is already given by server.", value = "Create an User", nickname = "createUser", produces = "application/json", authorizations = @Authorization(value = "api_key"))
 	@ApiImplicitParam(name = "Authorization", value = "Token Format: 'base64(username: password)'", required = true, dataType = "String", paramType = "Header", defaultValue = "Basic Token")
 	@PostMapping("/user")
 	public ResponseEntity<?> createUser(@Valid @RequestBody User user)
 			throws AlreadyExistException, BadRequestException {
-		Result<?> response = userService.createUser(user.getUsername(), user.getPassword(), user.getUserType(),
+		Result<?> response = userService.createUser(user.getUsername(), user.getUserType(),
 				user.getOem(), user.getMembers());
 		if (response.isSuccess()) {
 			LOG.debug("[createUser]: createUser request is processed successfully. user: {}", user);
@@ -84,6 +87,7 @@ public class UserController {
 		}
 	}
 
+	@Secured("ROLE_ADMIN")
 	@ApiOperation(notes = "Updates the User identified by the appId parameter and the JSON body.", value = "Updating an User", nickname = "updateUser", produces = "application/json", authorizations = @Authorization(value = "api_key"))
 	@ApiImplicitParam(name = "Authorization", value = "Token Format: 'base64(username: password)'", required = true, dataType = "String", paramType = "Header", defaultValue = "Basic Token")
 	@PutMapping("/user/{userId}")
@@ -100,6 +104,7 @@ public class UserController {
 		}
 	}
 
+	@Secured("ROLE_ADMIN")
 	@ApiOperation(notes = "Deletes the User specified by the userId path parameter.", value = "Deleting an User", nickname = "deleteUser", produces = "application/json", authorizations = @Authorization(value = "api_key"))
 	@ApiImplicitParam(name = "Authorization", value = "Token Format: 'base64(username: password)'", required = true, dataType = "String", paramType = "Header", defaultValue = "Basic Token")
 	@DeleteMapping("/user/{userId}")
@@ -111,6 +116,7 @@ public class UserController {
 		return new ResponseEntity<>(null, HttpStatus.OK);
 	}
 
+	@Secured({"ROLE_USER", "ROLE_ADMIN"})
 	@ApiOperation(notes = "Returns all Users.", value = "Getting all User", nickname = "getAllUser", produces = "application/json", authorizations = @Authorization(value = "api_key"))
 	@ApiImplicitParam(name = "Authorization", value = "Token Format: 'base64(username: password)'", required = true, dataType = "String", paramType = "Header", defaultValue = "Basic Token")
 	@GetMapping(value = "/user")
@@ -123,19 +129,5 @@ public class UserController {
 
 	}
 
-	@ApiOperation(notes = "This process is used to validate a given user.", value = "Validating an User", nickname = "validationUser", produces = "application/json", authorizations = @Authorization(value = "api_key"))
-	@ApiImplicitParam(name = "Authorization", value = "Token Format: 'base64(username: password)'", required = true, dataType = "String", paramType = "Header", defaultValue = "Basic Token")
-	@PostMapping("/user/validation")
-	public ResponseEntity<?> validationUser(@RequestBody User user) throws NotFoundException, BadRequestException {
-
-		User currentUser = userService.findByUserNameAndPassword(user.getUsername(), user.getPassword());
-		if (currentUser != null) {
-			LOG.debug("[validationUser]: validationUser request is processed successfully. user: {}", currentUser);
-			return new ResponseEntity<>(currentUser, HttpStatus.OK);
-		} else {
-			LOG.debug("[validationUser]: validationUser request is received. user: {}", currentUser);
-			throw new NotFoundException("User not found!");
-		}
-	}
 
 }
