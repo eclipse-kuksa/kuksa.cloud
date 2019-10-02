@@ -111,8 +111,17 @@ public class InfluxDBClient implements MessageHandler {
         if (entries == null || entries.isEmpty()) {
             return;
         }
-        
-        final Point point = createPoint(System.currentTimeMillis(), msg.getDeviceID(), entries);
+
+        //check for attribute named 'time' in message and use it as timestamp for the InfluxDb
+        long timestamp;
+        Object timeObject = entries.get("time");
+        if (timeObject != null && timeObject instanceof Long) {
+            timestamp = ((Long) timeObject).longValue();
+        } else {
+            timestamp = System.currentTimeMillis();
+        }
+
+        final Point point = createPoint(timestamp, msg.getDeviceID(), entries);
 		writePoint(point);
     }
 
