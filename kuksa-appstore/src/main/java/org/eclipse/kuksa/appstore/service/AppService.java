@@ -1,7 +1,7 @@
 /*******************************************************************************
- * Copyright (C) 2018 Netas Telekomunikasyon A.S.
+ * Copyright (C) 2018-2019 Netas Telekomunikasyon A.S. [and others]
  *  
- *  This program and the accompanying materials are made
+ * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
  *  
@@ -9,6 +9,8 @@
  *  
  * Contributors:
  * Adem Kose, Fatih Ayvaz and Ilker Kuzu (Netas Telekomunikasyon A.S.) - Initial functionality
+ * Philipp Heisig (Dortmund University of Applied Sciences and Arts) 
+ * Johannes Kristan (Bosch Software Innovation)
  ******************************************************************************/
 package org.eclipse.kuksa.appstore.service;
 
@@ -17,6 +19,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.eclipse.kuksa.appstore.client.HawkbitFeignClient;
+import org.eclipse.kuksa.appstore.client.HawkbitMultiPartFileFeignClient;
 import org.eclipse.kuksa.appstore.exception.AlreadyExistException;
 import org.eclipse.kuksa.appstore.exception.BadRequestException;
 import org.eclipse.kuksa.appstore.exception.NotFoundException;
@@ -32,6 +35,7 @@ import org.eclipse.kuksa.appstore.model.hawkbit.RuleMain;
 import org.eclipse.kuksa.appstore.model.hawkbit.SoftwareModule;
 import org.eclipse.kuksa.appstore.model.hawkbit.SoftwareModuleResult;
 import org.eclipse.kuksa.appstore.model.hawkbit.Target;
+import org.eclipse.kuksa.appstore.model.hawkbit.upload.ArtifactFile;
 import org.eclipse.kuksa.appstore.repo.AppCategoryRepository;
 import org.eclipse.kuksa.appstore.repo.AppRepository;
 import org.eclipse.kuksa.appstore.repo.OemRepository;
@@ -57,6 +61,8 @@ public class AppService {
 	AppCategoryRepository appCategoryRepository;
 	@Autowired
 	HawkbitFeignClient hawkbitFeignClient;
+	@Autowired
+	HawkbitMultiPartFileFeignClient hawkbitMultiPartFileFeignClient;
 	@Autowired
 	UserService userService;
 
@@ -121,6 +127,33 @@ public class AppService {
 			throw new BadRequestException("App could not be saved to Hawkbit and Appstore!");
 		}
 
+	}
+
+	public Result<?> uploadArtifactToHawkbit(Long id, String fileName, byte[] b) throws BadRequestException {
+		App app = appRepository.findById(id);
+		if (app != null) {
+			ArtifactFile appArtifactFile = new ArtifactFile(fileName, fileName, "multipart/form-data", b);
+			try {
+				SoftwareModuleResult softwareModuleResult = hawkbitFeignClient
+						.getSoftwaremoduleByName(Utils.createFIQLEqual("name", app.getName()) + ";"
+								+ Utils.createFIQLEqual("version", app.getVersion()));
+
+				Integer softwareModuleId = Utils.getExistsSoftwareModule(softwareModuleResult.getContent());
+				Response response = hawkbitMultiPartFileFeignClient.uploadFile(softwareModuleId.toString(),
+						appArtifactFile);
+
+				if (response.status() == HttpStatus.CREATED.value()) {
+					return Result.success(HttpStatus.CREATED, appRepository.findByName(app.getName()));
+				} else {
+					throw new BadRequestException("App could not be saved to Hawkbit and Appstore!");
+				}
+			} catch (Exception e) {
+				throw new BadRequestException(
+						"Hawkbit connection error. Check your Hawkbit's IP in the propreties file!");
+			}
+		} else {
+			throw new BadRequestException("App could not be found in Appstore!");
+		}
 	}
 
 	public App findById(Long id) {
