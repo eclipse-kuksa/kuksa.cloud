@@ -1,7 +1,7 @@
 /*******************************************************************************
- * Copyright (C) 2018 Netas Telekomunikasyon A.S.
+ * Copyright (C) 2018-2019 Netas Telekomunikasyon A.S. [and others]
  *  
- *  This program and the accompanying materials are made
+ * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
  *  
@@ -9,9 +9,12 @@
  *  
  * Contributors:
  * Adem Kose, Fatih Ayvaz and Ilker Kuzu (Netas Telekomunikasyon A.S.) - Initial functionality
+ * Philipp Heisig (Dortmund University of Applied Sciences and Arts) 
+ * Johannes Kristan (Bosch Software Innovation)
  ******************************************************************************/
 package org.eclipse.kuksa.appstore.controller;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -38,7 +41,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -81,6 +86,20 @@ public class AppController {
 			return new ResponseEntity<>(response.getPayload(), HttpStatus.OK);
 		} else {
 			LOG.debug("[createApp]: createApp request is received. app: {}", app);
+			return new ResponseEntity<>(HttpStatus.BAD_REQUEST.getReasonPhrase(), HttpStatus.BAD_REQUEST);
+		}
+	}
+	
+	@ApiOperation(notes = "Uploads an artifact to given app identified by its name and version. ", value = "Upload an Artifact to an App", nickname = "uploadArtifact", produces = "application/json", authorizations = @Authorization(value = "api_key"))
+	@ApiImplicitParam(name = "Authorization", value = "Token Format: 'base64(username: password)'", required = true, dataType = "String", paramType = "Header", defaultValue = "Basic Token")
+	@PostMapping("/app/{appId}/artifact")
+	public ResponseEntity<?> uploadArtifact(@Valid @RequestPart MultipartFile file, @PathVariable Long appId) throws AlreadyExistException, BadRequestException, IOException {
+		Result<?> response = appService.uploadArtifactToHawkbit(appId, file.getOriginalFilename(), file.getBytes());
+		if (response.isSuccess()) {
+			LOG.debug("[uploadArtifact]: uploadArtifact request is processed successfully with artifact: {}", file.getOriginalFilename());
+			return new ResponseEntity<>(response.getPayload(), HttpStatus.OK);
+		} else {
+			LOG.debug("[uploadArtifact]: uploadArtifact request is received. artifact: {}", file.getOriginalFilename());
 			return new ResponseEntity<>(HttpStatus.BAD_REQUEST.getReasonPhrase(), HttpStatus.BAD_REQUEST);
 		}
 	}
