@@ -1,0 +1,12 @@
+apiVersion: v1
+kind:  ConfigMap
+metadata:
+  name: mail-notification-configmap
+  namespace: extensions
+data:
+  SENDER_MAIL: "<SENDER_MAIL_PLACEHOLDER>"
+  SENDER_NAME: "<SENDER_NAME_PLACEHOLDER>"
+  SMTP_HOST: "<SMTP_HOST_PLACEHOLDER>"
+  SMTP_PORT: "<SMTP_PORT_PLACEHOLDER>"
+  SMTP_TRANSPORT: "<SMTP_TRANSPORT_PLACEHOLDER>"
+  

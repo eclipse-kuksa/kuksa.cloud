@@ -14,9 +14,9 @@ apply plugin: 'io.spring.dependency-management'
 
 bootJar {
     baseName = 'influxdb-rest'
-    version = '0.1.0'
 }
 
+version = '0.1.0'
 mainClassName = "org.eclipse.kuksa.influxdb.rest.Application"
 
 repositories {
