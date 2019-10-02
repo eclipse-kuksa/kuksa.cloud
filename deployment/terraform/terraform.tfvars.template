@@ -1,0 +1,3 @@
+INSTANCE_NAME     = "keycloak"
+REGION            = "westeurope"
+SUBSCRIPTION_ID   = "Azure Subscription ID"
