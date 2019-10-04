@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
       - name: influxdb-rest-container
-        image: <PLACEHOLDER>
+        image: <DOCKER_REGISTRY_SERVER>/<DOCKER_IMAGE_NAME>:<VERSION>
         imagePullPolicy: Always
         envFrom:
         - configMapRef:
@@ -30,4 +30,5 @@ spec:
           limits:
             memory: "2048Mi"
             cpu: 700m
-      
+      imagePullSecrets:
+      - name: <DOCKER_REGISTRY_SECRET>
