@@ -32,7 +32,7 @@ DOCKER_REGISTRY_EMAIL=${11}
 DOCKER_REGISTRY_SECRET="docker-secret"
 NAMESPACE=extensions
 DOCKER_IMAGE_NAME="mil-service"
-VERSION="0.1.0"
+VERSION="0.2.0"
 
 TARGET_DIR=$SCRIPTPATH/mil-service/target
 CONFIGMAP_DESCRIPTOR_TEMPLATE=$SCRIPTPATH/mil-service/mil-service-configmap.yaml

@@ -32,7 +32,7 @@ DOCKER_REGISTRY_EMAIL=${11}
 DOCKER_REGISTRY_SECRET="docker-secret"
 NAMESPACE=extensions
 DOCKER_IMAGE_NAME="mail-notification"
-VERSION="0.1.0"
+VERSION="0.2.0"
 
 TARGET_DIR=$SCRIPTPATH/mail-notification/target
 CONFIGMAP_DESCRIPTOR_TEMPLATE=$SCRIPTPATH/mail-notification/mail-notification-configmap.yaml

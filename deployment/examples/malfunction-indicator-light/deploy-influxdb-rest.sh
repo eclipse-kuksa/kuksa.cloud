@@ -28,7 +28,7 @@ DOCKER_REGISTRY_EMAIL=$7
 DOCKER_REGISTRY_SECRET="docker-secret"
 NAMESPACE=extensions
 DOCKER_IMAGE_NAME="influxdb-rest"
-VERSION="0.1.0"
+VERSION="0.2.0"
 
 TARGET_DIR=$SCRIPTPATH/influxdb-rest/target
 CONFIGMAP_DESCRIPTOR_TEMPLATE=$SCRIPTPATH/influxdb-rest/influxdb-rest-configmap.yaml

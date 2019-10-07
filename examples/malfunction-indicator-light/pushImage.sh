@@ -17,7 +17,7 @@ SCRIPTPATH=$(dirname "$(readlink -f "$0")")
 DOCKER_REGISTRY_SERVER=$1
 DOCKER_REGISTRY_USERNAME=$2
 DOCKER_REGISTRY_PASSWORD=$3
-VERSION=${4:-"0.1.0"}
+VERSION=${4:-"0.2.0"}
 
 echo
 echo "##############################################################"

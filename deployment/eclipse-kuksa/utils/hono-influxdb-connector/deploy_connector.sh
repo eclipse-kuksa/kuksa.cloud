@@ -34,12 +34,11 @@ DOCKER_REGISTRY_SERVER=${10:-localhost}
 DOCKER_REGISTRY_USERNAME=${11:-""}
 DOCKER_REGISTRY_PASSWORD=${12:-pw}
 DOCKER_REGISTRY_EMAIL=${13:-user@domain.com}
-VERSION=${10,-"0.1.0"}
+VERSION=${10,-"0.2.0"}
 
 NAMESPACE=hono
 DOCKER_IMAGE_NAME=hono-influxdb-connector
 
-VERSION="$(gradle properties -q | grep 'version:' | awk '{print $2}')"
 DOCKER_IMAGE_VERSION="$VERSION"
 
 SOURCE_DESCRIPTORS=$SCRIPTPATH/src/main/kubernetes
