@@ -4,7 +4,7 @@
 # terms and conditions of the Eclipse Distribution License v1.0 which
 # accompanies this distribution, and is available at
 # http://www.eclipse.org/org/documents/edl-v10.php
-FROM openjdk:8-jre-alpine
+FROM gcr.io/distroless/java:11
 
 COPY hono-influxdb-connector.jar /hono-influxdb-connector.jar
 
