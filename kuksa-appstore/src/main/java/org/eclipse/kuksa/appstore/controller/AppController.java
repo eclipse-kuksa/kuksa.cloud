@@ -90,6 +90,7 @@ public class AppController {
 		}
 	}
 	
+	@Secured("ROLE_ADMIN")
 	@ApiOperation(notes = "Uploads an artifact to given app identified by its name and version. ", value = "Upload an Artifact to an App", nickname = "uploadArtifact", produces = "application/json", authorizations = @Authorization(value = "api_key"))
 	@ApiImplicitParam(name = "Authorization", value = "Token Format: 'base64(username: password)'", required = true, dataType = "String", paramType = "Header", defaultValue = "Basic Token")
 	@PostMapping("/app/{appId}/artifact")

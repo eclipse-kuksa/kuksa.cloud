@@ -22,10 +22,13 @@ import java.io.OutputStream;
 import java.util.List;
 
 import org.eclipse.kuksa.appstore.client.HawkbitMultiPartFileFeignClient;
+import org.eclipse.kuksa.appstore.exception.BadRequestException;
 import org.eclipse.kuksa.appstore.client.HawkbitFeignClient;
 import org.eclipse.kuksa.appstore.model.hawkbit.Artifact;
-import org.eclipse.kuksa.appstore.model.hawkbit.upload.ArtifactFile;
+import org.eclipse.kuksa.appstore.model.hawkbit.Result;
+import org.eclipse.kuksa.appstore.service.AppService;
 import org.eclipse.kuksa.appstore.utils.Utils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 
 import com.vaadin.navigator.View;
@@ -50,8 +53,6 @@ import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.dnd.FileDropTarget;
 import com.vaadin.ui.renderers.ImageRenderer;
 
-import feign.Response;
-
 @SpringComponent
 @UIScope
 public class ArtifactFileEditor extends VerticalLayout implements View {
@@ -63,12 +64,15 @@ public class ArtifactFileEditor extends VerticalLayout implements View {
 	HawkbitFeignClient hawkbitFeignClient;
 	HawkbitMultiPartFileFeignClient hawkbitMultiPartFileFeignClient;
 	String softwareModuleId;
+	@Autowired
+	AppService appService;
 
 	public ArtifactFileEditor() {
 
 		class ImageUploader implements Receiver, SucceededListener {
 			public File file;
 
+			@Override
 			public OutputStream receiveUpload(String filename, String mimeType) {
 
 				FileOutputStream fos = null;
@@ -86,23 +90,38 @@ public class ArtifactFileEditor extends VerticalLayout implements View {
 				return fos;
 			}
 
+			@Override
 			public void uploadSucceeded(SucceededEvent event) {
 				byte[] b = new byte[(int) file.length()];
 
 				try {
-					FileInputStream fileInputStream;
-					fileInputStream = new FileInputStream(file);
+					FileInputStream fileInputStream = new FileInputStream(file);
 
 					fileInputStream.read(b);
-					uploadArtifactFile(event.getFilename(), b);
+					try {
+						Result<?> result = appService.uploadArtifactToHawkbit(Long.parseLong(softwareModuleId),
+								event.getFilename(), b);
+						if (result.getStatusCode() == HttpStatus.CREATED) {
+
+							new Notification("The artifact is successfully uploaded!",
+									Notification.Type.HUMANIZED_MESSAGE).show(Page.getCurrent());
+
+							fillGrids(softwareModuleId);
+						} else {
+
+							new Notification("The uploading process is failed!", result.getErrorMessage(),
+									Notification.Type.ERROR_MESSAGE).show(Page.getCurrent());
+						}
+					} catch (NumberFormatException e) {
+						e.printStackTrace();
+					} catch (BadRequestException e) {
+						e.printStackTrace();
+					}
 				} catch (FileNotFoundException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				} catch (IOException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-
 			}
 		}
 		;
@@ -164,7 +183,15 @@ public class ArtifactFileEditor extends VerticalLayout implements View {
 
 	private void addDeleteColumn(String caption) {
 		ImageRenderer<Artifact> renderer = new ImageRenderer<>();
-		renderer.addClickListener(e -> deleteArtifact(e.getItem()));
+		renderer.addClickListener(e -> {
+			try {
+				deleteArtifact(e.getItem());
+			} catch (NumberFormatException e2) {
+				e2.printStackTrace();
+			} catch (BadRequestException e2) {
+				e2.printStackTrace();
+			}
+		});
 
 		Grid.Column<Artifact, ThemeResource> iconColumn = artifactGrid
 				.addColumn(i -> new ThemeResource("img/delete.png"), renderer);
@@ -172,53 +199,26 @@ public class ArtifactFileEditor extends VerticalLayout implements View {
 		iconColumn.setMaximumWidth(100);
 		artifactGrid.addItemClickListener(e -> {
 			if (e.getColumn().equals(iconColumn)) {
-				deleteArtifact(e.getItem());
+				try {
+					deleteArtifact(e.getItem());
+				} catch (NumberFormatException e1) {
+					e1.printStackTrace();
+				} catch (BadRequestException e1) {
+					e1.printStackTrace();
+				}
 			}
 		});
 	}
 
-	private void deleteArtifact(Artifact artifact) {
-		try {
-			Response response = hawkbitFeignClient.deleteArtifactsBysoftwareModuleId(softwareModuleId,
-					artifact.getId());
-
-			if (response.status() == HttpStatus.OK.value()) {
-
-				new Notification("The artifact is successfully deleted.", Notification.Type.HUMANIZED_MESSAGE)
-						.show(Page.getCurrent());
-
-				fillGrids(softwareModuleId);
-
-			} else {
-				new Notification("The deleting process is failed.", Notification.Type.ERROR_MESSAGE)
-						.show(Page.getCurrent());
-			}
-		} catch (Exception e) {
-			new Notification("Hawkbit connection error. Check your Hawkbit's IP in the propreties file!",
-					Notification.Type.ERROR_MESSAGE).show(Page.getCurrent());
-		}
-	}
-
-	private void uploadArtifactFile(final String name, byte[] b) {
-
-		ArtifactFile appArtifactFile = new ArtifactFile(name, name, "multipart/form-data", b);
-		try {
-			Response response = hawkbitMultiPartFileFeignClient.uploadFile(softwareModuleId, appArtifactFile);
-
-			if (response.status() == HttpStatus.CREATED.value()) {
-
-				new Notification("The artifact is successfully uploaded!", Notification.Type.HUMANIZED_MESSAGE)
-						.show(Page.getCurrent());
-
-				fillGrids(softwareModuleId);
-			} else {
-
-				new Notification("The uploading process is failed!", response.reason(), Notification.Type.ERROR_MESSAGE)
-						.show(Page.getCurrent());
-			}
-		} catch (Exception e) {
-			new Notification("Hawkbit connection error. Check your Hawkbit's IP in the propreties file!",
-					Notification.Type.ERROR_MESSAGE).show(Page.getCurrent());
+	private void deleteArtifact(Artifact artifact) throws NumberFormatException, BadRequestException {
+		Result<?> result = appService.deleteArtifactFromHawkbit(Long.parseLong(softwareModuleId), artifact.getId());
+		if (result.getStatusCode() == HttpStatus.OK) {
+			new Notification("The artifact is successfully deleted.", Notification.Type.HUMANIZED_MESSAGE)
+					.show(Page.getCurrent());
+			fillGrids(softwareModuleId);
+		} else {
+			new Notification("The deleting process is failed.", Notification.Type.ERROR_MESSAGE)
+					.show(Page.getCurrent());
 		}
 	}
 
@@ -274,7 +274,14 @@ public class ArtifactFileEditor extends VerticalLayout implements View {
 						@Override
 						public void streamingFinished(final StreamingEndEvent event) {
 							progress.setVisible(false);
-							uploadArtifactFile(fileName, bas.toByteArray());
+							try {
+								appService.uploadArtifactToHawkbit(Long.parseLong(softwareModuleId), fileName,
+										bas.toByteArray());
+							} catch (NumberFormatException e) {
+								e.printStackTrace();
+							} catch (BadRequestException e) {
+								e.printStackTrace();
+							}
 						}
 
 						@Override
