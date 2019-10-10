@@ -1,7 +1,7 @@
 /*******************************************************************************
- * Copyright (C) 2018 Netas Telekomunikasyon A.S.
+ * Copyright (C) 2018-2019 Netas Telekomunikasyon A.S. [and others]
  *  
- *  This program and the accompanying materials are made
+ * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
  *  
@@ -9,6 +9,8 @@
  *  
  * Contributors:
  * Adem Kose, Fatih Ayvaz and Ilker Kuzu (Netas Telekomunikasyon A.S.) - Initial functionality
+ * Philipp Heisig (Dortmund University of Applied Sciences and Arts) 
+ * Johannes Kristan (Bosch Software Innovation)
  ******************************************************************************/
 package org.eclipse.kuksa.appstore.service;
 
@@ -17,12 +19,14 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.eclipse.kuksa.appstore.client.HawkbitFeignClient;
+import org.eclipse.kuksa.appstore.client.HawkbitMultiPartFileFeignClient;
 import org.eclipse.kuksa.appstore.exception.AlreadyExistException;
 import org.eclipse.kuksa.appstore.exception.BadRequestException;
 import org.eclipse.kuksa.appstore.exception.NotFoundException;
 import org.eclipse.kuksa.appstore.model.App;
 import org.eclipse.kuksa.appstore.model.Oem;
 import org.eclipse.kuksa.appstore.model.User;
+import org.eclipse.kuksa.appstore.model.hawkbit.Artifact;
 import org.eclipse.kuksa.appstore.model.hawkbit.AssignedResult;
 import org.eclipse.kuksa.appstore.model.hawkbit.Distribution;
 import org.eclipse.kuksa.appstore.model.hawkbit.DistributionResult;
@@ -32,6 +36,7 @@ import org.eclipse.kuksa.appstore.model.hawkbit.RuleMain;
 import org.eclipse.kuksa.appstore.model.hawkbit.SoftwareModule;
 import org.eclipse.kuksa.appstore.model.hawkbit.SoftwareModuleResult;
 import org.eclipse.kuksa.appstore.model.hawkbit.Target;
+import org.eclipse.kuksa.appstore.model.hawkbit.upload.ArtifactFile;
 import org.eclipse.kuksa.appstore.repo.AppCategoryRepository;
 import org.eclipse.kuksa.appstore.repo.AppRepository;
 import org.eclipse.kuksa.appstore.repo.OemRepository;
@@ -42,6 +47,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+
+import com.vaadin.ui.Notification;
 
 import feign.Response;
 
@@ -57,6 +64,8 @@ public class AppService {
 	AppCategoryRepository appCategoryRepository;
 	@Autowired
 	HawkbitFeignClient hawkbitFeignClient;
+	@Autowired
+	HawkbitMultiPartFileFeignClient hawkbitMultiPartFileFeignClient;
 	@Autowired
 	UserService userService;
 
@@ -120,19 +129,57 @@ public class AppService {
 			appRepository.delete(currentApp);
 			throw new BadRequestException("App could not be saved to Hawkbit and Appstore!");
 		}
+	}
 
+	public Result<?> uploadArtifactToHawkbit(Long id, String fileName, byte[] b) throws BadRequestException {
+		try {
+			ArtifactFile appArtifactFile = new ArtifactFile(fileName, fileName, "multipart/form-data", b);
+			Response response = hawkbitMultiPartFileFeignClient.uploadFile(getSoftwareModuleName(id), appArtifactFile);
+
+			if (response.status() == HttpStatus.CREATED.value()) {
+				return Result.success(HttpStatus.CREATED, appRepository.findById(id));
+			} else {
+				throw new BadRequestException("App could not be saved to Hawkbit and Appstore!");
+			}
+		} catch (Exception e) {
+			throw new BadRequestException("Hawkbit connection error. Check your Hawkbit's IP in the propreties file!");
+		}
 	}
 
 	public App findById(Long id) {
-
 		return appRepository.findById(id);
-
 	}
 
 	public App findByName(String name) {
-
 		return appRepository.findByName(name);
+	}
 
+	public Result<?> deleteArtifactFromHawkbit(Long id, String artifactId) throws BadRequestException {
+		try {
+			Response response = hawkbitFeignClient.deleteArtifactsBysoftwareModuleId(getSoftwareModuleName(id),
+					artifactId);
+			if (response.status() == HttpStatus.OK.value()) {
+				return Result.success(HttpStatus.OK, appRepository.findById(id));
+			} else {
+				throw new BadRequestException("App could not be deleted from Hawkbit and Appstore!");
+			}
+		} catch (Exception e) {
+			throw new BadRequestException("Hawkbit connection error. Check your Hawkbit's IP in the propreties file!");
+		}
+	}
+
+	private String getSoftwareModuleName(Long id) throws BadRequestException {
+		App app = appRepository.findById(id);
+		if (app != null) {
+			SoftwareModuleResult softwareModuleResult = hawkbitFeignClient
+					.getSoftwaremoduleByName(Utils.createFIQLEqual("name", app.getName()) + ";"
+							+ Utils.createFIQLEqual("version", app.getVersion()));
+
+			Integer softwareModuleId = Utils.getExistsSoftwareModule(softwareModuleResult.getContent());
+			return softwareModuleId.toString();
+		} else {
+			throw new BadRequestException("App could not be found in Appstore!");
+		}
 	}
 
 	public Result<?> updateApp(String appId, App app)
