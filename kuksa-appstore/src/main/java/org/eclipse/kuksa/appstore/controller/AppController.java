@@ -33,6 +33,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -57,6 +58,7 @@ public class AppController {
 	@Autowired
 	AppService appService;
 
+	@Secured({"ROLE_USER", "ROLE_ADMIN"})
 	@ApiOperation(notes = "Returns the App specified by the appId path parameter. The response includes all details about the App.", value = "Getting an App", nickname = "getAppbyId", produces = "application/json", authorizations = @Authorization(value = "api_key"))
 	@ApiImplicitParam(name = "Authorization", value = "Token Format: 'base64(username: password)'", required = true, dataType = "String", paramType = "Header", defaultValue = "Basic Token")
 	@GetMapping(value = "/app/{appId}")
@@ -73,6 +75,7 @@ public class AppController {
 
 	}
 
+	@Secured("ROLE_ADMIN")
 	@ApiOperation(notes = "Creates an App defined in the request JSON body. Id field should not implemented in post request JSON body because of that it is already given by server.", value = "Creating an App", nickname = "createApp", produces = "application/json", authorizations = @Authorization(value = "api_key"))
 	@ApiImplicitParam(name = "Authorization", value = "Token Format: 'base64(username: password)'", required = true, dataType = "String", paramType = "Header", defaultValue = "Basic Token")
 	@PostMapping("/app")
@@ -87,6 +90,7 @@ public class AppController {
 		}
 	}
 	
+	@Secured("ROLE_ADMIN")
 	@ApiOperation(notes = "Uploads an artifact to given app identified by its name and version. ", value = "Upload an Artifact to an App", nickname = "uploadArtifact", produces = "application/json", authorizations = @Authorization(value = "api_key"))
 	@ApiImplicitParam(name = "Authorization", value = "Token Format: 'base64(username: password)'", required = true, dataType = "String", paramType = "Header", defaultValue = "Basic Token")
 	@PostMapping("/app/{appId}/artifact")
@@ -101,6 +105,7 @@ public class AppController {
 		}
 	}
 
+	@Secured("ROLE_ADMIN")
 	@ApiOperation(notes = "Updates the App identified by the appId parameter and the JSON body.", value = "Updating an App", nickname = "updateApp", produces = "application/json", authorizations = @Authorization(value = "api_key"))
 	@ApiImplicitParam(name = "Authorization", value = "Token Format: 'base64(username: password)'", required = true, dataType = "String", paramType = "Header", defaultValue = "Basic Token")
 	@PutMapping("/app/{appId}")
@@ -117,6 +122,7 @@ public class AppController {
 		}
 	}
 
+	@Secured("ROLE_ADMIN")
 	@ApiOperation(notes = "Deletes the App specified by the appId parameter.", value = "Deleting an App", nickname = "deleteApp", produces = "application/json", authorizations = @Authorization(value = "api_key"))
 	@ApiImplicitParam(name = "Authorization", value = "Token Format: 'base64(username: password)'", required = true, dataType = "String", paramType = "Header", defaultValue = "Basic Token")
 	@DeleteMapping("/app/{appId}")
@@ -128,6 +134,7 @@ public class AppController {
 		return new ResponseEntity<>(null, HttpStatus.OK);
 	}
 
+	@Secured({"ROLE_USER", "ROLE_ADMIN"})
 	@ApiOperation(notes = "Returns all Apps.", value = "Getting all App", nickname = "getAllApp", produces = "application/json", authorizations = @Authorization(value = "api_key"))
 	@ApiImplicitParam(name = "Authorization", value = "Token Format: 'base64(username: password)'", required = true, dataType = "String", paramType = "Header", defaultValue = "Basic Token")
 	@GetMapping(value = "/app")
@@ -143,6 +150,7 @@ public class AppController {
 		}
 	}
 
+	@Secured({"ROLE_USER", "ROLE_ADMIN"})
 	@ApiOperation(notes = "Returns user's purchased apps.", value = "Getting User's Purchased Apps", nickname = "getPurchasedAppsbyUserId", produces = "application/json", authorizations = @Authorization(value = "api_key"))
 	@ApiImplicitParam(name = "Authorization", value = "Token Format: 'base64(username: password)'", required = true, dataType = "String", paramType = "Header", defaultValue = "Basic Token")
 	@GetMapping(value = "/app/purchased/user/{userId}")
@@ -157,6 +165,7 @@ public class AppController {
 
 	}
 
+	@Secured({"ROLE_USER", "ROLE_ADMIN"})
 	@ApiOperation(notes = "Returns User's installed Apps by userId and name parameter. The name parameter ensures to search by App Name.", value = "Getting User's installed Apps.", nickname = "getUserApssbyUserId", produces = "application/json", authorizations = @Authorization(value = "api_key"))
 	@ApiImplicitParam(name = "Authorization", value = "Token Format: 'base64(username: password)'", required = true, dataType = "String", paramType = "Header", defaultValue = "Basic Token")
 	@GetMapping(value = "/app/installed/user/{userId}")
@@ -171,6 +180,7 @@ public class AppController {
 
 	}
 
+	@Secured({"ROLE_USER", "ROLE_ADMIN"})
 	@ApiOperation(notes = "Returns User's installed Apps by userId and name parameter. The name parameter ensures to search by App Name.", value = "Getting User's installed Apps by name.", nickname = "getUserApssbyUserIdAndName", produces = "application/json", authorizations = @Authorization(value = "api_key"))
 	@ApiImplicitParam(name = "Authorization", value = "Token Format: 'base64(username: password)'", required = true, dataType = "String", paramType = "Header", defaultValue = "Basic Token")
 	@GetMapping(value = "/app/installed/user/{userId}/{name}")
@@ -187,6 +197,7 @@ public class AppController {
 
 	}
 
+	@Secured({"ROLE_USER", "ROLE_ADMIN"})
 	@ApiOperation(notes = "Returns Apps specified by appCategoryId parameter.", value = "Getting Apps By App Category Id", nickname = "getApssbyAppCategoryId", produces = "application/json", authorizations = @Authorization(value = "api_key"))
 	@ApiImplicitParam(name = "Authorization", value = "Token Format: 'base64(username: password)'", required = true, dataType = "String", paramType = "Header", defaultValue = "Basic Token")
 	@GetMapping(value = "/app/category/{appCategoryId}")
@@ -201,6 +212,7 @@ public class AppController {
 
 	}
 
+	@Secured({"ROLE_USER", "ROLE_ADMIN"})
 	@ApiOperation(notes = "Returns Apps specified by appCategoryId parameter and name parameter. The name parameter ensures to search by App Name.", value = "Getting Apps By App Category Id with Filter Text", nickname = "getApssbyNameAndAppcategoryId", produces = "application/json", authorizations = @Authorization(value = "api_key"))
 	@ApiImplicitParam(name = "Authorization", value = "Token Format: 'base64(username: password)'", required = true, dataType = "String", paramType = "Header", defaultValue = "Basic Token")
 	@GetMapping(value = "/app/category/{appCategoryId}/{name}")
@@ -215,6 +227,7 @@ public class AppController {
 
 	}
 
+	@Secured({"ROLE_USER", "ROLE_ADMIN"})
 	@ApiOperation(notes = "This process is used to purchase an App specified by userId and appId.", value = "Purchase an App", nickname = "purchaseApp", produces = "application/json", authorizations = @Authorization(value = "api_key"))
 	@ApiImplicitParam(name = "Authorization", value = "Token Format: 'base64(username: password)'", required = true, dataType = "String", paramType = "Header", defaultValue = "Basic Token")
 	@PostMapping(value = "/app/{appId}/purchase/{userId}")
@@ -225,6 +238,7 @@ public class AppController {
 		return new ResponseEntity<>(appService.purchaseApp(userId, appId), HttpStatus.OK);
 	}
 
+	@Secured({"ROLE_USER", "ROLE_ADMIN"})
 	@ApiOperation(notes = "This process is used to install an App specified by appId to the given device for user specified by userId .", value = "Install an App", nickname = "InstallApp", produces = "application/json", authorizations = @Authorization(value = "api_key"))
 	@ApiImplicitParam(name = "Authorization", value = "Token Format: 'base64(username: password)'", required = true, dataType = "String", paramType = "Header", defaultValue = "Basic Token")
 	@PostMapping(value = "/app/{appId}/install/{userId}")
@@ -236,6 +250,7 @@ public class AppController {
 		return new ResponseEntity<>(appService.InstallApp(deviceName, userId, appId), HttpStatus.OK);
 	}
 
+	@Secured({"ROLE_USER", "ROLE_ADMIN"})
 	@ApiOperation(notes = "This process is used to uninstall an App specified by appId from the given device for user specified by userId.", value = "Uninstall an App", nickname = "UninstallApp", produces = "application/json", authorizations = @Authorization(value = "api_key"))
 	@ApiImplicitParam(name = "Authorization", value = "Token Format: 'base64(username: password)'", required = true, dataType = "String", paramType = "Header", defaultValue = "Basic Token")
 	@DeleteMapping(value = "/app/{appId}/uninstall/{userId}")

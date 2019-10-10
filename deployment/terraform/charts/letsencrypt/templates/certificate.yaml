@@ -1,0 +1,17 @@
+apiVersion: certmanager.k8s.io/v1alpha1
+kind: Certificate
+metadata:
+    name: kuksa-tls-crt
+spec:
+    secretName: kuksa-secret
+    dnsNames:
+        - keycloak-{{.Values.ENVIRONMENT}}.westeurope.cloudapp.azure.com
+    acme:
+        config:
+            - http01:
+                  ingressClass: nginx
+              domains:
+                  - keycloak-{{.Values.ENVIRONMENT}}.westeurope.cloudapp.azure.com
+    issuerRef:
+        kind: ClusterIssuer
+        name: letsencrypt-prod

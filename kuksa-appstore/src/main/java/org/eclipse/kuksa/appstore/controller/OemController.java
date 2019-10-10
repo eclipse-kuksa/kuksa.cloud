@@ -28,6 +28,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -51,6 +52,7 @@ public class OemController {
 	@Autowired
 	OemService oemService;
 
+	@Secured({"ROLE_USER", "ROLE_ADMIN"})
 	@ApiOperation(notes = "Returns the OEM specified by the oemId parameter.", value = "Getting an OEM", nickname = "getOEM", produces = "application/json", authorizations = @Authorization(value = "api_key"))
 	@ApiImplicitParam(name = "Authorization", value = "Token Format: 'base64(username: password)'", required = true, dataType = "String", paramType = "Header", defaultValue = "Basic Token")
 	@GetMapping(value = "/oem/{oemId}")
@@ -67,6 +69,7 @@ public class OemController {
 
 	}
 
+	@Secured("ROLE_ADMIN")
 	@ApiOperation(notes = "Creates an OEM defined in the request JSON body. Id field should not implemented in post request JSON body because of that it is already given by server.", value = "Create an Oem", nickname = "createOem", produces = "application/json", authorizations = @Authorization(value = "api_key"))
 	@ApiImplicitParam(name = "Authorization", value = "Token Format: 'base64(username: password)'", required = true, dataType = "String", paramType = "Header", defaultValue = "Basic Token")
 	@PostMapping("/oem")
@@ -81,6 +84,7 @@ public class OemController {
 		}
 	}
 
+	@Secured("ROLE_ADMIN")
 	@ApiOperation(notes = "Updates an OEM defined in the request JSON body.", value = "Updating an OEM", nickname = "updateOEM", produces = "application/json", authorizations = @Authorization(value = "api_key"))
 	@ApiImplicitParam(name = "Authorization", value = "Token Format: 'base64(username: password)'", required = true, dataType = "String", paramType = "Header", defaultValue = "Basic Token")
 	@PutMapping("/oem/{oemId}")
@@ -97,6 +101,7 @@ public class OemController {
 		}
 	}
 
+	@Secured("ROLE_ADMIN")
 	@ApiOperation(notes = "Deletes an OEM specified by oemId parameter.", value = "Deleting an OEM", nickname = "deleteOEM", produces = "application/json", authorizations = @Authorization(value = "api_key"))
 	@ApiImplicitParam(name = "Authorization", value = "Token Format: 'base64(username: password)'", required = true, dataType = "String", paramType = "Header", defaultValue = "Basic Token")
 	@DeleteMapping("/oem/{oemId}")
@@ -108,6 +113,7 @@ public class OemController {
 		return new ResponseEntity<>(null, HttpStatus.OK);
 	}
 
+	@Secured({"ROLE_USER", "ROLE_ADMIN"})
 	@ApiOperation(notes = "Returns all OEM.", value = "Getting all OEM", nickname = "getAllOEM", produces = "application/json", authorizations = @Authorization(value = "api_key"))
 	@ApiImplicitParam(name = "Authorization", value = "Token Format: 'base64(username: password)'", required = true, dataType = "String", paramType = "Header", defaultValue = "Basic Token")
 	@GetMapping(value = "/oem")

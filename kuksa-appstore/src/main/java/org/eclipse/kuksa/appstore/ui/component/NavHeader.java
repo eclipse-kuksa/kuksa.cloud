@@ -16,8 +16,8 @@ import org.eclipse.kuksa.appstore.model.UserType;
 import org.eclipse.kuksa.appstore.ui.AppEditView;
 import org.eclipse.kuksa.appstore.ui.AppsListView;
 import org.eclipse.kuksa.appstore.ui.InstalledAppsListView;
-import org.eclipse.kuksa.appstore.ui.PurchasedAppsListView;
 import org.eclipse.kuksa.appstore.ui.ProfileEditView;
+import org.eclipse.kuksa.appstore.ui.PurchasedAppsListView;
 import org.eclipse.kuksa.appstore.ui.UserEditView;
 
 import com.vaadin.event.LayoutEvents.LayoutClickEvent;
@@ -29,7 +29,6 @@ import com.vaadin.ui.CustomLayout;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Image;
 import com.vaadin.ui.Label;
-import com.vaadin.ui.Notification;
 
 public class NavHeader {
 	private CustomLayout sample;
@@ -141,7 +140,7 @@ public class NavHeader {
 			@Override
 			public void layoutClick(LayoutClickEvent event) {
 				VaadinSession.getCurrent().close();
-				Page.getCurrent().setLocation("");
+				Page.getCurrent().setLocation("sso/logout");
 			}
 		};
 		headerLayout.addComponent(createNavItem("logout.png", styleName, "Logout", listener));

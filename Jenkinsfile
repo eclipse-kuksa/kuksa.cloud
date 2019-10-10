@@ -32,7 +32,7 @@ spec:
           sh 'mkdir release && mkdir release/utils && mkdir release/examples && mkdir release/utils/hono-influxdb-connector && mkdir release/examples/malfunction-indicator-light'
           dir('utils/hono-influxdb-connector') {
               sh 'gradle build'
-              sh 'curl -o ../../release/utils/hono-influxdb-connector/hono-influxdb-connector.jar -F file=@build/libs/hono-influxdb-connector-0.2.1.jar http://build.eclipse.org:31338/sign'
+              sh 'curl -o ../../release/utils/hono-influxdb-connector/hono-influxdb-connector.jar -F file=@build/libs/hono-influxdb-connector-0.1.0.jar http://build.eclipse.org:31338/sign'
               sh 'cp pushImage.sh ../../release/utils/hono-influxdb-connector/pushImage.sh && cp README.md ../../release/utils/hono-influxdb-connector/README.md'
           }
           dir('examples/malfunction-indicator-light') {
@@ -43,7 +43,7 @@ spec:
             }
             dir('mail-notification') {
               sh 'gradle build'
-              sh 'curl -o build/libs/mail-notification.jar -F file=@build/libs/mail-notification-0.2.0.jar http://build.eclipse.org:31338/sign'
+              sh 'curl -o build/libs/mail-notification.jar -F file=@build/libs/mail-notification-0.1.0.jar http://build.eclipse.org:31338/sign'
               sh 'cp build/libs/mail-notification.jar ../../../release/examples/malfunction-indicator-light/mail-notification.jar'
             }
             dir('mil-service') {

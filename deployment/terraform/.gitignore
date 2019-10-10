@@ -1,0 +1,10 @@
+### Terraform files
+*.tfvars
+*.tfstate
+*.tfstate.backup
+
+### Dynamic directories
+.helm
+.kube
+.terraform
+terraform.d

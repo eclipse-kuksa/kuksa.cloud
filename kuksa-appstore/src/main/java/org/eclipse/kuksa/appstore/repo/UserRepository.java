@@ -27,7 +27,6 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface UserRepository extends CrudRepository<User, String> {
 
-	User findByUsernameAndPassword(String username, String password);
 
 	List<User> findByUsernameStartsWithIgnoreCase(String name);
 
