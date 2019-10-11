@@ -32,6 +32,10 @@ cp ./terraform.tfvars.template ./terraform.tfvars
 ```
 Edit ```./terraform.tfvars``` according your Azure subscription.   
 
+**configure Terraform backend**
+
+This deployment stores the state of in a storage in Azure. The storage is realized through a Terraform backend which needs to be configured in the main.tf. Nore information can be found under: https://www.terraform.io/docs/backends/types/azurerm.html.
+
 **deploy infrastructure**
 ```sh
 source ./prepare_environment.sh
