@@ -12,8 +12,6 @@
 # Make the script fail if a command fails
 set -e
 
-VERSION="$(gradle properties -q | grep 'version:' | awk '{print $2}')"
-
 echo
 echo "##############################################################"
 echo "##############################################################"
@@ -21,9 +19,8 @@ echo "################# Eclipse Kuksa Cloud build ##################"
 echo "##############################################################"
 echo "##############################################################"
 
-
 echo
 echo "##### Build with Gradle #####"
 gradle clean bootJar
 
-cp build/libs/hono-influxdb-connector-${VERSION}.jar hono-influxdb-connector.jar
+cp build/libs/hono-influxdb-connector-*.jar hono-influxdb-connector.jar
