@@ -42,11 +42,17 @@ resource "helm_release" "keycloak-configuration" {
   }
 }
 
+data "helm_repository" "codecentric" {
+    name = "codecentric"
+    url = "https://codecentric.github.io/helm-charts"
+}
+
 resource "helm_release" "keycloak" {
+  repository = "${data.helm_repository.codecentric.metadata.0.name}"
   name    = "keycloak"
-  chart   = "stable/keycloak"
+  chart   = "keycloak"
   timeout = 1800
-  version = "4.3.0"
+  version = "5.1.7"
   depends_on = [ "helm_release.keycloak-configuration" ]
 
   values  = [
