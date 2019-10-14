@@ -115,10 +115,12 @@ public class InfluxDBClient implements MessageHandler {
         //check for attribute named 'time' in message and use it as timestamp for the InfluxDb
         long timestamp;
         Object timeObject = entries.get(MessageDTO.TIMESTAMP_ATTRIBUTE_NAME);
-        if (timeObject != null && timeObject instanceof Long) {
-            timestamp = ((Long) timeObject).longValue();
+        if (timeObject instanceof Long) {
+            timestamp = (Long) timeObject;
+            LOGGER.debug("Used timestamp: {} from message with sender: {}", timestamp, msg.getDeviceID());
         } else {
             timestamp = System.currentTimeMillis();
+            LOGGER.debug("Generated timestamp: {} for message with sender: {}", timestamp, msg.getDeviceID());
         }
 
         final Point point = createPoint(timestamp, msg.getDeviceID(), entries);
