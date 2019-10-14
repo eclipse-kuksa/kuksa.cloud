@@ -43,7 +43,7 @@ To deploy in a Kubernetes cluster, run in
 `deployment/eclipse-kuksa/utils/hono-influxdb-connector`
 
 ```bash
-./deploy.sh \
+./deploy_connector.sh \
     <Cluster-internal URL of InfluxDB, typically http://influxdb.hono:8086> \
     <Cluster-internal hostname of QPID dispatch router, typically hono-dispatch-router-ext.hono> \
     <Cluster-internal port of QPID dispatch router, typically 5671> \
