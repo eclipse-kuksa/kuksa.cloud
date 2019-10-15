@@ -26,7 +26,6 @@ import org.eclipse.kuksa.appstore.exception.NotFoundException;
 import org.eclipse.kuksa.appstore.model.App;
 import org.eclipse.kuksa.appstore.model.Oem;
 import org.eclipse.kuksa.appstore.model.User;
-import org.eclipse.kuksa.appstore.model.hawkbit.Artifact;
 import org.eclipse.kuksa.appstore.model.hawkbit.AssignedResult;
 import org.eclipse.kuksa.appstore.model.hawkbit.Distribution;
 import org.eclipse.kuksa.appstore.model.hawkbit.DistributionResult;
@@ -47,9 +46,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-
-import com.vaadin.ui.Notification;
-
 import feign.Response;
 
 @Service
@@ -131,17 +127,30 @@ public class AppService {
 		}
 	}
 
-	public Result<?> uploadArtifactToHawkbit(Long id, String fileName, byte[] b) throws BadRequestException {
+	public Result<?> uploadArtifactWithAppId(Long appId, String fileName, byte[] b)
+			throws BadRequestException, NotFoundException {
+		String softwareModuleId = getSoftwareModuleName(appId);
+		return uploadArtifactToHawkbit(softwareModuleId, fileName, b);
+	}
+
+	public Result<?> uploadArtifactWithSoftwareModuleId(String softwareModuleId, String fileName, byte[] b)
+			throws BadRequestException {
+		return uploadArtifactToHawkbit(softwareModuleId, fileName, b);
+	}
+
+	private Result<?> uploadArtifactToHawkbit(String softwareModuleId, String fileName, byte[] b)
+			throws BadRequestException {
 		try {
 			ArtifactFile appArtifactFile = new ArtifactFile(fileName, fileName, "multipart/form-data", b);
-			Response response = hawkbitMultiPartFileFeignClient.uploadFile(getSoftwareModuleName(id), appArtifactFile);
+			Response response = hawkbitMultiPartFileFeignClient.uploadFile(softwareModuleId, appArtifactFile);
 
 			if (response.status() == HttpStatus.CREATED.value()) {
-				return Result.success(HttpStatus.CREATED, appRepository.findById(id));
+				return Result.success(HttpStatus.CREATED);
 			} else {
 				throw new BadRequestException("App could not be saved to Hawkbit and Appstore!");
 			}
 		} catch (Exception e) {
+			e.printStackTrace();
 			throw new BadRequestException("Hawkbit connection error. Check your Hawkbit's IP in the propreties file!");
 		}
 	}
@@ -154,31 +163,22 @@ public class AppService {
 		return appRepository.findByName(name);
 	}
 
-	public Result<?> deleteArtifactFromHawkbit(Long id, String artifactId) throws BadRequestException {
-		try {
-			Response response = hawkbitFeignClient.deleteArtifactsBysoftwareModuleId(getSoftwareModuleName(id),
-					artifactId);
-			if (response.status() == HttpStatus.OK.value()) {
-				return Result.success(HttpStatus.OK, appRepository.findById(id));
-			} else {
-				throw new BadRequestException("App could not be deleted from Hawkbit and Appstore!");
-			}
-		} catch (Exception e) {
-			throw new BadRequestException("Hawkbit connection error. Check your Hawkbit's IP in the propreties file!");
-		}
-	}
-
-	private String getSoftwareModuleName(Long id) throws BadRequestException {
+	private String getSoftwareModuleName(Long id) throws BadRequestException, NotFoundException {
 		App app = appRepository.findById(id);
 		if (app != null) {
-			SoftwareModuleResult softwareModuleResult = hawkbitFeignClient
-					.getSoftwaremoduleByName(Utils.createFIQLEqual("name", app.getName()) + ";"
-							+ Utils.createFIQLEqual("version", app.getVersion()));
+			try {
+				SoftwareModuleResult softwareModuleResult = hawkbitFeignClient
+						.getSoftwaremoduleByName(Utils.createFIQLEqual("name", app.getName()) + ";"
+								+ Utils.createFIQLEqual("version", app.getVersion()));
 
-			Integer softwareModuleId = Utils.getExistsSoftwareModule(softwareModuleResult.getContent());
-			return softwareModuleId.toString();
+				Integer softwareModuleId = Utils.getExistsSoftwareModule(softwareModuleResult.getContent());
+				return softwareModuleId.toString();
+			} catch (Exception e) {
+				throw new NotFoundException(
+						"Hawkbit connection error. Check your Hawkbit's IP in the propreties file!");
+			}
 		} else {
-			throw new BadRequestException("App could not be found in Appstore!");
+			throw new NotFoundException("App not found. appId: " + id);
 		}
 	}
 
@@ -257,6 +257,30 @@ public class AppService {
 			return Result.success(HttpStatus.OK, app);
 		}
 
+	}
+
+	public Result<?> deleteArtifactWithAppId(Long appId, String artifactId)
+			throws BadRequestException, NotFoundException {
+		String softwareModuleId = getSoftwareModuleName(appId);
+		return deleteArtifactFromHawkbit(softwareModuleId, artifactId);
+	}
+
+	public Result<?> deleteArtifactWithSoftwareModuleId(String softwareModuleId, String artifactId)
+			throws BadRequestException {
+		return deleteArtifactFromHawkbit(softwareModuleId, artifactId);
+	}
+
+	private Result<?> deleteArtifactFromHawkbit(String softwareModuleId, String artifactId) throws BadRequestException {
+		try {
+			Response response = hawkbitFeignClient.deleteArtifactsBysoftwareModuleId(softwareModuleId, artifactId);
+			if (response.status() == HttpStatus.OK.value()) {
+				return Result.success(HttpStatus.OK);
+			} else {
+				throw new BadRequestException("App could not be deleted from Hawkbit and Appstore!");
+			}
+		} catch (Exception e) {
+			throw new BadRequestException("Hawkbit connection error. Check your Hawkbit's IP in the propreties file!");
+		}
 	}
 
 	public void deleteApp(String appId) throws NotFoundException {

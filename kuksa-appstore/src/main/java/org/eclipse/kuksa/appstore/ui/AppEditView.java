@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2018 Netas Telekomunikasyon A.S.
+ * Copyright (C) 2018 Netas Telekomunikasyon A.S. [and others]
  *  
  *  This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -9,6 +9,7 @@
  *  
  * Contributors:
  * Adem Kose, Fatih Ayvaz and Ilker Kuzu (Netas Telekomunikasyon A.S.) - Initial functionality
+ * Philipp Heisig (Dortmund University of Applied Sciences and Arts)
  ******************************************************************************/
 package org.eclipse.kuksa.appstore.ui;
 
@@ -58,7 +59,7 @@ public class AppEditView extends CustomComponent implements View {
 
 	public static final String VIEW_NAME = "appedit";
 	public static final String TITLE_NAME = "App Edit";
-	final AppEditor appEditor = new AppEditor();
+	private final AppEditor appEditor;
 
 	final Grid<App> grid;
 
@@ -76,7 +77,8 @@ public class AppEditView extends CustomComponent implements View {
 	HawkbitMultiPartFileFeignClient hawkbitMultiPartFileFeignClient;
 
 	@Autowired
-	public AppEditView() {
+	public AppEditView(AppEditor appEditor) {
+		this.appEditor = appEditor;
 		com.vaadin.server.Page.getCurrent().setTitle(TITLE_NAME);
 
 		this.grid = new Grid<>(App.class);

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2018 Netas Telekomunikasyon A.S.
+ * Copyright (C) 2018 Netas Telekomunikasyon A.S. [and others]
  *  
  *  This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -9,6 +9,7 @@
  *  
  * Contributors:
  * Adem Kose, Fatih Ayvaz and Ilker Kuzu (Netas Telekomunikasyon A.S.) - Initial functionality
+ * Philipp Heisig (Dortmund University of Applied Sciences and Arts)
  ******************************************************************************/
 package org.eclipse.kuksa.appstore.ui;
 
@@ -24,6 +25,7 @@ import org.eclipse.kuksa.appstore.model.hawkbit.SoftwareModuleResult;
 import org.eclipse.kuksa.appstore.service.AppCategoryService;
 import org.eclipse.kuksa.appstore.service.AppService;
 import org.eclipse.kuksa.appstore.utils.Utils;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import com.vaadin.data.Binder;
 import com.vaadin.event.ShortcutAction;
@@ -73,7 +75,7 @@ public class AppEditor extends VerticalLayout implements View {
 	HawkbitFeignClient hawkbitFeignClient;
 	HawkbitMultiPartFileFeignClient hawkbitMultiPartFileFeignClient;
 	final Window artifactFileEditorWindow = new Window("Artifact File");
-	final ArtifactFileEditor artifactFileEditor = new ArtifactFileEditor();
+	private final ArtifactFileEditor artifactFileEditor;
 	SoftwareModuleResult softwareModuleResult;
 
 	public void setAppService(AppService appService) {
@@ -92,8 +94,9 @@ public class AppEditor extends VerticalLayout implements View {
 		this.hawkbitMultiPartFileFeignClient = hawkbitMultiPartFileFeignClient;
 	}
 
-	public AppEditor() {
-
+	@Autowired
+	public AppEditor(ArtifactFileEditor artifactFileEditor) {
+		this.artifactFileEditor = artifactFileEditor;
 		name.setWidth("220px");
 		name.setPlaceholder("App Name");
 		description.setWidth("450px");
