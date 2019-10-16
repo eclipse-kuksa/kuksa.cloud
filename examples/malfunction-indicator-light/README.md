@@ -5,7 +5,7 @@
 In this use-case the car sends telemetry data to the Kuksa cloud backend to check for a possible malfunction of the car.
 On the occurrence of a malfunction the driver will get notified by email including the next garage to get its car fixed.
 
-For this use-case the malfunction of the car is indicated by the *Malfunction Indicator Light* (MIL) defined in the [w3c VIS draft](https://w3c.github.io/automotive/vehicle_data/vehicle_information_service.html).
+For this use-case the malfunction of the car is indicated by the *Malfunction Indicator Light* (MIL) defined in the [w3c VISS draft](https://w3c.github.io/automotive/vehicle_data/vehicle_information_service.html) and [Vehicle Signal Specification](http://genivi.github.io/vehicle_signal_specification/).
 A value of `true` or `1` indicates a malfunction in the car and `false` or `0` indicates that the car is running fine.
 The car sends periodically telemetry data to the Kuksa cloud including the MIL value.
 Those telemetry data is stored in an InfluxDB database series based on the ID of the device.
