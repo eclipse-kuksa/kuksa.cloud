@@ -94,10 +94,12 @@ public class AppController {
 	@ApiOperation(notes = "Uploads an artifact to given app identified by its name and version. ", value = "Upload an Artifact to an App", nickname = "uploadArtifact", produces = "application/json", authorizations = @Authorization(value = "api_key"))
 	@ApiImplicitParam(name = "Authorization", value = "Token Format: 'base64(username: password)'", required = true, dataType = "String", paramType = "Header", defaultValue = "Basic Token")
 	@PostMapping("/app/{appId}/artifact")
-	public ResponseEntity<?> uploadArtifact(@Valid @RequestPart MultipartFile file, @PathVariable Long appId) throws AlreadyExistException, BadRequestException, IOException {
-		Result<?> response = appService.uploadArtifactToHawkbit(appId, file.getOriginalFilename(), file.getBytes());
+	public ResponseEntity<?> uploadArtifact(@Valid @RequestPart MultipartFile file, @PathVariable Long appId)
+			throws AlreadyExistException, BadRequestException, IOException, NotFoundException {
+		Result<?> response = appService.uploadArtifactWithAppId(appId, file.getOriginalFilename(), file.getBytes());
 		if (response.isSuccess()) {
-			LOG.debug("[uploadArtifact]: uploadArtifact request is processed successfully with artifact: {}", file.getOriginalFilename());
+			LOG.debug("[uploadArtifact]: uploadArtifact request is processed successfully with artifact: {}",
+					file.getOriginalFilename());
 			return new ResponseEntity<>(response.getPayload(), HttpStatus.OK);
 		} else {
 			LOG.debug("[uploadArtifact]: uploadArtifact request is received. artifact: {}", file.getOriginalFilename());

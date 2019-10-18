@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2018 Netas Telekomunikasyon A.S.
+ * Copyright (C) 2018 Netas Telekomunikasyon A.S. [and others]
  *  
  *  This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -9,6 +9,7 @@
  *  
  * Contributors:
  * Adem Kose, Fatih Ayvaz and Ilker Kuzu (Netas Telekomunikasyon A.S.) - Initial functionality
+ * Philipp Heisig (Dortmund University of Applied Sciences and Arts) 
  ******************************************************************************/
 package org.eclipse.kuksa.appstore.ui;
 
@@ -64,10 +65,11 @@ public class ArtifactFileEditor extends VerticalLayout implements View {
 	HawkbitFeignClient hawkbitFeignClient;
 	HawkbitMultiPartFileFeignClient hawkbitMultiPartFileFeignClient;
 	String softwareModuleId;
-	@Autowired
-	AppService appService;
+	private AppService appService;
 
-	public ArtifactFileEditor() {
+	@Autowired
+	public ArtifactFileEditor(AppService appService) {
+		this.appService = appService;
 
 		class ImageUploader implements Receiver, SucceededListener {
 			public File file;
@@ -99,7 +101,7 @@ public class ArtifactFileEditor extends VerticalLayout implements View {
 
 					fileInputStream.read(b);
 					try {
-						Result<?> result = appService.uploadArtifactToHawkbit(Long.parseLong(softwareModuleId),
+						Result<?> result = appService.uploadArtifactWithSoftwareModuleId(softwareModuleId,
 								event.getFilename(), b);
 						if (result.getStatusCode() == HttpStatus.CREATED) {
 
@@ -211,7 +213,7 @@ public class ArtifactFileEditor extends VerticalLayout implements View {
 	}
 
 	private void deleteArtifact(Artifact artifact) throws NumberFormatException, BadRequestException {
-		Result<?> result = appService.deleteArtifactFromHawkbit(Long.parseLong(softwareModuleId), artifact.getId());
+		Result<?> result = appService.deleteArtifactWithSoftwareModuleId(softwareModuleId, artifact.getId());
 		if (result.getStatusCode() == HttpStatus.OK) {
 			new Notification("The artifact is successfully deleted.", Notification.Type.HUMANIZED_MESSAGE)
 					.show(Page.getCurrent());
@@ -275,7 +277,7 @@ public class ArtifactFileEditor extends VerticalLayout implements View {
 						public void streamingFinished(final StreamingEndEvent event) {
 							progress.setVisible(false);
 							try {
-								appService.uploadArtifactToHawkbit(Long.parseLong(softwareModuleId), fileName,
+								appService.uploadArtifactWithSoftwareModuleId(softwareModuleId, fileName,
 										bas.toByteArray());
 							} catch (NumberFormatException e) {
 								e.printStackTrace();
