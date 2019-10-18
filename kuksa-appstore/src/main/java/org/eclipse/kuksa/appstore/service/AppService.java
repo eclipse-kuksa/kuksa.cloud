@@ -393,14 +393,17 @@ public class AppService {
 		List<Oem> listOem = new ArrayList<>();
 		List<User> listUser = new ArrayList<>();
 		if (oemList.size() > 0) {
-			listOem = oemRepository.findIdByNameIn(oemList);
+			if (oemList.size() > 0) {
+				listOem = oemRepository.findIdByNameIn(oemList);
 
-			List<Long> listOemId = new ArrayList<>();
-			for (int i = 0; i < listOem.size(); i++) {
-				listOemId.add(listOem.get(i).getId());
+				List<Long> listOemId = new ArrayList<>();
+				for (int i = 0; i < listOem.size(); i++) {
+					listOemId.add(listOem.get(i).getId());
+				}
+				if (listOemId.size() > 0) {
+					listUser = userRepository.findByOemIdIn(listOemId);
+				}
 			}
-
-			listUser = userRepository.findByOemIdIn(listOemId);
 		}
 		List<App> listUsersApp = new ArrayList<>();
 		List<Long> listUsersAppId = new ArrayList<>();
