@@ -23,6 +23,7 @@ import org.eclipse.kuksa.appstore.exception.AlreadyExistException;
 import org.eclipse.kuksa.appstore.exception.BadRequestException;
 import org.eclipse.kuksa.appstore.exception.NotFoundException;
 import org.eclipse.kuksa.appstore.model.App;
+import org.eclipse.kuksa.appstore.model.Oem;
 import org.eclipse.kuksa.appstore.model.User;
 import org.eclipse.kuksa.appstore.model.hawkbit.Result;
 import org.eclipse.kuksa.appstore.service.AppService;
@@ -49,8 +50,9 @@ import com.vaadin.ui.Image;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.VerticalLayout;
+import com.vaadin.ui.Window;
 
-@Secured({"ROLE_USER", "ROLE_ADMIN"})
+@Secured({ "ROLE_USER", "ROLE_ADMIN" })
 @SpringView(name = AppView.VIEW_NAME)
 public class AppView extends CustomComponent implements View {
 
@@ -59,6 +61,7 @@ public class AppView extends CustomComponent implements View {
 	public static final String TITLE_NAME = "App";
 
 	private String imgPath = "img";
+	final Window permissionConfirmWindow = new Window("Permission Confirm");
 
 	User currentUser;
 	CustomLayout appslayout;
@@ -72,6 +75,14 @@ public class AppView extends CustomComponent implements View {
 	AppService appService;
 	Button purchase_install;
 	Button uninstallButton;
+	private PermissionConfirm permissionConfirm;
+	ComboBox<String> comboBoxDevice;
+
+	@Autowired
+	public AppView(PermissionConfirm permissionConfirm) {
+		this.permissionConfirm = permissionConfirm;
+
+	}
 
 	@PostConstruct
 	public void init() {
@@ -83,6 +94,13 @@ public class AppView extends CustomComponent implements View {
 					Notification.Type.ERROR_MESSAGE).show(Page.getCurrent());
 			Page.getCurrent().setUriFragment("!" + AppsListView.VIEW_NAME);
 		}
+
+		VerticalLayout popupContent = new VerticalLayout();
+		popupContent.addComponent(permissionConfirm);
+		permissionConfirmWindow.setContent(popupContent);
+		permissionConfirmWindow.center();
+		permissionConfirmWindow.setModal(true);
+		permissionConfirmWindow.setResizable(false);
 
 		currentUser = userService.findByUserName(VaadinSession.getCurrent().getAttribute("user").toString());
 		com.vaadin.server.Page.getCurrent().setTitle(TITLE_NAME + "-" + currentApp.getName());
@@ -140,8 +158,39 @@ public class AppView extends CustomComponent implements View {
 		appslayout.addComponent(countlabel, "appcount");
 
 		mainlayout.addComponent(appslayout);
-		setCompositionRoot(mainlayout);
 
+		permissionConfirm.confirm.addClickListener(eventConfirm -> {
+			VaadinUI.getCurrent().removeWindow(permissionConfirmWindow);
+			try {
+				Result<?> result = appService.InstallApp(comboBoxDevice.getSelectedItem().get(), currentUser.getId(),
+						currentApp.getId());
+
+				if (result.isSuccess()) {
+					new Notification("Succes Install Action",
+							"The installing action has been sent to Hawkbit for selected device.",
+							Notification.Type.TRAY_NOTIFICATION).show(com.vaadin.server.Page.getCurrent());
+
+				} else {
+					new Notification("Fail Update Action", result.getErrorMessage(), Notification.Type.ERROR_MESSAGE)
+							.show(com.vaadin.server.Page.getCurrent());
+
+				}
+			} catch (NotFoundException e) {
+				new Notification(e.getMessage(), Notification.Type.ERROR_MESSAGE)
+						.show(com.vaadin.server.Page.getCurrent());
+
+			} catch (BadRequestException e) {
+				new Notification(e.getMessage(), Notification.Type.ERROR_MESSAGE)
+						.show(com.vaadin.server.Page.getCurrent());
+
+			} catch (AlreadyExistException e) {
+				new Notification(e.getMessage(), Notification.Type.ERROR_MESSAGE)
+						.show(com.vaadin.server.Page.getCurrent());
+			}
+
+		});
+
+		setCompositionRoot(mainlayout);
 	}
 
 	@Override
@@ -165,8 +214,9 @@ public class AppView extends CustomComponent implements View {
 			return;
 
 		}
+
 		if (isOwner) {
-			ComboBox<String> comboBoxDevice;
+
 			comboBoxDevice = new ComboBox<>("Select A Device");
 			comboBoxDevice.setItems(listOfTargets);
 			comboBoxDevice.setPlaceholder("No device selected");
@@ -184,32 +234,10 @@ public class AppView extends CustomComponent implements View {
 
 					if (comboBoxDevice.getValue() != null) {
 
-						try {
-							Result<?> result = appService.InstallApp(comboBoxDevice.getSelectedItem().get(),
-									currentUser.getId(), currentApp.getId());
+						permissionConfirmWindow.center();
+						VaadinUI.getCurrent().addWindow(permissionConfirmWindow);
 
-							if (result.isSuccess()) {
-								new Notification("Succes Install Action",
-										"The installing action has been sent to Hawkbit for selected device.",
-										Notification.Type.TRAY_NOTIFICATION).show(com.vaadin.server.Page.getCurrent());
-
-							} else {
-								new Notification("Fail Update Action", result.getErrorMessage(),
-										Notification.Type.ERROR_MESSAGE).show(com.vaadin.server.Page.getCurrent());
-
-							}
-						} catch (NotFoundException e) {
-							new Notification(e.getMessage(), Notification.Type.ERROR_MESSAGE)
-									.show(com.vaadin.server.Page.getCurrent());
-
-						} catch (BadRequestException e) {
-							new Notification(e.getMessage(), Notification.Type.ERROR_MESSAGE)
-									.show(com.vaadin.server.Page.getCurrent());
-
-						} catch (AlreadyExistException e) {
-							new Notification(e.getMessage(), Notification.Type.ERROR_MESSAGE)
-									.show(com.vaadin.server.Page.getCurrent());
-						}
+						permissionConfirm.listPermisson(currentApp.getId());
 
 					} else {
 						new Notification("Select a Device", "You have to select a device!",

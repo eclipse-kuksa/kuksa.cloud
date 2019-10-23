@@ -13,17 +13,28 @@
 package org.eclipse.kuksa.appstore.utils;
 
 import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.kuksa.appstore.model.Permission;
 import org.eclipse.kuksa.appstore.model.User;
 import org.eclipse.kuksa.appstore.model.hawkbit.SoftwareModule;
+
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.vaadin.server.Page;
+import com.vaadin.ui.Notification;
 
 public class Utils {
 
 	private static final String IMAGE_FILE_PATH = System.getProperty("user.dir") + File.separator + "imgs"
 			+ File.separator + "app";
-	
+
 	public static final String UNINSTALLED_ALL = "UNINSTALLED_ALL";
+
 	public static String getImageFilePath() {
 		return IMAGE_FILE_PATH;
 	}
@@ -74,6 +85,7 @@ public class Utils {
 		}
 		return false;
 	}
+
 	public static List<SoftwareModule> UninstallApp(SoftwareModule softwareModule,
 			List<SoftwareModule> softwareModuleList) {
 
@@ -85,8 +97,8 @@ public class Utils {
 		}
 		return softwareModuleList;
 	}
-	public static boolean isUserAlreadyOwner(User user,
-			List<User> ownerList) {
+
+	public static boolean isUserAlreadyOwner(User user, List<User> ownerList) {
 
 		for (User indexUser : ownerList) {
 			if (indexUser.getId().equals(user.getId())) {
@@ -95,8 +107,8 @@ public class Utils {
 		}
 		return false;
 	}
-	public static List<User> removeOwnerUser(User user,
-			List<User> ownerList) {
+
+	public static List<User> removeOwnerUser(User user, List<User> ownerList) {
 
 		for (User indexUser : ownerList) {
 			if (indexUser.getId().equals(user.getId())) {
@@ -105,5 +117,22 @@ public class Utils {
 			}
 		}
 		return ownerList;
+	}
+
+	public static List<String> convertPermissionArtifactFileToStringList(String permissionArtifactString)
+			throws JsonParseException, JsonMappingException, IOException {
+		List<Permission> permissionList = new ArrayList<>();
+		ObjectMapper mapper = new ObjectMapper();
+
+		permissionList = mapper.readValue(permissionArtifactString, new TypeReference<List<Permission>>() {
+		});
+
+		List<String> permissionStringList = new ArrayList<String>();
+		for (Permission permission : permissionList) {
+			permissionStringList.add(permission.getDisplayName());
+
+		}
+		return permissionStringList;
+
 	}
 }
