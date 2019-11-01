@@ -82,7 +82,7 @@ public class PermissionConfirm extends VerticalLayout implements View {
 				try {
 					permissionsList = new ListSelect<>(
 							"<b><font color=\"red\">This application wants the following permissions!</font></b>",
-							Utils.convertPermissionArtifactFileToStringList(responseDownloadArtifactString));
+							Utils.permissionArtifactStringToList(responseDownloadArtifactString));
 				} catch (JsonParseException e) {
 					new Notification("PERMISSIONFILE.JSON Json Parse Exception", e.getMessage(),
 							Notification.Type.ERROR_MESSAGE).show(Page.getCurrent());

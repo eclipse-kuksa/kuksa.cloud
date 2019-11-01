@@ -119,7 +119,7 @@ public class Utils {
 		return ownerList;
 	}
 
-	public static List<String> convertPermissionArtifactFileToStringList(String permissionArtifactString)
+	public static List<String> permissionArtifactStringToList(String permissionArtifactString)
 			throws JsonParseException, JsonMappingException, IOException {
 		List<Permission> permissionList = new ArrayList<>();
 		ObjectMapper mapper = new ObjectMapper();
