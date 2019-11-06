@@ -26,6 +26,7 @@ import org.eclipse.kuksa.appstore.exception.NotFoundException;
 import org.eclipse.kuksa.appstore.model.App;
 import org.eclipse.kuksa.appstore.model.Oem;
 import org.eclipse.kuksa.appstore.model.User;
+import org.eclipse.kuksa.appstore.model.hawkbit.Artifact;
 import org.eclipse.kuksa.appstore.model.hawkbit.AssignedResult;
 import org.eclipse.kuksa.appstore.model.hawkbit.Distribution;
 import org.eclipse.kuksa.appstore.model.hawkbit.DistributionResult;
@@ -46,6 +47,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+
 import feign.Response;
 
 @Service
@@ -393,14 +395,17 @@ public class AppService {
 		List<Oem> listOem = new ArrayList<>();
 		List<User> listUser = new ArrayList<>();
 		if (oemList.size() > 0) {
+
 			listOem = oemRepository.findIdByNameIn(oemList);
 
 			List<Long> listOemId = new ArrayList<>();
 			for (int i = 0; i < listOem.size(); i++) {
 				listOemId.add(listOem.get(i).getId());
 			}
+			if (listOemId.size() > 0) {
+				listUser = userRepository.findByOemIdIn(listOemId);
+			}
 
-			listUser = userRepository.findByOemIdIn(listOemId);
 		}
 		List<App> listUsersApp = new ArrayList<>();
 		List<Long> listUsersAppId = new ArrayList<>();
@@ -761,6 +766,32 @@ public class AppService {
 				.getDistributionByName(Utils.createFIQLEqual("name", targetDeviceName), 1, "id:DESC");
 
 		return lastDistributionResult;
+	}
+
+	public String downloadPermissionArtifactFile(Long appId) throws BadRequestException, NotFoundException {
+
+		App currentApp = appRepository.findById(appId);
+		SoftwareModuleResult currentSoftwareModuleResult = hawkbitFeignClient
+				.getSoftwaremoduleByName(Utils.createFIQLEqual("name", currentApp.getName()) + ";"
+						+ Utils.createFIQLEqual("version", currentApp.getVersion()));
+
+		List<Artifact> listArtifact = hawkbitFeignClient
+				.getArtifactsBysoftwareModuleId(currentSoftwareModuleResult.getContent().get(0).getId().toString());
+
+		String artifactId = null;
+
+		for (Artifact artifact : listArtifact) {
+			if (artifact.getProvidedFilename().toUpperCase().equals(Utils.PERMISSION)) {
+				artifactId = artifact.getId();
+				break;
+			}
+		}
+		if (artifactId == null) {
+			return null;
+		}
+		String responseDownloadArtifactFile = hawkbitFeignClient
+				.downloadArtifactFile(currentSoftwareModuleResult.getContent().get(0).getId().toString(), artifactId);
+		return responseDownloadArtifactFile;
 	}
 
 }

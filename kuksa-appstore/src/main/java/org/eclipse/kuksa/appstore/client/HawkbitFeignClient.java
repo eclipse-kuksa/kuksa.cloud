@@ -15,6 +15,7 @@ package org.eclipse.kuksa.appstore.client;
 import java.util.List;
 
 import org.eclipse.kuksa.appstore.configuration.HawkbitFeignConfig;
+import org.eclipse.kuksa.appstore.model.Permission;
 import org.eclipse.kuksa.appstore.model.hawkbit.Artifact;
 import org.eclipse.kuksa.appstore.model.hawkbit.AssignedResult;
 import org.eclipse.kuksa.appstore.model.hawkbit.Distribution;
@@ -85,4 +86,9 @@ public interface HawkbitFeignClient {
 			"Content-Type=application/json;charset=UTF-8" }, value = "/rest/v1/softwaremodules/{softwareModuleId}")
 	Response updateSoftwareModule(@PathVariable("softwareModuleId") String softwareModuleId,
 			@RequestBody SoftwareModule softwareModule);
+
+	@RequestMapping(method = RequestMethod.GET, headers = {
+			"Content-Type=application/octet-stream;charset=UTF-8" }, value = "rest/v1/softwaremodules/{softwareModuleId}/artifacts/{artifactId}/download")
+	String downloadArtifactFile(@PathVariable("softwareModuleId") String softwareModuleId,
+			@PathVariable("artifactId") String artifactId);
 }

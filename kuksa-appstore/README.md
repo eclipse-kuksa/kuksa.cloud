@@ -65,12 +65,16 @@ Just run `AppStoreApplication.java` class.Spring boot has an embedded Tomcat ins
 
 > keycloak.realm= demo // keycloak realm name
 > keycloak.resource= demo // keycloak client name
-> keycloak.auth-server-url= http://217.78.106.103:8022/auth/ // keycloak server url
+> keycloak.auth-server-url= http://keycloakIP:keycloakPORT/auth/ // keycloak server url
 > keycloak.credentials.secret= 460650c2-6b4a-4ef4-99cb-eef2b8664d2a // keycloak client credential secret key
 
 - src\main\resources\realm-export.json // Import this file to your Keycloak server to upload Keycloak real and client configuration.
+
 > There are 4 roles on our realm. Like "ROLE_ADMIN","ROLE_USER","uma_authorization","offline_access". Admin user should to have 4 roles and Normal User should to have 3 roles like this "ROLE_USER","uma_authorization","offline_access". You can assign roles to users from Keycloak admin console.
 
+- src\main\resources\PERMISSION.JSON // Upload this json file to every single application as an artifact file. This file contains permission list that the application will use.
+
+> PERMISSION.JSON contains list array and each permission object has 4 field like [name,type,displayName,description].
  
 - Build Kuksa App Store jar file:
 

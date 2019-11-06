@@ -1,0 +1,14 @@
+[
+ {
+   "name": "CAMERA",
+   "type": "CRITICAL",
+   "displayName": "Camere permission",
+   "description" : "Camere permission description"
+ },
+ {
+   "name": "MICROPHONE",
+   "type": "NEGLIGIBLE",
+   "displayName": "Microphone permission",
+   "description" : "Camere permission description"
+ }
+]
