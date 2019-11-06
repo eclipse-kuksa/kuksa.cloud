@@ -34,7 +34,7 @@ public class Utils {
 			+ File.separator + "app";
 
 	public static final String UNINSTALLED_ALL = "UNINSTALLED_ALL";
-
+	public static final String PERMISSION = "PERMISSION.JSON";
 	public static String getImageFilePath() {
 		return IMAGE_FILE_PATH;
 	}

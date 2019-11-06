@@ -781,7 +781,7 @@ public class AppService {
 		String artifactId = null;
 
 		for (Artifact artifact : listArtifact) {
-			if (artifact.getProvidedFilename().toUpperCase().equals("PERMISSIONFILE.JSON")) {
+			if (artifact.getProvidedFilename().toUpperCase().equals(Utils.PERMISSION)) {
 				artifactId = artifact.getId();
 				break;
 			}

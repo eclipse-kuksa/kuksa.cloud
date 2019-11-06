@@ -84,24 +84,24 @@ public class PermissionConfirm extends VerticalLayout implements View {
 							"<b><font color=\"red\">This application wants the following permissions!</font></b>",
 							Utils.permissionArtifactStringToList(responseDownloadArtifactString));
 				} catch (JsonParseException e) {
-					new Notification("PERMISSIONFILE.JSON Json Parse Exception", e.getMessage(),
+					new Notification(Utils.PERMISSION + " Json Parse Exception", e.getMessage(),
 							Notification.Type.ERROR_MESSAGE).show(Page.getCurrent());
 				} catch (JsonMappingException e) {
-					new Notification("PERMISSIONFILE.JSON Json Mapping Exception", e.getMessage(),
+					new Notification(Utils.PERMISSION + " Json Mapping Exception", e.getMessage(),
 							Notification.Type.ERROR_MESSAGE).show(Page.getCurrent());
 				} catch (IOException e) {
-					new Notification("PERMISSIONFILE.JSON IO Exception", e.getMessage(),
+					new Notification(Utils.PERMISSION + " IO Exception", e.getMessage(),
 							Notification.Type.ERROR_MESSAGE).show(Page.getCurrent());
 				}
 			} else {
-				new Notification("PERMISSIONFILE.JSON not found or empty.", Notification.Type.ERROR_MESSAGE)
+				new Notification(Utils.PERMISSION + " not found or empty.", Notification.Type.ERROR_MESSAGE)
 						.show(Page.getCurrent());
 			}
 		} catch (BadRequestException e1) {
-			new Notification("PERMISSIONFILE.JSON not found or empty.", Notification.Type.ERROR_MESSAGE)
+			new Notification(Utils.PERMISSION + " not found or empty.", Notification.Type.ERROR_MESSAGE)
 					.show(Page.getCurrent());
 		} catch (NotFoundException e1) {
-			new Notification("PERMISSIONFILE.JSON not found or empty.", Notification.Type.ERROR_MESSAGE)
+			new Notification(Utils.PERMISSION + " not found or empty.", Notification.Type.ERROR_MESSAGE)
 					.show(Page.getCurrent());
 		}
 
