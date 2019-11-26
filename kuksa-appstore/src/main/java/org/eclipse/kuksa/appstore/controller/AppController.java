@@ -89,23 +89,6 @@ public class AppController {
 			return new ResponseEntity<>(HttpStatus.BAD_REQUEST.getReasonPhrase(), HttpStatus.BAD_REQUEST);
 		}
 	}
-	
-	@Secured("ROLE_ADMIN")
-	@ApiOperation(notes = "Uploads an artifact to given app identified by its name and version. ", value = "Upload an Artifact to an App", nickname = "uploadArtifact", produces = "application/json", authorizations = @Authorization(value = "api_key"))
-	@ApiImplicitParam(name = "Authorization", value = "Token Format: 'base64(username: password)'", required = true, dataType = "String", paramType = "Header", defaultValue = "Basic Token")
-	@PostMapping("/app/{appId}/artifact")
-	public ResponseEntity<?> uploadArtifact(@Valid @RequestPart MultipartFile file, @PathVariable Long appId)
-			throws AlreadyExistException, BadRequestException, IOException, NotFoundException {
-		Result<?> response = appService.uploadArtifactWithAppId(appId, file.getOriginalFilename(), file.getBytes());
-		if (response.isSuccess()) {
-			LOG.debug("[uploadArtifact]: uploadArtifact request is processed successfully with artifact: {}",
-					file.getOriginalFilename());
-			return new ResponseEntity<>(response.getPayload(), HttpStatus.OK);
-		} else {
-			LOG.debug("[uploadArtifact]: uploadArtifact request is received. artifact: {}", file.getOriginalFilename());
-			return new ResponseEntity<>(HttpStatus.BAD_REQUEST.getReasonPhrase(), HttpStatus.BAD_REQUEST);
-		}
-	}
 
 	@Secured("ROLE_ADMIN")
 	@ApiOperation(notes = "Updates the App identified by the appId parameter and the JSON body.", value = "Updating an App", nickname = "updateApp", produces = "application/json", authorizations = @Authorization(value = "api_key"))
@@ -264,5 +247,54 @@ public class AppController {
 		List<Long> appIds = new ArrayList<Long>();
 		appIds.add(appId);
 		return new ResponseEntity<>(appService.UninstallMultiApp(deviceName, userId, appIds), HttpStatus.OK);
+	}
+	
+	@Secured("ROLE_ADMIN")
+	@ApiOperation(notes = "Get all artifacts to given app identified by its name and version.", value = "Get Artifacts for an App", nickname = "getArtifacts", produces = "application/json", authorizations = @Authorization(value = "api_key"))
+	@ApiImplicitParam(name = "Authorization", value = "Token Format: 'base64(username: password)'", required = true, dataType = "String", paramType = "Header", defaultValue = "Basic Token")
+	@GetMapping("/app/{appId}/artifacts")
+	public ResponseEntity<?> getArtifacts(@PathVariable Long appId)
+			throws AlreadyExistException, BadRequestException, IOException, NotFoundException {
+		Result<?> response = appService.getArtifactsWithAppId(appId);
+		if (response.isSuccess()) {
+			LOG.debug("[getArtifacts]: getArtifacts request is processed successfully for app: {}", appId);
+			return new ResponseEntity<>(response.getPayload(), HttpStatus.OK);
+		} else {
+			LOG.debug("[getArtifacts]: getArtifacts request is received for app: {}", appId);
+			return new ResponseEntity<>(HttpStatus.BAD_REQUEST.getReasonPhrase(), HttpStatus.BAD_REQUEST);
+		}
+	}
+	
+	@Secured("ROLE_ADMIN")
+	@ApiOperation(notes = "Uploads an artifact to given app identified by its name and version. ", value = "Upload an Artifact to an App", nickname = "uploadArtifact", produces = "application/json", authorizations = @Authorization(value = "api_key"))
+	@ApiImplicitParam(name = "Authorization", value = "Token Format: 'base64(username: password)'", required = true, dataType = "String", paramType = "Header", defaultValue = "Basic Token")
+	@PostMapping("/app/{appId}/artifact")
+	public ResponseEntity<?> uploadArtifact(@Valid @RequestPart MultipartFile file, @PathVariable Long appId)
+			throws AlreadyExistException, BadRequestException, IOException, NotFoundException {
+		Result<?> response = appService.uploadArtifactWithAppId(appId, file.getOriginalFilename(), file.getBytes());
+		if (response.isSuccess()) {
+			LOG.debug("[uploadArtifact]: uploadArtifact request is processed successfully with artifact: {}",
+					file.getOriginalFilename());
+			return new ResponseEntity<>(response.getPayload(), HttpStatus.OK);
+		} else {
+			LOG.debug("[uploadArtifact]: uploadArtifact request is received. artifact: {}", file.getOriginalFilename());
+			return new ResponseEntity<>(HttpStatus.BAD_REQUEST.getReasonPhrase(), HttpStatus.BAD_REQUEST);
+		}
+	}
+	
+	@Secured("ROLE_ADMIN")
+	@ApiOperation(notes = "Delete an artifact to given app identified by its name and version.", value = "Delete Artifact for an App", nickname = "deleteArtifact", produces = "application/json", authorizations = @Authorization(value = "api_key"))
+	@ApiImplicitParam(name = "Authorization", value = "Token Format: 'base64(username: password)'", required = true, dataType = "String", paramType = "Header", defaultValue = "Basic Token")
+	@DeleteMapping("/app/{appId}/artifact/{artifactId}")
+	public ResponseEntity<?> deleteArtifact(@PathVariable Long appId, @PathVariable String artifactId)
+			throws AlreadyExistException, BadRequestException, IOException, NotFoundException {
+		Result<?> response = appService.deleteArtifactWithAppId(appId, artifactId);
+		if (response.isSuccess()) {
+			LOG.debug("[uploadArtifact]: uploadArtifact request is processed successfully with artifact: {}", appId);
+			return new ResponseEntity<>(response.getPayload(), HttpStatus.OK);
+		} else {
+			LOG.debug("[uploadArtifact]: uploadArtifact request is received. artifact: {}", appId);
+			return new ResponseEntity<>(HttpStatus.BAD_REQUEST.getReasonPhrase(), HttpStatus.BAD_REQUEST);
+		}
 	}
 }

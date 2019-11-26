@@ -70,36 +70,21 @@ public class AppService {
 	public Result<?> createApp(App app) throws AlreadyExistException, BadRequestException {
 
 		if (app.getName() == null || app.getName().equals("")) {
-
 			throw new BadRequestException("Name is mandatory field!");
-
 		} else if (app.getName().contains(" ")) {
-
 			throw new BadRequestException("Name should not contain space character!");
-
 		} else if (app.getVersion() == null || app.getVersion().equals("")) {
-
 			throw new BadRequestException("Version is mandatory field!");
-
 		} else if (app.getDescription() == null || app.getDescription().equals("")) {
-
 			throw new BadRequestException("Description is mandatory field!");
-
 		} else if (app.getOwner() == null || app.getOwner().equals("")) {
-
 			throw new BadRequestException("Owner is mandatory field!");
-
 		} else if (appRepository.findByNameIgnoreCase(app.getName()) != null) {
-
 			throw new AlreadyExistException("App name already exist. name: " + app.getName());
-
 		} else if (app.getAppcategory() == null) {
-
 			throw new BadRequestException("App Category is mandatory field!");
-
 		} else if (app.getAppcategory() != null
 				&& appCategoryRepository.findById(app.getAppcategory().getId()) == null) {
-
 			throw new BadRequestException("App Category should exist!");
 		}
 		appRepository.save(app);
@@ -111,7 +96,6 @@ public class AppService {
 		App currentApp = appRepository.findByName(app.getName());
 		List<SoftwareModule> responsesoftwareModule;
 		try {
-
 			List<SoftwareModule> softwareModuleList = new ArrayList<>();
 			softwareModuleList.add(new SoftwareModule(app.getName(), app.getDescription(), app.getVersion(),
 					"application", app.getOwner()));
@@ -129,61 +113,6 @@ public class AppService {
 		}
 	}
 
-	public Result<?> uploadArtifactWithAppId(Long appId, String fileName, byte[] b)
-			throws BadRequestException, NotFoundException {
-		String softwareModuleId = getSoftwareModuleName(appId);
-		return uploadArtifactToHawkbit(softwareModuleId, fileName, b);
-	}
-
-	public Result<?> uploadArtifactWithSoftwareModuleId(String softwareModuleId, String fileName, byte[] b)
-			throws BadRequestException {
-		return uploadArtifactToHawkbit(softwareModuleId, fileName, b);
-	}
-
-	private Result<?> uploadArtifactToHawkbit(String softwareModuleId, String fileName, byte[] b)
-			throws BadRequestException {
-		try {
-			ArtifactFile appArtifactFile = new ArtifactFile(fileName, fileName, "multipart/form-data", b);
-			Response response = hawkbitMultiPartFileFeignClient.uploadFile(softwareModuleId, appArtifactFile);
-
-			if (response.status() == HttpStatus.CREATED.value()) {
-				return Result.success(HttpStatus.CREATED);
-			} else {
-				throw new BadRequestException("App could not be saved to Hawkbit and Appstore!");
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-			throw new BadRequestException("Hawkbit connection error. Check your Hawkbit's IP in the propreties file!");
-		}
-	}
-
-	public App findById(Long id) {
-		return appRepository.findById(id);
-	}
-
-	public App findByName(String name) {
-		return appRepository.findByName(name);
-	}
-
-	private String getSoftwareModuleName(Long id) throws BadRequestException, NotFoundException {
-		App app = appRepository.findById(id);
-		if (app != null) {
-			try {
-				SoftwareModuleResult softwareModuleResult = hawkbitFeignClient
-						.getSoftwaremoduleByName(Utils.createFIQLEqual("name", app.getName()) + ";"
-								+ Utils.createFIQLEqual("version", app.getVersion()));
-
-				Integer softwareModuleId = Utils.getExistsSoftwareModule(softwareModuleResult.getContent());
-				return softwareModuleId.toString();
-			} catch (Exception e) {
-				throw new NotFoundException(
-						"Hawkbit connection error. Check your Hawkbit's IP in the propreties file!");
-			}
-		} else {
-			throw new NotFoundException("App not found. appId: " + id);
-		}
-	}
-
 	public Result<?> updateApp(String appId, App app)
 			throws NotFoundException, BadRequestException, AlreadyExistException {
 
@@ -192,37 +121,22 @@ public class AppService {
 		if (currentApp == null) {
 			throw new NotFoundException("App not found. appId: " + appId);
 		} else if (app.getName() == null || app.getName().equals("")) {
-
 			throw new BadRequestException("Name is mandatory field!");
-
 		} else if (app.getName().contains(" ")) {
-
 			throw new BadRequestException("Name should not contain space character!");
-
 		} else if (app.getVersion() == null || app.getVersion().equals("")) {
-
 			throw new BadRequestException("Version is mandatory field!");
-
 		} else if (app.getDescription() == null || app.getDescription().equals("")) {
-
 			throw new BadRequestException("Description is mandatory field!");
-
 		} else if (app.getOwner() == null || app.getOwner().equals("")) {
-
 			throw new BadRequestException("Owner is mandatory field!");
-
 		} else if (!currentApp.getName().equals(app.getName())
 				&& appRepository.findByNameIgnoreCase(app.getName()) != null) {
-
 			throw new AlreadyExistException("New App name already exist. New name: " + app.getName());
-
 		} else if (app.getAppcategory() == null) {
-
 			throw new BadRequestException("App Category is mandatory field!");
-
 		} else if (app.getAppcategory() != null
 				&& appCategoryRepository.findById(app.getAppcategory().getId()) == null) {
-
 			throw new BadRequestException("App Category should exist!");
 		}
 		app.setId(currentApp.getId());
@@ -258,7 +172,67 @@ public class AppService {
 			appRepository.save(app);
 			return Result.success(HttpStatus.OK, app);
 		}
+	}
 
+	public void deleteApp(String appId) throws NotFoundException {
+		App currentApp = appRepository.findById(Long.parseLong(appId));
+		if (currentApp == null) {
+			throw new NotFoundException("App not found. appId: " + appId);
+		} else {
+			SoftwareModuleResult softwareModuleResult;
+			try {
+				softwareModuleResult = hawkbitFeignClient
+						.getSoftwaremoduleByName(Utils.createFIQLEqual("name", currentApp.getName()) + ";"
+								+ Utils.createFIQLEqual("version", currentApp.getVersion()));
+			} catch (Exception e) {
+				throw new NotFoundException(
+						"Hawkbit connection error. Check your Hawkbit's IP in the propreties file!");
+			}
+
+			if (softwareModuleResult.getSize() > 0) {
+				Integer softawareModuleId = Utils.getExistsSoftwareModule(softwareModuleResult.getContent());
+
+				Response responseSoftwareModule = hawkbitFeignClient
+						.deletesoftwareModuleById(softawareModuleId.toString());
+
+				if (responseSoftwareModule.status() == HttpStatus.OK.value()) {
+					appRepository.delete(currentApp);
+				} else {
+					throw new NotFoundException(responseSoftwareModule.body().toString());
+				}
+			} else {
+				throw new NotFoundException("Software Module not found on Hawkbit. . Software:"
+						+ Utils.createSoftwareName(currentApp.getId()));
+			}
+		}
+	}
+
+	public Result<?> uploadArtifactWithAppId(Long appId, String fileName, byte[] b)
+			throws BadRequestException, NotFoundException {
+		String softwareModuleId = getSoftwareModuleName(appId);
+		return uploadArtifactToHawkbit(softwareModuleId, fileName, b);
+	}
+
+	public Result<?> uploadArtifactWithSoftwareModuleId(String softwareModuleId, String fileName, byte[] b)
+			throws BadRequestException {
+		return uploadArtifactToHawkbit(softwareModuleId, fileName, b);
+	}
+
+	private Result<?> uploadArtifactToHawkbit(String softwareModuleId, String fileName, byte[] b)
+			throws BadRequestException {
+		try {
+			ArtifactFile appArtifactFile = new ArtifactFile(fileName, fileName, "multipart/form-data", b);
+			Response response = hawkbitMultiPartFileFeignClient.uploadFile(softwareModuleId, appArtifactFile);
+
+			if (response.status() == HttpStatus.CREATED.value()) {
+				return Result.success(HttpStatus.CREATED);
+			} else {
+				throw new BadRequestException("App could not be saved to Hawkbit and Appstore!");
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw new BadRequestException("Hawkbit connection error. Check your Hawkbit's IP in the propreties file!");
+		}
 	}
 
 	public Result<?> deleteArtifactWithAppId(Long appId, String artifactId)
@@ -285,149 +259,14 @@ public class AppService {
 		}
 	}
 
-	public void deleteApp(String appId) throws NotFoundException {
-		App currentApp = appRepository.findById(Long.parseLong(appId));
-		if (currentApp == null) {
-			throw new NotFoundException("App not found. appId: " + appId);
+	public Result<?> getArtifactsWithAppId(Long appId) throws BadRequestException, NotFoundException {
+		String softwareModuleId = getSoftwareModuleName(appId);
+		List<Artifact> artifacts = hawkbitFeignClient.getArtifactsBysoftwareModuleId(softwareModuleId);
+		if (!artifacts.isEmpty()) {
+			return Result.success(HttpStatus.OK, artifacts);
 		} else {
-
-			SoftwareModuleResult softwareModuleResult;
-			try {
-				softwareModuleResult = hawkbitFeignClient
-						.getSoftwaremoduleByName(Utils.createFIQLEqual("name", currentApp.getName()) + ";"
-								+ Utils.createFIQLEqual("version", currentApp.getVersion()));
-			} catch (Exception e) {
-				throw new NotFoundException(
-						"Hawkbit connection error. Check your Hawkbit's IP in the propreties file!");
-			}
-
-			if (softwareModuleResult.getSize() > 0) {
-				Integer softawareModuleId = Utils.getExistsSoftwareModule(softwareModuleResult.getContent());
-
-				Response responseSoftwareModule = hawkbitFeignClient
-						.deletesoftwareModuleById(softawareModuleId.toString());
-
-				if (responseSoftwareModule.status() == HttpStatus.OK.value()) {
-
-					appRepository.delete(currentApp);
-
-				} else {
-					throw new NotFoundException(responseSoftwareModule.body().toString());
-				}
-			} else {
-				throw new NotFoundException("Software Module not found on Hawkbit. . Software:"
-						+ Utils.createSoftwareName(currentApp.getId()));
-			}
-
+			return Result.fail(HttpStatus.NO_CONTENT);
 		}
-	}
-
-	public List<App> findAll() {
-
-		return appRepository.findAll();
-
-	}
-
-	public List<App> findByNameStartsWithIgnoreCase(String name) {
-
-		return appRepository.findByNameStartsWithIgnoreCase(name);
-
-	}
-
-	public Page<App> findAll(Pageable pageable) {
-
-		return appRepository.findAll(pageable);
-
-	}
-
-	public Page<App> findByNameStartsWithIgnoreCase(String name, Pageable pageable) {
-
-		return appRepository.findByNameStartsWithIgnoreCase(name, pageable);
-
-	}
-
-	public App incrementAppDownloadCount(App app) {
-
-		app.setDownloadcount(app.getDownloadcount() + 1);
-
-		return app;
-
-	}
-
-	public Page<App> findByNameStartsWithIgnoreCaseAndInstalledusersUserName(String appname, String username,
-			Pageable pageable) {
-
-		return appRepository.findByNameStartsWithIgnoreCaseAndInstalledusersUsername(appname, username, pageable);
-
-	}
-
-	public Page<App> findByInstalledusersId(Long userid, Pageable pageable) {
-
-		return appRepository.findByInstalledusersId(userid, pageable);
-
-	}
-
-	public Page<App> findByNameStartsWithIgnoreCaseAndInstalledusersId(String appname, Long userid, Pageable pageable) {
-
-		return appRepository.findByNameStartsWithIgnoreCaseAndInstalledusersId(appname, userid, pageable);
-
-	}
-
-	public Page<App> findByIdIn(List<Long> myappsid, Pageable pageable) {
-
-		return appRepository.findByIdIn(myappsid, pageable);
-	}
-
-	public Page<App> findByAppcategoryId(Long id, Pageable pageable) {
-
-		return appRepository.findByAppcategoryId(id, pageable);
-
-	}
-
-	public Page<App> findByNameStartsWithIgnoreCaseAndAppcategoryId(String name, Long id, Pageable pageable) {
-
-		return appRepository.findByNameStartsWithIgnoreCaseAndAppcategoryId(name, id, pageable);
-
-	}
-
-	public List<Long> createUsersAppList(String userId, List<String> oemList) {
-
-		List<Oem> listOem = new ArrayList<>();
-		List<User> listUser = new ArrayList<>();
-		if (oemList.size() > 0) {
-
-			listOem = oemRepository.findIdByNameIn(oemList);
-
-			List<Long> listOemId = new ArrayList<>();
-			for (int i = 0; i < listOem.size(); i++) {
-				listOemId.add(listOem.get(i).getId());
-			}
-			if (listOemId.size() > 0) {
-				listUser = userRepository.findByOemIdIn(listOemId);
-			}
-
-		}
-		List<App> listUsersApp = new ArrayList<>();
-		List<Long> listUsersAppId = new ArrayList<>();
-		for (int i = 0; i < listUser.size(); i++) {
-
-			listUsersApp.addAll(listUser.get(i).getUserapps());
-		}
-		for (int i = 0; i < listUsersApp.size(); i++) {
-
-			listUsersAppId.add(listUsersApp.get(i).getId());
-		}
-		List<Long> listUsersAppIdFromRelationQuery = new ArrayList<>();
-		listUsersAppIdFromRelationQuery = appRepository.findUsersAppsIdFromUsersRelationship(userId);
-		listUsersAppId.addAll(listUsersAppIdFromRelationQuery);
-		return listUsersAppId;
-
-	}
-
-	public Page<App> findUsersApps(String userId, List<String> oemList, Pageable pageable) {
-
-		return appRepository.findUsersApps(createUsersAppList(userId, oemList), pageable);
-
 	}
 
 	public Result<?> purchaseApp(Long userId, Long appId) throws NotFoundException, BadRequestException {
@@ -449,7 +288,7 @@ public class AppService {
 		appRepository.save(currentApp);
 		return Result.success(HttpStatus.OK, currentApp);
 	}
-
+	
 	public Result<?> InstallApp(String targetDeviceName, Long userId, Long appId)
 			throws NotFoundException, BadRequestException, AlreadyExistException {
 
@@ -467,10 +306,8 @@ public class AppService {
 
 		if (!isOwner) {
 			throw new BadRequestException("This User is not owner of this app!");
-
 		}
 		if (targetDeviceName == null) {
-
 			throw new BadRequestException("targetDeviceName should not be empty!");
 		}
 		SoftwareModuleResult currentSoftwareModuleResult = hawkbitFeignClient
@@ -505,12 +342,10 @@ public class AppService {
 					.getModules();
 
 			if (softwareModules.size() == 1 && softwareModules.get(0).getName().equals(Utils.UNINSTALLED_ALL)) {
-
 				softwareModules.remove(0);
 			}
 
 			if (!Utils.isAppAlreadyInstalled(currentSoftwareModuleResult.getContent().get(0), softwareModules)) {
-
 				softwareModules.addAll(currentSoftwareModuleResult.getContent());
 			} else {
 				isAlreadyAssigned = true;
@@ -528,21 +363,16 @@ public class AppService {
 					.createDistributionSets(Arrays.asList(newDistribution));
 			if (responseCreateDistribution.status() != HttpStatus.CREATED.value()) {
 				throw new BadRequestException("Fail Creating Distribution");
-
 			}
 			DistributionResult newDistributionResult = hawkbitFeignClient
 					.getDistributionByName(Utils.createFIQLEqual("name", targetDeviceName), 1, "id:DESC");
 			if (newDistributionResult.getSize() > 0) {
-
 				ruleNew.setId(newDistributionResult.getContent().get(0).getId());
 			} else {
-
 				throw new BadRequestException("This app not found on Hawkbit!");
 			}
 		} else {
-
 			ruleNew.setId(lastDistributionResult.getContent().get(lastDistributionResult.getSize() - 1).getId());
-
 		}
 
 		AssignedResult response = hawkbitFeignClient.sendApptoDevice(targetDeviceName, ruleNew);
@@ -550,7 +380,6 @@ public class AppService {
 
 			List<User> list = currentApp.getInstalledusers();
 			if (!Utils.isUserAlreadyOwner(currentUser, list)) {
-
 				currentApp = incrementAppDownloadCount(currentApp);
 				list.add(currentUser);
 
@@ -559,14 +388,10 @@ public class AppService {
 			}
 			return Result.success(HttpStatus.OK);
 		} else if (response.getAlreadyAssigned() > 0) {
-
 			throw new BadRequestException("The updating action is already assigned for selected device.");
-
 		} else {
 			throw new BadRequestException("The updating action hasnt been sent to Hawkbit for selected device.");
-
 		}
-
 	}
 
 	public Result<?> UninstallMultiApp(String targetDeviceName, Long userId, List<Long> appIds)
@@ -577,7 +402,6 @@ public class AppService {
 			throw new NotFoundException("User not found. userId: " + userId);
 		}
 		if (targetDeviceName == null) {
-
 			throw new BadRequestException("targetDeviceName should not be empty!");
 		}
 		Rule ruleNew = new Rule();
@@ -623,13 +447,9 @@ public class AppService {
 					softwareModules);
 
 			if (isAlreadyAssigned == true) {
-
 				softwareModules = Utils.UninstallApp(currentSoftwareModuleResult.getContent().get(0), softwareModules);
-
 			} else {
-
 				throw new BadRequestException("This App is not installed right now on the device!");
-
 			}
 		}
 
@@ -661,11 +481,9 @@ public class AppService {
 							"Hawkbit connection error. Check your Hawkbit's IP in the propreties file!");
 				}
 				if (responsesoftwareModule.size() == 0) {
-
 					throw new BadRequestException(
 							Utils.UNINSTALLED_ALL + " Dummy App could not be saved to Hawkbit and Appstore!");
 				} else {
-
 					softwareModules.add(responsesoftwareModule.get(0));
 				}
 
@@ -673,7 +491,6 @@ public class AppService {
 				softwareModules.add(softwareModuleResult.getContent().get(0));
 			}
 			// Check UNINSTALLED_ALL MODULE
-
 		}
 
 		Distribution newDistribution = new Distribution(targetDeviceName, Integer.toString(newVersion));
@@ -712,64 +529,13 @@ public class AppService {
 			}
 			return Result.success(HttpStatus.OK);
 		} else if (response.getAlreadyAssigned() > 0) {
-
 			throw new BadRequestException("The updating action is already assigned for selected device.");
-
 		} else {
 			throw new BadRequestException("The updating action hasnt been sent to Hawkbit for selected device.");
-
 		}
-
 	}
-
-	public List<String> getListOfOem(List<String> listOfTargets) throws BadRequestException {
-		List<String> listOfOem = new ArrayList<>();
-		for (int i = 0; i < listOfTargets.size(); i++) {
-
-			try {
-				String deviceName = listOfTargets.get(i);
-				int index = deviceName.indexOf("_");
-				String oem = deviceName.substring(0, index);
-				listOfOem.add(oem);
-			} catch (Exception e) {
-				throw new BadRequestException(
-						"The names of device/target are invalid!, The names of device/target should be like this format OEM_TARGETNAME .");
-
-			}
-		}
-		return listOfOem;
-	}
-
-	public List<String> getListOfTargets(Long userId) throws BadRequestException {
-		List<String> listOfTargets = new ArrayList<>();
-
-		String dis = userRepository.findById(userId).getUsername();
-		dis = "" + "*" + dis + "*";
-		dis = "description==" + dis;
-		List<Target> deviceList = new ArrayList<>();
-		try {
-			deviceList = hawkbitFeignClient.getTargetsByDes(dis, "name:ASC").getContent();
-		} catch (Exception e) {
-			throw new BadRequestException(
-					"Not Found Hawkbit Instance, Make sure that you connect any Hawkbit instance with this AppStore!");
-		}
-		for (Target target : deviceList) {
-			listOfTargets.add(target.getControllerId());
-		}
-		return listOfTargets;
-
-	}
-
-	public DistributionResult getDistributionOfTarget(String targetDeviceName) throws BadRequestException {
-
-		DistributionResult lastDistributionResult = hawkbitFeignClient
-				.getDistributionByName(Utils.createFIQLEqual("name", targetDeviceName), 1, "id:DESC");
-
-		return lastDistributionResult;
-	}
-
+	
 	public String downloadPermissionArtifactFile(Long appId) throws BadRequestException, NotFoundException {
-
 		App currentApp = appRepository.findById(appId);
 		SoftwareModuleResult currentSoftwareModuleResult = hawkbitFeignClient
 				.getSoftwaremoduleByName(Utils.createFIQLEqual("name", currentApp.getName()) + ";"
@@ -794,4 +560,156 @@ public class AppService {
 		return responseDownloadArtifactFile;
 	}
 
+	public App findById(Long id) {
+		return appRepository.findById(id);
+	}
+
+	public App findByName(String name) {
+		return appRepository.findByName(name);
+	}
+
+	public List<App> findAll() {
+		return appRepository.findAll();
+	}
+
+	public List<App> findByNameStartsWithIgnoreCase(String name) {
+		return appRepository.findByNameStartsWithIgnoreCase(name);
+	}
+	
+	public App incrementAppDownloadCount(App app) {
+		app.setDownloadcount(app.getDownloadcount() + 1);
+		return app;
+	}
+	
+	private String getSoftwareModuleName(Long id) throws BadRequestException, NotFoundException {
+		App app = appRepository.findById(id);
+		if (app != null) {
+			try {
+				SoftwareModuleResult softwareModuleResult = hawkbitFeignClient
+						.getSoftwaremoduleByName(Utils.createFIQLEqual("name", app.getName()) + ";"
+								+ Utils.createFIQLEqual("version", app.getVersion()));
+
+				Integer softwareModuleId = Utils.getExistsSoftwareModule(softwareModuleResult.getContent());
+				return softwareModuleId.toString();
+			} catch (Exception e) {
+				throw new NotFoundException(
+						"Hawkbit connection error. Check your Hawkbit's IP in the propreties file!");
+			}
+		} else {
+			throw new NotFoundException("App not found. appId: " + id);
+		}
+	}
+	
+	public List<String> getListOfOem(List<String> listOfTargets) throws BadRequestException {
+		List<String> listOfOem = new ArrayList<>();
+		for (int i = 0; i < listOfTargets.size(); i++) {
+
+			try {
+				String deviceName = listOfTargets.get(i);
+				int index = deviceName.indexOf("_");
+				String oem = deviceName.substring(0, index);
+				listOfOem.add(oem);
+			} catch (Exception e) {
+				throw new BadRequestException(
+						"The names of device/target are invalid!, The names of device/target should be like this format OEM_TARGETNAME .");
+			}
+		}
+		return listOfOem;
+	}
+
+	public List<String> getListOfTargets(Long userId) throws BadRequestException {
+		List<String> listOfTargets = new ArrayList<>();
+
+		String dis = userRepository.findById(userId).getUsername();
+		dis = "" + "*" + dis + "*";
+		dis = "description==" + dis;
+		List<Target> deviceList = new ArrayList<>();
+		try {
+			deviceList = hawkbitFeignClient.getTargetsByDes(dis, "name:ASC").getContent();
+		} catch (Exception e) {
+			throw new BadRequestException(
+					"Not Found Hawkbit Instance, Make sure that you connect any Hawkbit instance with this AppStore!");
+		}
+		for (Target target : deviceList) {
+			listOfTargets.add(target.getControllerId());
+		}
+		return listOfTargets;
+	}
+
+	public DistributionResult getDistributionOfTarget(String targetDeviceName) throws BadRequestException {
+		DistributionResult lastDistributionResult = hawkbitFeignClient
+				.getDistributionByName(Utils.createFIQLEqual("name", targetDeviceName), 1, "id:DESC");
+
+		return lastDistributionResult;
+	}
+	
+	public Page<App> findAll(Pageable pageable) {
+		return appRepository.findAll(pageable);
+	}
+
+	public Page<App> findByNameStartsWithIgnoreCase(String name, Pageable pageable) {
+		return appRepository.findByNameStartsWithIgnoreCase(name, pageable);
+	}
+
+	public Page<App> findByNameStartsWithIgnoreCaseAndInstalledusersUserName(String appname, String username,
+			Pageable pageable) {
+		return appRepository.findByNameStartsWithIgnoreCaseAndInstalledusersUsername(appname, username, pageable);
+	}
+
+	public Page<App> findByInstalledusersId(Long userid, Pageable pageable) {
+		return appRepository.findByInstalledusersId(userid, pageable);
+	}
+
+	public Page<App> findByNameStartsWithIgnoreCaseAndInstalledusersId(String appname, Long userid, Pageable pageable) {
+		return appRepository.findByNameStartsWithIgnoreCaseAndInstalledusersId(appname, userid, pageable);
+	}
+
+	public Page<App> findByIdIn(List<Long> myappsid, Pageable pageable) {
+		return appRepository.findByIdIn(myappsid, pageable);
+	}
+
+	public Page<App> findByAppcategoryId(Long id, Pageable pageable) {
+		return appRepository.findByAppcategoryId(id, pageable);
+	}
+
+	public Page<App> findByNameStartsWithIgnoreCaseAndAppcategoryId(String name, Long id, Pageable pageable) {
+		return appRepository.findByNameStartsWithIgnoreCaseAndAppcategoryId(name, id, pageable);
+	}
+
+	public Page<App> findUsersApps(String userId, List<String> oemList, Pageable pageable) {
+		return appRepository.findUsersApps(createUsersAppList(userId, oemList), pageable);
+	}
+	
+	public List<Long> createUsersAppList(String userId, List<String> oemList) {
+		List<Oem> listOem = new ArrayList<>();
+		List<User> listUser = new ArrayList<>();
+		if (oemList.size() > 0) {
+
+			listOem = oemRepository.findIdByNameIn(oemList);
+
+			List<Long> listOemId = new ArrayList<>();
+			for (int i = 0; i < listOem.size(); i++) {
+				listOemId.add(listOem.get(i).getId());
+			}
+			if (listOemId.size() > 0) {
+				listUser = userRepository.findByOemIdIn(listOemId);
+			}
+
+		}
+		List<App> listUsersApp = new ArrayList<>();
+		List<Long> listUsersAppId = new ArrayList<>();
+		for (int i = 0; i < listUser.size(); i++) {
+
+			listUsersApp.addAll(listUser.get(i).getUserapps());
+		}
+		for (int i = 0; i < listUsersApp.size(); i++) {
+
+			listUsersAppId.add(listUsersApp.get(i).getId());
+		}
+		List<Long> listUsersAppIdFromRelationQuery = new ArrayList<>();
+		listUsersAppIdFromRelationQuery = appRepository.findUsersAppsIdFromUsersRelationship(userId);
+		listUsersAppId.addAll(listUsersAppIdFromRelationQuery);
+		return listUsersAppId;
+
+	}
 }
