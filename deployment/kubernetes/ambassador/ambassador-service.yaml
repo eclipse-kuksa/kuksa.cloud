@@ -146,6 +146,14 @@ metadata:
       host: traccar.<CLUSTER_NAME>.<DNS_ZONE_NAME>
       service: traccar.kuksa.svc.cluster.local:5055
       ---
+      apiVersion: ambassador/v1
+      kind: TCPMapping
+      name: sensoris-cloud-mapping
+      port: 9000
+      host: sensoris-cloud.<CLUSTER_NAME>.<DNS_ZONE_NAME>
+      service: sensoris-cloud.kuksa.svc.cluster.local:9000
+      tls: true
+      ---
       # extension
       apiVersion: ambassador/v1
       kind: TCPMapping
@@ -181,6 +189,7 @@ metadata:
       # kuksa
       - kuksa-appstore.<CLUSTER_NAME>.<DNS_ZONE_NAME>
       - traccar.<CLUSTER_NAME>.<DNS_ZONE_NAME>
+      - sensoris-cloud.<CLUSTER_NAME>.<DNS_ZONE_NAME>
       # extension
       - influxdb-rest-service.<CLUSTER_NAME>.<DNS_ZONE_NAME>
       - mail-notification.<CLUSTER_NAME>.<DNS_ZONE_NAME>
@@ -206,6 +215,8 @@ spec:
      port: 8443
    - name: mqtts
      port: 8883
+   - name: wss
+     port: 9000
   selector:
     app.kubernetes.io/instance: ambassador
     app.kubernetes.io/name: ambassador

@@ -27,10 +27,6 @@ EMAIL_ADDRESS_FOR_LETS_ENCRYPT=$8
 LETS_ENCRYPT_ENVIRONMENT=${9:-prod} # either prod or staging
 ZONE_RESOURCE_GROUP_NAME=${10:-$RESOURCE_GROUP_NAME} # optional, only set if zone is defined in a different resource group
 
-# See https://hub.helm.sh/charts?q=cert-manager for versions and repositories
-CERT_MANAGER_VERSION=0.6.2
-CERT_MANAGER_CHART_VERSION=0.6.6 # In the stable repository, chart and app version diverge
-CERT_MANAGER_HELM_REPOSITORY="stable"
 NAMESPACE_TO_STORE_CERTIFICATES_IN="default"
 NAME_OF_CLUSTER_ISSUER="letsencrypt-$LETS_ENCRYPT_ENVIRONMENT-dns01"
 
@@ -71,13 +67,19 @@ function createCertificateDescriptor() {
 }
 
 echo
-echo "####################################################################################################"
-echo "####################################################################################################"
-echo "###############     Install Cert-Manager and Get Certificates from Let's Encrypt     ###############"
-echo "####################################################################################################"
-echo "####################################################################################################"
+echo "##############################################################################################"
+echo "##############################################################################################"
+echo "###############     Update Certificates and Cert Issuers for Let's Encrypt     ###############"
+echo "##############################################################################################"
+echo "##############################################################################################"
 echo
 echo "########## Initialization ##########"
+echo
+echo "# To install cert-manager"
+echo "# see https://cert-manager.io/docs/installation/kubernetes/#installing-with-helm"
+echo
+echo "# To upgrade cert-manager"
+echo "# see https://cert-manager.io/docs/installation/upgrading/"
 
 RESOURCE_TEMPLATES=$SCRIPTPATH/resource-descriptor-templates
 CLUSTER_ISSUER_TEMPLATES=$RESOURCE_TEMPLATES/cluster-issuers
@@ -94,76 +96,6 @@ customizeClusterIssuer "letsencrypt-staging-clusterissuer-dns01.yaml"
 
 mkdir -p $CERT_RESOURCES
 createCertificateDescriptor "gateway" $NAMESPACE_TO_STORE_CERTIFICATES_IN
-
-echo "### Install cert-manager ###"
-#check whether cert-manager is already deployed
-CERT_MANAGER_DEPLOYEMENT="$(kubectl get deployments -n cert-manager cert-manager -o yaml --ignore-not-found=true)"
-
-if [[ "" != "$CERT_MANAGER_DEPLOYEMENT" ]]; then
-	INSTALLED_CERT_MANAGER_CHART_VERSION="$(kubectl get deployments -n cert-manager cert-manager -o yaml --ignore-not-found=true \
-	| yq r - metadata.labels.chart \
-	| tr -d '\"' \
-	| sed -e 's/cert-manager-v//')"
-	echo "Found cert-manager deployment with chart version $INSTALLED_CERT_MANAGER_CHART_VERSION and chart version to install is $CERT_MANAGER_CHART_VERSION"
-else
-	INSTALLED_CERT_MANAGER_CHART_VERSION=""
-	echo "Did not find a deployment for the cert-manager."
-fi
-
-
-if [[ "$INSTALLED_CERT_MANAGER_CHART_VERSION" == "$CERT_MANAGER_CHART_VERSION" ]]; then
-	echo "cert-manager is up-to-date"
-elif [[ "" != "$INSTALLED_CERT_MANAGER_CHART_VERSION" ]]; then
-	# See
-	# * https://helm.sh/docs/using_helm/#installing-helm
-	# * https://docs.helm.sh/using_helm/#securing-your-helm-installation
-	# * https://docs.cert-manager.io/en/latest/tasks/upgrading/index.html
-	# Note that tiller is started, sent to the background and eventually terminated
-	echo "Upgrading cert-manager using local tiller ..."
-	tiller --storage=secret &
-	export HELM_HOST=:44134
-	kubectl apply \
-		     -f https://raw.githubusercontent.com/jetstack/cert-manager/v$CERT_MANAGER_VERSION/deploy/manifests/00-crds.yaml \
-	    && echo "Waiting for custom resource definitions to be available ..." \
-	    && until [[ "5" == "$(kubectl get CustomResourceDefinitions | grep 'certmanager.k8s.io' | wc -l)" ]]; do echo "Waiting ..."; sleep 3; done \
-		&& helm repo update \
-		&& kubectl label namespace cert-manager certmanager.k8s.io/disable-validation=true --overwrite=true \
-		&& helm upgrade \
-			--wait \
-			--timeout 600 \
-			--version v$CERT_MANAGER_CHART_VERSION \
-			cert-manager \
-			$CERT_MANAGER_HELM_REPOSITORY/cert-manager \
-		&& kill "$(jobs -p %tiller)"
-else
-	# See
-	# * https://helm.sh/docs/using_helm/#installing-helm
-	# * https://docs.helm.sh/using_helm/#securing-your-helm-installation
-	# * https://docs.cert-manager.io/en/latest/getting-started/install.html
-	# Note that tiller is started, sent to the background and eventually terminated
-	echo "Installing cert-manager using local tiller ..."
-	tiller --storage=secret &
-	export HELM_HOST=:44134
-	helm init \
-			--client-only \
-			--override 'spec.template.spec.containers[0].command'='{/tiller,--storage=secret}' \
-		&& kubectl apply \
-			-f https://raw.githubusercontent.com/jetstack/cert-manager/v$CERT_MANAGER_VERSION/deploy/manifests/00-crds.yaml \
-	    && echo "Waiting for custom resource definitions to be available ..." \
-		&& until [[ "5" == "$(kubectl get CustomResourceDefinitions | grep 'certmanager.k8s.io' | wc -l)" ]]; do echo "Waiting ..."; sleep 3; done \
-		&& createOrReuseNamespace cert-manager \
-		&& kubectl label namespace cert-manager certmanager.k8s.io/disable-validation=true --overwrite=true \
-		&& helm repo add jetstack https://charts.jetstack.io \
-		&& helm repo update \
-		&& helm install \
-			--wait \
-			--timeout 600 \
-		    --name cert-manager \
-		    --namespace cert-manager \
-		    --version v$CERT_MANAGER_CHART_VERSION \
-		    $CERT_MANAGER_HELM_REPOSITORY/cert-manager \
-		&& kill "$(jobs -p %tiller)"
-fi
 
 echo "### Apply cluster issuer resource descriptors ###"
 kubectl apply -f $CLUSTER_ISSUER_RESOURCES/

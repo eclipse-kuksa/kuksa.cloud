@@ -9,7 +9,7 @@
 #
 # *****************************************************************************
 #
-apiVersion: certmanager.k8s.io/v1alpha1
+apiVersion: cert-manager.io/v1alpha2
 kind: Certificate
 metadata:
   name: <SIMPLE_NAME>-cert
@@ -21,6 +21,8 @@ spec:
     name: <NAME_OF_CLUSTER_ISSUER>
     kind: ClusterIssuer
     namespace: cert-manager
+  duration: 2160h # 90d
+  renewBefore: 360h # 15d
   # commonName should not be longer than 64 bytes
   commonName: <SIMPLE_NAME>.<CLUSTER_NAME>.<DNS_ZONE_NAME>
   dnsNames:
@@ -40,30 +42,7 @@ spec:
   # kuksa
   - kuksa-appstore.<CLUSTER_NAME>.<DNS_ZONE_NAME>
   - traccar.<CLUSTER_NAME>.<DNS_ZONE_NAME>
+  - sensoris-cloud.<CLUSTER_NAME>.<DNS_ZONE_NAME>
   # extension
   - influxdb-rest-service.<CLUSTER_NAME>.<DNS_ZONE_NAME>
   - mail-notification.<CLUSTER_NAME>.<DNS_ZONE_NAME>
-  acme:
-    config:
-    - dns01:
-        provider: azure
-      domains:
-      - gateway.<CLUSTER_NAME>.<DNS_ZONE_NAME>
-      # hono
-      - grafana.<CLUSTER_NAME>.<DNS_ZONE_NAME>
-      - hono-adapter-amqp-vertx.<CLUSTER_NAME>.<DNS_ZONE_NAME>
-      - hono-adapter-http-vertx.<CLUSTER_NAME>.<DNS_ZONE_NAME>
-      - hono-adapter-kura.<CLUSTER_NAME>.<DNS_ZONE_NAME>
-      - hono-adapter-mqtt-vertx.<CLUSTER_NAME>.<DNS_ZONE_NAME>
-      - hono-dispatch-router.<CLUSTER_NAME>.<DNS_ZONE_NAME>
-      - hono-service-device-registry.<CLUSTER_NAME>.<DNS_ZONE_NAME>
-      - hono-service-messaging.<CLUSTER_NAME>.<DNS_ZONE_NAME>
-      - influxdb.<CLUSTER_NAME>.<DNS_ZONE_NAME>
-      # hawkbit
-      - hawkbit.<CLUSTER_NAME>.<DNS_ZONE_NAME>
-      # kuksa
-      - kuksa-appstore.<CLUSTER_NAME>.<DNS_ZONE_NAME>
-      - traccar.<CLUSTER_NAME>.<DNS_ZONE_NAME>
-      # extension
-      - influxdb-rest-service.<CLUSTER_NAME>.<DNS_ZONE_NAME>
-      - mail-notification.<CLUSTER_NAME>.<DNS_ZONE_NAME>

@@ -98,6 +98,7 @@ allocateDomainNameForIpAddress "hawkbit"
 
 allocateDomainNameForIpAddress "kuksa-appstore"
 allocateDomainNameForIpAddress "traccar"
+allocateDomainNameForIpAddress "sensoris-cloud"
 
 allocateDomainNameForIpAddress "influxdb-rest-service"
 allocateDomainNameForIpAddress "mail-notification"
