@@ -553,7 +553,7 @@ public class AppService {
 			}
 		}
 		if (artifactId == null) {
-			return null;
+			return Utils.NOT_FOUND;
 		}
 		String responseDownloadArtifactFile = hawkbitFeignClient
 				.downloadArtifactFile(currentSoftwareModuleResult.getContent().get(0).getId().toString(), artifactId);

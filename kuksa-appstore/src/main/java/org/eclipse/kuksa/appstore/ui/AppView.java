@@ -237,7 +237,9 @@ public class AppView extends CustomComponent implements View {
 						permissionConfirmWindow.center();
 						VaadinUI.getCurrent().addWindow(permissionConfirmWindow);
 
-						permissionConfirm.listPermisson(currentApp.getId());
+						if (permissionConfirm.listPermisson(currentApp.getId()) == 1) {
+							VaadinUI.getCurrent().removeWindow(permissionConfirmWindow);
+						}
 
 					} else {
 						new Notification("Select a Device", "You have to select a device!",

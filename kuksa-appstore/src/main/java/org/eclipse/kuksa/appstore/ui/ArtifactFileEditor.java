@@ -20,6 +20,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.kuksa.appstore.client.HawkbitMultiPartFileFeignClient;
@@ -175,6 +176,22 @@ public class ArtifactFileEditor extends VerticalLayout implements View {
 	public void fillGrids(String softwareModuleId) {
 		try {
 			List<Artifact> artifactResultList = hawkbitFeignClient.getArtifactsBysoftwareModuleId(softwareModuleId);
+
+			boolean permissionFileExists = false;
+			for (Iterator iterator = artifactResultList.iterator(); iterator.hasNext();) {
+				Artifact artifact = (Artifact) iterator.next();
+				if (artifact.getProvidedFilename().equals(Utils.PERMISSION)) {
+					permissionFileExists = true;
+					break;
+				}
+
+			}
+			if (permissionFileExists == false) {
+				new Notification("There is no " + Utils.PERMISSION + " file.",
+						" You should add " + Utils.PERMISSION
+								+ " file to specify permissions that are used on this application!",
+						Notification.Type.ERROR_MESSAGE).show(Page.getCurrent());
+			}
 
 			artifactGrid.setItems(artifactResultList);
 		} catch (Exception e) {
