@@ -6,6 +6,6 @@
 # http://www.eclipse.org/org/documents/edl-v10.php
 FROM gcr.io/distroless/java:11
 
-COPY hono-influxdb-connector.jar /hono-influxdb-connector.jar
+COPY build/libs/hono-influxdb-connector-*.jar /hono-influxdb-connector.jar
 
 ENTRYPOINT ["java","-jar", "hono-influxdb-connector.jar"]

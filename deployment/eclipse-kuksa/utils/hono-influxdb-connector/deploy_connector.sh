@@ -33,16 +33,14 @@ DOCKER_REGISTRY_SECRET=${9:-""}
 DOCKER_REGISTRY_SERVER=${10:-localhost}
 DOCKER_REGISTRY_USERNAME=${11:-""}
 DOCKER_REGISTRY_PASSWORD=${12:-pw}
-DOCKER_REGISTRY_EMAIL=${13:-user@domain.com}
-VERSION=${10,-"0.1.0"}
 
 NAMESPACE=hono
 DOCKER_IMAGE_NAME=hono-influxdb-connector
 
-VERSION="$(gradle properties -q | grep 'version:' | awk '{print $2}')"
+VERSION="0.1.0"
 DOCKER_IMAGE_VERSION="$VERSION"
 
-SOURCE_DESCRIPTORS=$SCRIPTPATH/src/main/kubernetes
+SOURCE_DESCRIPTORS=$SCRIPTPATH/kubernetes
 TARGET_DIR=$SCRIPTPATH/target
 RESOURCE_DESCRIPTORS=$TARGET_DIR/descriptors
 CONFIGMAP_DESCRIPTOR=$RESOURCE_DESCRIPTORS/configmap.yaml
@@ -55,14 +53,12 @@ function createOrReuseDockerRegistrySecret() {
 	local DOCKER_REGISTRY_SERVER=$3
 	local DOCKER_REGISTRY_USERNAME=$4
 	local DOCKER_REGISTRY_PASSWORD=$5
-	local DOCKER_REGISTRY_EMAIL=$6
 	
 	if [[ "" == "$(kubectl get secret $NAME_OF_SECRET --namespace $NAMESPACE --ignore-not-found=true)" ]]; then
 		kubectl create secret docker-registry $NAME_OF_SECRET \
 			--docker-server=$DOCKER_REGISTRY_SERVER \
 			--docker-username=$DOCKER_REGISTRY_USERNAME \
 			--docker-password=$DOCKER_REGISTRY_PASSWORD \
-			--docker-email=$DOCKER_REGISTRY_EMAIL \
 			--namespace=$NAMESPACE
 	else
 		echo "The secret $NAME_OF_SECRET exists already and will be re-used."
@@ -102,9 +98,6 @@ sed -i 's/HONO_VERIFYHOSTNAME: "true"/HONO_VERIFYHOSTNAME: "'"$VERIFY_HONO_HOSTN
 echo "# Customize $SECRET_DESCRIPTOR"
 HONO_USER="$(echo -n $HONO_USER | base64)"
 HONO_PASSWORD="$(echo -n $HONO_PASSWORD | base64)"
-echo -n $HONO_USER
-echo -n $HONO_PASSWORD
-echo $SECRET_DESCRIPTOR
 sed -i 's/HONO_USER: /HONO_USER: "'"$HONO_USER"'"/' $SECRET_DESCRIPTOR
 sed -i 's/HONO_PASSWORD: /HONO_PASSWORD: "'"$HONO_PASSWORD"'"/' $SECRET_DESCRIPTOR
 
@@ -131,8 +124,7 @@ createOrReuseDockerRegistrySecret \
 	$NAMESPACE \
 	$DOCKER_REGISTRY_SERVER \
 	$DOCKER_REGISTRY_USERNAME \
-	$DOCKER_REGISTRY_PASSWORD \
-	$DOCKER_REGISTRY_EMAIL
+	$DOCKER_REGISTRY_PASSWORD
 	
 echo
 echo "##### Create configuration secret if it does not exist #####"
