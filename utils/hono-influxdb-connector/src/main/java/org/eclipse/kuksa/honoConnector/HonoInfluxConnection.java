@@ -72,8 +72,13 @@ public class HonoInfluxConnection {
 
         messageHandler = new InfluxDBClient(influxURL, dbName);
 
-        // try to reconnect if connection closes
-        final Handler<Void> closeHandler = x -> reconnect();
+        // try to reconnect if link is closed by Hono
+        final Handler<Void> closeHandler = unused -> {
+        	// The close handler is invoked when the Hono dispatch router
+        	// closes the telemetry receiver link.
+        	LOGGER.info("Telemetry receiver link was closed.");
+        	reconnect();
+        };
 
         // on connection established create a new telemetry consumer to handle incoming messages
         connectionHandler = result -> {
@@ -93,7 +98,12 @@ public class HonoInfluxConnection {
      */
 	public void connectToHono() {
         try {
-            Future<HonoClient> future = honoClient.connect(options);
+            Future<HonoClient> future = honoClient.connect(options, unused -> {
+            	// The disconnect handler is invoked when the TCP connection is lost for any
+            	// reason e.g. a network outage or when Hono is restarted.
+            	LOGGER.info("AMQP connection was disconnected");
+            	reconnect();
+            });
             LOGGER.info("Started connection attempt to Hono for tenantId {}.", tenantId);
             // set handler to react to the outcome of the connection attempt
             future.setHandler(connectionHandler);
