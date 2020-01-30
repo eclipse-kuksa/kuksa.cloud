@@ -30,4 +30,8 @@ bin/
 .project
 .classpath
 
+
 deployment/exportStaticIpAddresses.inc
+
+# Kubernetes resources derived from Eclipse hawkBit helm chart
+deployment/eclipse-hawkbit/base/hawkbit/
