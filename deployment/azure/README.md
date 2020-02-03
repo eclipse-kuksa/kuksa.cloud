@@ -43,9 +43,9 @@ Scripts to provision on an Azure Kubernetes Service.
 * Script:
   * `create_and_deploy_certificates.sh`
 * Purpose:
-  * Install cert-manager for AzureDNS
+  * Install [cert-manager](https://cert-manager.io/docs/) for AzureDNS
   * Add certificate resources to cert-manager
-  * Use Let's encrypt [dns01 challenge](https://docs.cert-manager.io/en/latest/tutorials/acme/dns-validation.html)
+  * Use [Let's encrypt](https://letsencrypt.org/) [dns01 challenge](https://cert-manager.io/docs/tutorials/acme/dns-validation/)
     to issue and automatically renew certificates via cert-manager
 * Options:
   * `RESOURCE_GROUP_NAME`: Name of the resource group, to which the AKS is deployed. Note that the resource group has to create prior to executing the script.
