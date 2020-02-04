@@ -68,7 +68,7 @@ public class PermissionConfirm extends VerticalLayout implements View {
 		void onChange();
 	}
 
-	public final void listPermisson(Long appId) {
+	public final int listPermisson(Long appId) {
 
 		HorizontalLayout hlayout = new HorizontalLayout();
 		VerticalLayout vlayout = new VerticalLayout();
@@ -78,7 +78,15 @@ public class PermissionConfirm extends VerticalLayout implements View {
 		String responseDownloadArtifactString;
 		try {
 			responseDownloadArtifactString = appService.downloadPermissionArtifactFile(appId);
-			if (responseDownloadArtifactString != null) {
+			if (responseDownloadArtifactString == null) {
+				new Notification(Utils.PERMISSION + " is empty!", Notification.Type.WARNING_MESSAGE)
+						.show(Page.getCurrent());
+			} else if (responseDownloadArtifactString.equals(Utils.NOT_FOUND)) {
+				new Notification(Utils.PERMISSION + " not found!", Notification.Type.ERROR_MESSAGE)
+						.show(Page.getCurrent());
+				return 1;
+			} else {
+
 				try {
 					permissionsList = new ListSelect<>(
 							"<b><font color=\"red\">This application wants the following permissions!</font></b>",
@@ -86,23 +94,26 @@ public class PermissionConfirm extends VerticalLayout implements View {
 				} catch (JsonParseException e) {
 					new Notification(Utils.PERMISSION + " Json Parse Exception", e.getMessage(),
 							Notification.Type.ERROR_MESSAGE).show(Page.getCurrent());
+					return 1;
 				} catch (JsonMappingException e) {
 					new Notification(Utils.PERMISSION + " Json Mapping Exception", e.getMessage(),
 							Notification.Type.ERROR_MESSAGE).show(Page.getCurrent());
+					return 1;
 				} catch (IOException e) {
 					new Notification(Utils.PERMISSION + " IO Exception", e.getMessage(),
 							Notification.Type.ERROR_MESSAGE).show(Page.getCurrent());
+					return 1;
 				}
-			} else {
-				new Notification(Utils.PERMISSION + " not found or empty.", Notification.Type.ERROR_MESSAGE)
-						.show(Page.getCurrent());
 			}
+
 		} catch (BadRequestException e1) {
-			new Notification(Utils.PERMISSION + " not found or empty.", Notification.Type.ERROR_MESSAGE)
+			new Notification(Utils.PERMISSION + " Bad Request Exception", Notification.Type.ERROR_MESSAGE)
 					.show(Page.getCurrent());
+			return 1;
 		} catch (NotFoundException e1) {
-			new Notification(Utils.PERMISSION + " not found or empty.", Notification.Type.ERROR_MESSAGE)
+			new Notification(Utils.PERMISSION + "Not Found Exception", Notification.Type.ERROR_MESSAGE)
 					.show(Page.getCurrent());
+			return 1;
 		}
 
 		permissionsList.setRows(10);
@@ -126,7 +137,7 @@ public class PermissionConfirm extends VerticalLayout implements View {
 		setVisible(true);
 
 		confirm.focus();
-
+		return 0;
 	}
 
 	public void setChangeHandler(ChangeHandler h) {
