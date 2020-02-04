@@ -1,0 +1,7 @@
+# Just a placeholder for generic kustomize of the Helm chart
+#
+# See
+# * https://github.com/kubernetes-sigs/kustomize/tree/master/docs
+
+resources:
+- hawkbit/templates/service.yaml
