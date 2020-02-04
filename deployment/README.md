@@ -8,13 +8,36 @@ https://www.eclipse.org/org/documents/epl-2.0/index.php
 ***************************************************************************** 
 -->
 # Kuksa Cloud Deployment
-The scripts in this directory and it's subdirectories help to setup a deployment of the Kuksa cloud. These scripts assume a running Kubernetes cluster which can be configured using `kubectl`. More information regarding the parameters of the scripts can be found within the respective script file.
 
-## Structure
-The deployment scripts are divided into the following parts:
-  1. **Azure** for Azure-specific configuration that provides the basis of Kubernetes.
-  2. **Eclipse hawkBit** enables the deployment of the corresponding software update components, in particular the update server.
-  **Note that this step requires the installation of the command line tool kompose. Installation instructions can be found at http://kompose.io/**
-  3. **Eclipse Hono** enables the deployment of a messaging infrastructure. 
-  4. **Kubernetes** provides functions for the Kubernetes deployment of the Kuksa cloud. 
-  5. **Utils** scripts that are included by other parts of the deployment infrastructure (e.g. handling static IP-addresses for the services). It is possible to set static IP-addresses and DNS entries for deployed services. For more details on that configuration see the `Readme.md` file in the `utils` directory.
+The scripts in this directory and it's subdirectories help to setup a deployment of the Kuksa cloud. These scripts
+assume a running Kubernetes cluster which can be configured using `kubectl`. More information regarding the parameters
+of the scripts can be found within the respective script file.
+
+## Overall structure
+
+The scripts have been written to deploy to a Kubernetes cluster on Microsoft Azure. They might be modified to deploy
+to other Kubernetes services.
+
+The deployment scripts are divided into the following groups:
+
+### Infrastructure
+
+These services are required to make the other services work
+
+  1. [Azure](azure/README.md) for Azure-specific configuration that provides the basis of Kubernetes. It includes
+     cert-manager that obtains TLS certificates.
+  1. [Kubernetes](kubernetes/README.md) provides functions for the Kubernetes deployment of the Kuksa cloud. It also
+     covers the Ambassador gateway service that performs uniform TLS termination for all services.
+  
+### Services
+
+  1. [Eclipse Hono](eclipse-hono/README.md) enables the deployment of a messaging infrastructure
+  1. [Eclipse hawkBit](eclipse-hawkbit/README.md) enables the deployment of the corresponding software update
+     components, in particular the update server
+  1. [Kuksa Appstore](../kuksa-appstore/README.md) has to be
+     [built](eclipse-kuksa/utils/README.md#build-eclipse-kuksa-appstore) before is can be
+     [deployed](eclipse-kuksa/utils/README.md#deploy-eclipse-kuksa-appstore)
+  1. [Hono-Influxdb-Connector](../utils/hono-influxdb-connector/README.md) sends Hono telemetry data and events to
+     InfluxDB.
+  1. [MIL example](../examples/malfunction-indicator-light/README.md) an exemplary malfunction-indicator-light use case
+  1. [Traccar](eclipse-kuksa/README.md#deploy-traccar-server) deploys a service for tracking cars
