@@ -90,7 +90,11 @@ public class InfluxDBClient implements MessageHandler {
     private boolean createDatabase() {
         String query = String.format("CREATE DATABASE \"%s\"", dbName);
         QueryResult result = influxDB.query(new Query(query, dbName, true));
-
+        if (result.hasError()) {
+            LOGGER.error("Creating database {} resulted in error: {}", dbName, result.getError());
+        } else {
+            LOGGER.info("Database {} now exists and has been created if it did not exist before", dbName);
+        }
         return result != null && !result.hasError();
     }
 
