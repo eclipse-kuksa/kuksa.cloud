@@ -1,0 +1,2 @@
+Congratulations!
+You succesfully deployed a release of the Eclipse Kuksa Cloud.

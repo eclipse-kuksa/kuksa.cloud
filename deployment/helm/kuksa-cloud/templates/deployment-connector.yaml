@@ -1,0 +1,48 @@
+######################################################################
+# Copyright (c) 2020 Bosch.IO GmbH [and others]
+#
+# This program and the accompanying materials are made
+# available under the terms of the Eclipse Public License 2.0
+# which is available at https://www.eclipse.org/legal/epl-2.0/
+#
+# SPDX-License-Identifier: EPL-2.0
+########################################################################
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: "{{ .Release.Name }}-connector"
+  #namespace: hono
+  labels:
+    app: hono-influxdb-connector
+    version: {{ .Chart.AppVersion }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}-connector
+  template:
+    metadata:
+      labels:
+        app: {{ .Release.Name }}-connector
+        version: {{ .Chart.AppVersion }}
+    spec:
+      containers:
+      - image: "{{ .Values.imageCredentials.registry }}/{{.Values.connector.image}}:{{ .Chart.AppVersion }}"
+        name: "{{ .Release.Name }}-connector"
+        imagePullPolicy: {{ .Values.connector.imagePullPolicy }}
+        envFrom:
+        - configMapRef:
+            name: {{ .Release.Name }}-connector-configmap
+        - secretRef:
+            name: {{ .Release.Name }}-connector-secret
+        volumeMounts:
+        - mountPath: /etc/hono
+          name: config
+          readOnly: true
+      volumes:
+      - name: config
+        secret:
+          secretName: {{ .Release.Name}}-dispatch-router-conf
+      imagePullSecrets:
+        - name: docker-secret

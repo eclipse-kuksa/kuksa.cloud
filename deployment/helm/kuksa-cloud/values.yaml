@@ -1,0 +1,50 @@
+######################################################################
+# Copyright (c) 2020 Bosch.IO GmbH [and others]
+#
+# This program and the accompanying materials are made
+# available under the terms of the Eclipse Public License 2.0
+# which is available at https://www.eclipse.org/legal/epl-2.0/
+#
+# SPDX-License-Identifier: EPL-2.0
+########################################################################
+# credentials for the registry hosting privat container images (e.g. Hono-InfluxDB-Connector)
+imageCredentials:
+  registry: 
+  username: 
+  password: 
+
+# configure the Hono-InfluxDB-Connector
+connector:
+  # The name of the container image for the connector. Note that the address of the container registry under imageCredentials.registry is added as prefix and that the image should be tagged with the App version of this chart.
+  image: hono-influxdb-connector
+  imagePullPolicy: Always
+  qpidRouterPort: 15671
+  honoTrustedStorePath: /etc/hono/trusted-certs.pem
+  honoVerifyHostname: false
+  # The credentials for the dispatch router endpoint in Eclipse Hono. The default values in this chart are also the default credentials for that endpoint.
+  honoUser: consumer@HONO
+  honoPassword: verysecret
+  loggingLevel: INFO
+  # This part can be used to configure the connections on which the connector will listen. The 'tenantId' indicates the tenant in Eclipse Hono on which the connector will connect. The connector then writes all messages received from the respective tenant to the database specified in 'influxDatabaseName'. 
+  connections:
+    - tenantId: tenant1
+      influxDatabaseName: tenant1-data
+    - tenantId: tenant2
+      influxDatabaseName: tenant2-data
+
+# control which dependencies should be deployed (enabled: true)
+components:
+  hono:
+    enabled: true
+  influxdb:
+    enabled: true
+  hawkbit:
+    enabled: false
+  keycloak:
+    enabled: false
+
+# configure the values from the Eclipse Hono Helm chart fetched from https://github.com/eclipse/packages/tree/master/charts/hono)
+hono:
+  adapters:
+    amqp:
+      enabled: false
