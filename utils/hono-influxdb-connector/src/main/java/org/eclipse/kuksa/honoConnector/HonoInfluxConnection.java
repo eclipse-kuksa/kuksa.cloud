@@ -1,5 +1,5 @@
 /*********************************************************************
- * Copyright (c) 2019 Bosch Software Innovations GmbH [and others]
+ * Copyright (c) 2019, 2020 Bosch.IO GmbH [and others]
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -9,14 +9,16 @@
  **********************************************************************/
 package org.eclipse.kuksa.honoConnector;
 
-import static org.slf4j.LoggerFactory.getLogger;
-
-import java.io.UncheckedIOException;
-import java.net.MalformedURLException;
-import java.util.function.Function;
-
+import io.vertx.core.AsyncResult;
+import io.vertx.core.Future;
+import io.vertx.core.Handler;
+import io.vertx.core.Vertx;
+import io.vertx.core.json.DecodeException;
+import io.vertx.core.json.JsonObject;
+import io.vertx.proton.ProtonClientOptions;
 import org.apache.qpid.proton.message.Message;
-import org.eclipse.hono.client.HonoClient;
+import org.eclipse.hono.client.ApplicationClientFactory;
+import org.eclipse.hono.client.HonoConnection;
 import org.eclipse.hono.config.ClientConfigProperties;
 import org.eclipse.hono.util.MessageHelper;
 import org.eclipse.kuksa.honoConnector.config.ConnectionConfig;
@@ -25,13 +27,11 @@ import org.eclipse.kuksa.honoConnector.message.MessageDTO;
 import org.eclipse.kuksa.honoConnector.message.MessageHandler;
 import org.slf4j.Logger;
 
-import io.vertx.core.AsyncResult;
-import io.vertx.core.Future;
-import io.vertx.core.Handler;
-import io.vertx.core.Vertx;
-import io.vertx.core.json.DecodeException;
-import io.vertx.core.json.JsonObject;
-import io.vertx.proton.ProtonClientOptions;
+import java.io.UncheckedIOException;
+import java.net.MalformedURLException;
+import java.util.function.Function;
+
+import static org.slf4j.LoggerFactory.getLogger;
 
 public class HonoInfluxConnection {
 
@@ -43,8 +43,8 @@ public class HonoInfluxConnection {
     /** vertx instance opened to connect to Hono Messaging, needs to be closed */
     private final Vertx vertx;
 
-    /** client used to connect to the Hono Messaging Service to receive new messages */
-    private final HonoClient honoClient;
+    /** connection used to connect to the Hono Messaging Service to receive new messages */
+    private final HonoConnection honoConnection;
 
     /** connection options for the connection to the Hono Messaging Service */
     private final ProtonClientOptions options;
@@ -53,7 +53,7 @@ public class HonoInfluxConnection {
     private final MessageHandler messageHandler;
 
     /** handler of the outcome of a connection attempt to Hono Messaging */
-    private final Handler<AsyncResult<HonoClient>> connectionHandler;
+    private final Handler<AsyncResult<HonoConnection>> connectionHandler;
     
     public HonoInfluxConnection(final ClientConfigProperties honoConfig,
     		final String influxURL, final ConnectionConfig config) throws MalformedURLException {
@@ -65,8 +65,9 @@ public class HonoInfluxConnection {
     	this.tenantId = tenantId;
         vertx = Vertx.vertx();
 
-        honoClient = HonoClient.newClient(vertx, honoConfig);
-        
+        honoConnection = HonoConnection.newConnection(vertx, honoConfig);
+        ApplicationClientFactory clientFactory = ApplicationClientFactory.create(honoConnection);
+
         options = new ProtonClientOptions();
         options.setConnectTimeout(10000);
 
@@ -83,8 +84,9 @@ public class HonoInfluxConnection {
         // on connection established create a new telemetry consumer to handle incoming messages
         connectionHandler = result -> {
             if (result.succeeded()) {
-                LOGGER.info("Connected to Hono at {}:{} for tenantId {}", honoConfig.getHost(), honoConfig.getPort(), tenantId);
-                honoClient.createTelemetryConsumer(tenantId, this::handleTelemetryMessage, closeHandler);
+                LOGGER.info("Connected to Hono at {}:{} for tenantId {} and Influx database {}", honoConfig.getHost(),
+                        honoConfig.getPort(), tenantId, dbName);
+                clientFactory.createTelemetryConsumer(tenantId, this::handleTelemetryMessage, closeHandler);
             } else {
                 LOGGER.error("Failed to connect to Hono for tenantId {}.", result.cause(), tenantId);
                 disconnect();
@@ -98,12 +100,9 @@ public class HonoInfluxConnection {
      */
 	public void connectToHono() {
         try {
-            Future<HonoClient> future = honoClient.connect(options, unused -> {
-            	// The disconnect handler is invoked when the TCP connection is lost for any
-            	// reason e.g. a network outage or when Hono is restarted.
-            	LOGGER.info("AMQP connection was disconnected");
-            	reconnect();
-            });
+            LOGGER.info("Connect to Hono at host {}:{}, with user: {}", honoConnection.getConfig().getHost(),
+                    honoConnection.getConfig().getPort(), honoConnection.getConfig().getUsername());
+            Future<HonoConnection> future = honoConnection.connect(options);
             LOGGER.info("Started connection attempt to Hono for tenantId {}.", tenantId);
             // set handler to react to the outcome of the connection attempt
             future.setHandler(connectionHandler);
