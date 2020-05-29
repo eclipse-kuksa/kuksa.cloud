@@ -1,0 +1,26 @@
+######################################################################
+# Copyright (c) 2020 Bosch.IO GmbH [and others]
+#
+# This program and the accompanying materials are made
+# available under the terms of the Eclipse Public License 2.0
+# which is available at https://www.eclipse.org/legal/epl-2.0/
+#
+# SPDX-License-Identifier: EPL-2.0
+########################################################################
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: "{{.Release.Name}}-connector-configmap"
+data: 
+  INFLUXDB_URL: "http://{{.Release.Name}}-influxdb.{{.Release.Namespace}}.svc.cluster.local:8086"
+  QPID_ROUTER_HOST: "{{.Release.Name}}-dispatch-router-ext.{{.Release.Namespace}}.svc.cluster.local"
+  QPID_ROUTER_PORT: {{quote .Values.connector.qpidRouterPort}}
+  HONO_TRUSTEDSTOREPATH: {{quote .Values.connector.honoTrustedStorePath}}
+  HONO_VERIFYHOSTNAME: "{{.Values.connector.honoVerifyHostname}}"
+  {{- range $index, $item := .Values.connector.connections}}
+    {{- range $key, $value := $item}}
+  HONO_CONNECTIONS_{{ $index }}_{{ $key | upper }} : {{ $value }}
+    {{- end}}
+  {{- end}}
+  LOGGING_LEVEL_ROOT: {{quote .Values.connector.loggingLevel }}
+  
