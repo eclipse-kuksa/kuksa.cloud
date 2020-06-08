@@ -32,6 +32,30 @@ connector:
     - tenantId: tenant2
       influxDatabaseName: tenant2-data
 
+# configure the app store
+appstore:
+  image: kuksa-appstore
+  service:
+    type: LoadBalancer
+  credentials: 
+    username: admin
+    password: admin
+  hawkbit:
+    username: admin
+    password: admin
+  keycloak:
+    # these values need to be configured within Keycloak
+    realm: "app-store-realm"
+    resource: "app-store"
+    # the address under which Keycloak is publicly available (e.g. the public address of the LoadBalancer service for Keycloak)
+    url: "http://localhost:80/auth"
+    principalAttribute: "prefered_username"
+    credentials:
+      # the secret can be set and generated for the client used by the app store in the mangement UI of Keycloak
+      secret: "secret"
+  vaadinProductionModeEnabled: "true"
+    
+
 # control which dependencies should be deployed (enabled: true)
 components:
   hono:
@@ -39,12 +63,22 @@ components:
   influxdb:
     enabled: true
   hawkbit:
-    enabled: false
+    enabled: true
   keycloak:
-    enabled: false
+    enabled: true
 
-# configure the values from the Eclipse Hono Helm chart fetched from https://github.com/eclipse/packages/tree/master/charts/hono)
+# configure the values from the Eclipse Hono Helm chart fetched from https://github.com/eclipse/packages/tree/master/charts/hono
 hono:
   adapters:
     amqp:
       enabled: false
+    mqtt:
+      enabled: false
+
+# configure the values from the Keycloak chart fetched from https://github.com/codecentric/helm-charts/tree/master/charts/keycloak
+keycloak:
+  keycloak:
+    username: keycloak
+    password: admin
+    service:
+      type: LoadBalancer

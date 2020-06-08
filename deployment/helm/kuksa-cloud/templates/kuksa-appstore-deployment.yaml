@@ -1,5 +1,5 @@
 ######################################################################
-# Copyright (c) 2019 Bosch Software Innovations GmbH [and others]
+# Copyright (c) 2019, 2020 Bosch.IO GmbH [and others]
 #
 # This program and the accompanying materials are made
 # available under the terms of the Eclipse Public License 2.0
@@ -11,36 +11,39 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
-    app: kuksa-appstore
-    version: "<VERSION>"
-  name: kuksa-appstore
+    app: {{.Release.Name}}-app-store
+    version: {{.Chart.AppVersion}}
+  name: {{.Release.Name}}-app-store
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: kuksa-appstore
+      app: {{.Release.Name}}-app-store
   template:
     metadata:
       labels:
-        app: kuksa-appstore
-        version: "<VERSION>"
+        app: {{.Release.Name}}-app-store
+        version: {{.Chart.AppVersion}}
     spec:
       containers:
       - name: appstore
-        image: <DOCKER_REGISTRY_SERVER>/<DOCKER_IMAGE_NAME>:<VERSION>
+        image: "{{ .Values.imageCredentials.registry }}/{{.Values.appstore.image}}:{{ .Chart.AppVersion }}"
         ports:
         - containerPort: 8080
           name: http
           protocol: TCP
+        - containerPort: 8089
+          name: redirect
+          protocol: TCP
         env:
         - name: SPRING_CONFIG_LOCATION
           value: file:///etc/kuksa/
+        envFrom:
+        - secretRef:
+            name: {{ .Release.Name }}-app-store-conf
         volumeMounts:
         - mountPath: /var/lib/kuksa/appstore-h2-database
           name: appstore-h2-database
-        - mountPath: /etc/kuksa
-          name: conf
-          readOnly: true
         resources:
           requests:
             memory: "400Mi"
@@ -48,12 +51,8 @@ spec:
             memory: "1Gi"
         imagePullPolicy: Always
       imagePullSecrets:
-      - name: <DOCKER_REGISTRY_SECRET>
+      - name: docker-secret
       volumes:
       - name: appstore-h2-database
         persistentVolumeClaim:
           claimName: appstore-h2-database
-      - name: conf
-        secret:
-          secretName: kuksa-appstore-conf
-      

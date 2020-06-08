@@ -1,5 +1,5 @@
 ######################################################################
-# Copyright (c) 2019 Bosch Software Innovations GmbH [and others]
+# Copyright (c) 2019, 2020 Bosch.IO GmbH [and others]
 #
 # This program and the accompanying materials are made
 # available under the terms of the Eclipse Public License 2.0
@@ -11,15 +11,19 @@ apiVersion: v1
 kind: Service
 metadata:
   labels:
-    app: kuksa-appstore
-    version: "<VERSION>"
-  name: kuksa-appstore
+    app: {{.Release.Name}}-app-store
+    version: {{.Chart.AppVersion}}
+  name: {{.Release.Name}}-app-store
 spec:
   ports:
   - name: http
     port: 8080
     protocol: TCP
     targetPort: 8080
+  - name: redirect
+    port: 8089
+    protocol: TCP
+    targetPort: 8089
   selector:
-    app: kuksa-appstore
-  type: ClusterIP
+    app: {{.Release.Name}}-app-store
+  type: {{ .Values.appstore.service.type }}
