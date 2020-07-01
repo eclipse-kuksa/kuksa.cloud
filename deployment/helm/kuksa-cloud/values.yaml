@@ -36,7 +36,7 @@ connector:
 appstore:
   image: kuksa-appstore
   service:
-    type: LoadBalancer
+    type: ClusterIP
   credentials: 
     username: admin
     password: admin
@@ -66,9 +66,12 @@ components:
     enabled: true
   keycloak:
     enabled: true
+  ambassador:
+    enabled: true
 
 # configure the values from the Eclipse Hono Helm chart fetched from https://github.com/eclipse/packages/tree/master/charts/hono
 hono:
+  useLoadBalancer: false
   adapters:
     amqp:
       enabled: false
@@ -81,4 +84,23 @@ keycloak:
     username: keycloak
     password: admin
     service:
-      type: LoadBalancer
+      type: ClusterIP
+
+ambassador:
+  replicaCount: 2
+  enableAES: false
+  image:
+      repository: docker.io/datawire/ambassador
+  service:
+    ports: [{"name": "http","port": 80,"targetPort": 8080},{"name": "https","port": 443,"targetPort": 8443},{"name": "grafana","port": 3000,"targetPort": 3000}, {"name": "hawkbit","port": 38080,"targetPort": 38080}, {"name": "influxdb","port": 8086,"targetPort": 8086}, {"name": "keycloak","port": 48080,"targetPort": 48080}, {"name": "mqtt-adapter","port": 1883,"targetPort": 1883}, {"name": "http-adapter","port": 18080,"targetPort": 18080}, {"name": "app-store","port": 58080,"targetPort": 58080}, {"name": "dispatch-router","port": 5671,"targetPort": 15671}, {"name": "device-registry","port": 28080,"targetPort": 28080}]
+    http:
+      enabled: true
+      port: 80
+      targetPort: 80
+    https:
+      port: 8443
+      targetPort: 8443
+    loadBalancerIP: localhost
+    # The annotations are specific to the Cloud provider (see https://kubernetes.io/docs/concepts/services-networking/service/#loadbalancer ). The default annotation in this chart is suited for Azure to allow the assignment of an Azure managed IP-address to the LoadBalancer service of the Ambassador. One needs to replace "kuksa" with the actual name of the resource group of the IP-address assigned in 'loadBalancerIP' and allow the service principle for the AKS to access the IP-address. For more information see https://docs.microsoft.com/en-us/azure/aks/static-ip. 
+    annotations: 
+      service.beta.kubernetes.io/azure-load-balancer-resource-group: "kuksa"

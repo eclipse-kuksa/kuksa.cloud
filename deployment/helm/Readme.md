@@ -47,3 +47,30 @@ to get an overview of all available services. To change the service type of Keyc
 Notes:
 - All addresses (app store and Keycloak) need to be accessible from the user's machine which in most scnearios means that they should be reachable from the internet.
 - If the redirect after the login back to the app store fails with an error like `too many redirects`, the reason could be that the app store has a wrong secret configured. 
+
+# TLS with Cert Manager and Ambassador
+To enable users to access the Kuksa Cloud services with a single IP-address, the Cloud makes use of the [Ambassador](https://www.getambassador.io) project as API gateway. 
+The Ambassador allows the routing on the TCP layer. To signal which service one wants to call one can specify the port. The default configuration has the following port mappings. Note, that some of the ports are not a standard port because some of the services share the same default port. 
+
+
+| Service               | Port on Ambassador (external)  | Port on Pod (internal) |
+|-----------------------|-------|-------|
+| Grafana | 3000  | 3000 |
+| InfluxDB | 8086  | 8086 |
+| Hono Dispatch Router | 5671 | 15671 |
+| MQTT Adapter | 1883 | 1883 |
+| HTTP Adapter | 18080 | 18080 |
+| Hono Device Registry | 28080 | 28080 |
+| hawkBit | 38080 | 80 |
+| Keycloak | 48080 | 80 |
+| App Store | 58080 | 8080 |
+
+
+
+
+
+The decision which service is called, is signalled through the SNI field in the used certificates. 
+For the creation of these certificates the Kuksa Clouds relies on an instance of the [cert-manager](https://cert-manager.io). 
+
+The cert-manager requires so-called custom resource definitions (CRD) which are not installed as part of the Helm chart. To install the CRDs before installing the Helm chart one needs to run: `kubectl apply -f https://github.com/jetstack/cert-manager/releases/latest/download/cert-manager.crds.yaml`
+
