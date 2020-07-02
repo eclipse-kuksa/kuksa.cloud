@@ -1,16 +1,12 @@
 # Description
 
-With this part of kuksa.cloud project it is possible to deploy a Keycloak server to Azure cloud platform secured with a 
-valid Let's Encrypt certificate without any manual steps. Please keep in mind that there is no claim to use this deployment
-in a productive setup.
+With this part of kuksa.cloud project it is possible to deploy the required infrastructure for the Kuksa cloud to Azure. Please keep in mind that there is no claim to use this deployment
+in a productive setup. 
 
 ## Used Technologies  
 - Terraform
 - Azure
 - AKS
-- Helm
-- Let’s Encrypt
-- Keycloak
 
 # How-to use
 
@@ -34,21 +30,21 @@ Edit ```./terraform.tfvars``` according your Azure subscription.
 
 **configure Terraform backend**
 
-This deployment stores the state of in a storage in Azure. The storage is realized through a Terraform backend which needs to be configured in the main.tf. Nore information can be found under: https://www.terraform.io/docs/backends/types/azurerm.html.
+This deployment stores the state of in a storage in Azure. The storage is realized through a Terraform backend which needs to be configured in the `main.tf`. Nore information can be found under: https://www.terraform.io/docs/backends/types/azurerm.html. If you want to store the Terraform locally, you need to adapt the `main.tf`
 
 **deploy infrastructure**
+You may select to use Terraform workspace with: 
+```terraform workspace select <dev, stage or prod>
+```
+In either case, one then can proceed running:
 ```sh
-source ./prepare_environment.sh
-terraform workspace select <dev, stage or prod>
 terraform init -upgrade
 terraform plan
 terraform apply
 ```
 
-**open url (e.g. for Linux systems)**
-```sh
-xdg-open "$(terraform output KEYCLOAK_ENDPOINT)"
-```
+# Remark regarding Cloud provider support
+One requirment for the development of the Kuksa cloud is too enable operators to choose the Cloud environment that they want to use. Because of that we try to stick to a Kubernetes cluster as the main requirement for running the Kuksa cloud. For more details see the other directories in the `deployment` directory (especially the deployment in `helm`). However, the provisioning of the required resources and infrastructure remains very specific to the used Cloud provider. The intention of this Terraform deployment is therefore to support the creation of this infrastrucutre in Azure. If you are using another Cloud you need to manually create the required infrastructure and access rights (Kubernetes cluster, container registry and an optional public IP-address) or adapt this Terraform deployment accordingly. We are of course happy for contributions to support further Cloud providers.
 
 # FAQ
 
