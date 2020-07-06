@@ -35,3 +35,10 @@ deployment/exportStaticIpAddresses.inc
 
 # Kubernetes resources derived from Eclipse hawkBit helm chart
 deployment/eclipse-hawkbit/base/hawkbit/
+
+#MacOS file
+.DS_Store
+
+#Helm
+deployment/helm/kuksa-cloud/charts
+deployment/helm/kuksa-cloud/Chart.lock

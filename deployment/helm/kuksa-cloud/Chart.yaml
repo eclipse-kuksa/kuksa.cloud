@@ -45,4 +45,8 @@ dependencies:
       version: ~8.0.0
       repository: https://codecentric.github.io/helm-charts
       condition: components.keycloak.enabled
-
+    - name: ambassador
+      version: ~6.4.5
+      repository: https://www.getambassador.io
+      condition: components.ambassador.enabled
+   
