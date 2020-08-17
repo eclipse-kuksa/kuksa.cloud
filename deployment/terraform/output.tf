@@ -1,17 +1,9 @@
 /*
- * Keycloak
+ * Ingress IP
  */
-output "KEYCLOAK_ENDPOINT" {
-  value = "https://${azurerm_public_ip.ingress_ip.fqdn}/auth"
-  description = "Keycloak endpoint"
-}
-
-/*
- * Kubernetes
- */
-output "K8S_INGRESS_FQDN" {
-  value = "${azurerm_public_ip.ingress_ip.fqdn}"
-  description = "Kubernetes Ingress FQDN"
+output "K8S_INGRESS_IP" {
+  value = "${azurerm_public_ip.ingress_ip.ip_address}"
+  description = "Kubernetes Ingress IP"
 }
 
 /*
@@ -31,4 +23,20 @@ output "CR_ADMIN_PASSWORD" {
   value       = "${azurerm_container_registry.main.admin_password}"
   description = "Container Registry Admin Password"
   sensitive   = true
+}
+
+/*
+ * Resource Group
+ */
+output "RESOURCE_GROUP" {
+  value = azurerm_resource_group.main.name
+  description = "The name of the resource group where Terraform provisioned the resource to."
+}
+
+/*
+ * Kubernetes Cluster
+ */
+output "K8S_CLUSTER_NAME" {
+    value = azurerm_kubernetes_cluster.main.name
+    description = "The name of the created Kubernetes cluster. This might be needed to get the credentials with az aks get-credentials"
 }
