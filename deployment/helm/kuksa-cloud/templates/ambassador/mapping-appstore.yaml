@@ -14,5 +14,8 @@ metadata:
   name:  {{.Release.Name}}-app-store
 spec:
   port: 58080
+  {{if and .Values.certificates.sslForTcpMappings .Values.dns.enabled}}
+  host: {{.Values.dns.domain}}
+  {{end}}
   service: {{.Release.Name}}-app-store:8080
 {{end}}

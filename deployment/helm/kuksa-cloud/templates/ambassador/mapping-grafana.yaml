@@ -14,5 +14,8 @@ metadata:
   name:  {{.Release.Name}}-grafana
 spec:
   port: 3000
+  {{if and .Values.certificates.sslForTcpMappings .Values.dns.enabled}}
+  host: {{ .Values.dns.domain}}
+  {{end}}
   service: {{.Release.Name}}-grafana:3000
 {{end}}

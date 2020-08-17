@@ -7,15 +7,13 @@
 #
 # SPDX-License-Identifier: EPL-2.0
 ########################################################################
-{{ if .Values.components.ambassador.enabled }}
+{{ if and .Values.components.ambassador.enabled .Values.dns.enabled }}
 apiVersion: getambassador.io/v2
-kind:  TCPMapping
+kind:  Mapping
 metadata:
-  name:  {{.Release.Name}}-adapter-mqtt
+  name:  {{.Release.Name}}-http-http-adapter
 spec:
-  port: 1883
-  {{if and .Values.certificates.sslForTcpMappings .Values.dns.enabled}}
-  host: {{ .Values.dns.domain}}
-  {{end}}
-  service: {{.Release.Name}}-adapter-mqtt-vertx:1883
+  prefix: /
+  host: http-adapter.{{ .Values.dns.domain}}
+  service: {{.Release.Name}}-adapter-http-vertx:8080
 {{end}}

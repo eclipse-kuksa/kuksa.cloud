@@ -7,7 +7,7 @@
 #
 # SPDX-License-Identifier: EPL-2.0
 ########################################################################
-{{- if .Values.components.ambassador.enabled }}
+{{- if and .Values.components.ambassador.enabled .Values.keycloak.tcpMappingActive}}
 apiVersion: getambassador.io/v2
 kind:  TCPMapping
 metadata:

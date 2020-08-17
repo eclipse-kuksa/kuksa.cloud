@@ -13,7 +13,6 @@ name: kuksa-cloud
 description: A Helm chart for deploying the core parts of the Eclipse Kuksa cloud to a Kubernetes instance. The Eclipse Kuksa cloud consists of the following parts Eclipse Hono, Eclipse hawkBit, Keycloak, InfluxDb, Kuksa Hono-to-InfluxDb-Connector.
 
 home: https://eclipse.org/kuksa
-#sources: https://github.com/eclipse/kuksa.cloud
 keywords: 
     - IoT
     - Kuksa
@@ -49,4 +48,8 @@ dependencies:
       version: ~6.4.5
       repository: https://www.getambassador.io
       condition: components.ambassador.enabled
+#    - name: cert-manager
+#      version: ~0.15.2
+#      repository: https://charts.jetstack.io
+#      condition: components.cert-manager.enabled
    
