@@ -14,5 +14,8 @@ metadata:
   name:  {{.Release.Name}}-hawkbit
 spec:
   port: 38080
+  {{if and .Values.certificates.sslForTcpMappings .Values.dns.enabled}}
+  host: {{.Values.dns.domain}}
+  {{end}}
   service: {{.Release.Name}}-hawkbit:80
 {{end}}

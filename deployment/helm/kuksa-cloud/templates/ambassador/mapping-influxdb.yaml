@@ -14,5 +14,8 @@ metadata:
   name:  {{.Release.Name}}-influxdb
 spec:
   port: 8086
+  {{if and .Values.certificates.sslForTcpMappings .Values.dns.enabled}}
+  host: {{.Values.dns.domain}}
+  {{end}}
   service: {{.Release.Name}}-influxdb:8086
   {{end}}

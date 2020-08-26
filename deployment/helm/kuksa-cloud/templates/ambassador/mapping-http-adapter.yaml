@@ -14,5 +14,8 @@ metadata:
   name:  {{.Release.Name}}-http-adapter
 spec:
   port: 18080
+  {{if and .Values.certificates.sslForTcpMappings .Values.dns.enabled}}
+  host: {{.Values.dns.domain}}
+  {{end}}
   service: {{.Release.Name}}-adapter-http-vertx:8080
 {{end}}

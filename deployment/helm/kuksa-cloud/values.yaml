@@ -13,6 +13,11 @@ imageCredentials:
   username: 
   password: 
 
+# sets the domain for the hosts used for the API gateway (Ambassador)
+dns:
+  domain: example.org
+  enabled: false
+
 # configure the Hono-InfluxDB-Connector
 connector:
   # The name of the container image for the connector. Note that the address of the container registry under imageCredentials.registry is added as prefix and that the image should be tagged with the App version of this chart.
@@ -68,6 +73,8 @@ components:
     enabled: true
   ambassador:
     enabled: true
+  certmanager:
+    enabled: false
 
 # configure the values from the Eclipse Hono Helm chart fetched from https://github.com/eclipse/packages/tree/master/charts/hono
 hono:
@@ -80,6 +87,7 @@ hono:
 
 # configure the values from the Keycloak chart fetched from https://github.com/codecentric/helm-charts/tree/master/charts/keycloak
 keycloak:
+  tcpMappingActive: true
   keycloak:
     username: keycloak
     password: admin
@@ -103,4 +111,18 @@ ambassador:
     loadBalancerIP: localhost
     # The annotations are specific to the Cloud provider (see https://kubernetes.io/docs/concepts/services-networking/service/#loadbalancer ). The default annotation in this chart is suited for Azure to allow the assignment of an Azure managed IP-address to the LoadBalancer service of the Ambassador. One needs to replace "kuksa" with the actual name of the resource group of the IP-address assigned in 'loadBalancerIP' and allow the service principle for the AKS to access the IP-address. For more information see https://docs.microsoft.com/en-us/azure/aks/static-ip. 
     annotations: 
-      service.beta.kubernetes.io/azure-load-balancer-resource-group: "kuksa"
+      service.beta.kubernetes.io/azure-load-balancer-resource-group: "azure-resource-group"
+
+    cert-manager:
+      installCRDs: true
+
+    #The cert manager is used to request certificates from Let's encrypt using ACME with a DNS-01 challeng. For more information visit https://cert-manager.io/docs/configuration/acme/dns01/ or consult the Readme file. For this Chart we assume that the Kuksa Cloud is hosted in an Azure environment. An introduction of the required information for the ACME challenge in Azure and how to obtain those values is available under: https://cert-manager.io/docs/configuration/acme/dns01/azuredns/. If you are using another environment for managing your DNS entries, you need to adapt the respective issuer in templates/cert-manager.
+    certificates:
+      productionCertificate: false
+      sslForTcpMappings: false
+      sslForHttpMappings: false
+      azureSubscriptionId: 
+      azureTenantId: 
+      azureResourceGroup: 
+      azureSpId: 
+      azureSpPassword: 

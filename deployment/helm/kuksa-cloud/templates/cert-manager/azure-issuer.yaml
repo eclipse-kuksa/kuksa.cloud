@@ -1,0 +1,39 @@
+######################################################################
+# Copyright (c) 2020 Bosch.IO GmbH [and others]
+#
+# This program and the accompanying materials are made
+# available under the terms of the Eclipse Public License 2.0
+# which is available at https://www.eclipse.org/legal/epl-2.0/
+#
+# SPDX-License-Identifier: EPL-2.0
+########################################################################
+{{if and .Values.components.certmanager.enabled .Values.components.ambassador.enabled .Values.dns.enabled }}
+{{if or .Values.certificates.sslForTcpMappings .Values.certificates.sslForHttpMappings}}
+apiVersion: cert-manager.io/v1alpha2
+kind: Issuer
+metadata:
+  name: {{ .Release.Name }}-issuer
+spec:
+  acme:
+    email: {{ .Values.certificates.email }}
+    {{ if .Values.certificates.productionCertificate}}
+    server: https://acme-v02.api.letsencrypt.org/directory
+    {{ else }}
+    server: https://acme-staging-v02.api.letsencrypt.org/directory
+    {{ end }}
+    privateKeySecretRef:
+        name: issuer-key
+    solvers:
+    - dns01:
+        azuredns:
+          clientID: {{ .Values.certificates.azureSpId }}
+          clientSecretSecretRef:
+            name: {{ .Release.Name}}-dns-zone-service-principal-secret
+            key: sp_pw
+          subscriptionID: {{ .Values.certificates.azureSubscriptionId }}
+          tenantID: {{ .Values.certificates.azureTenantId }}
+          resourceGroupName: {{ .Values.certificates.azureResourceGroup }}
+          hostedZoneName: {{ .Values.dns.domain}}
+          environment: AzurePublicCloud
+{{end}}
+{{end}}

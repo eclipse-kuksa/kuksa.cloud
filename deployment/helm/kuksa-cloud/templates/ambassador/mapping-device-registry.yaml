@@ -14,5 +14,8 @@ metadata:
   name:  {{ .Release.Name }}-device-registry
 spec:
   port: 28080
-  service: {{.Release.Name}}-device-registry-ext:28080
+  {{if and .Values.certificates.sslForTcpMappings .Values.dns.enabled}}
+  host: {{ .Values.dns.domain}}
+  {{end}}
+  service: {{.Release.Name}}-service-device-registry-ext:28080
 {{end}}

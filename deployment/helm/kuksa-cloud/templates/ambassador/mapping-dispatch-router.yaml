@@ -14,5 +14,8 @@ metadata:
   name:  {{.Release.Name}}-dispatch-router
 spec:
   port: 5671
+  {{if and .Values.dns.sslForTcpMappings .Values.dns.enabled}}
+  host: {{.Values.certificates.domain}}
+  {{end}}
   service: {{.Release.Name}}-dispatch-router-ext:15671
 {{end}}

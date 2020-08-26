@@ -1,0 +1,30 @@
+######################################################################
+# Copyright (c) 2020 Bosch.IO GmbH [and others]
+#
+# This program and the accompanying materials are made
+# available under the terms of the Eclipse Public License 2.0
+# which is available at https://www.eclipse.org/legal/epl-2.0/
+#
+# SPDX-License-Identifier: EPL-2.0
+########################################################################
+{{if and .Values.components.certmanager.enabled .Values.components.ambassador.enabled .Values.dns.enabled}}
+{{if or .Values.certificates.sslForTcpMappings .Values.certificates.sslForHttpMappings}}
+apiVersion: cert-manager.io/v1alpha2
+kind: Certificate
+metadata:
+  name: {{ .Release.Name}}-tcp-certificate
+spec:
+  secretName: {{ .Release.Name}}-tcp-certificate
+  issuerRef:
+    name: {{ .Release.Name }}-issuer
+    kind: Issuer
+  dnsNames:
+  - {{ .Values.dns.domain }}
+  - app-store.{{.Values.dns.domain}}
+  - device-registry.{{.Values.dns.domain}}
+  - grafana.{{.Values.dns.domain}}
+  - hawkbit.{{.Values.dns.domain}}
+  - http-adapter.{{.Values.dns.domain}}
+  - keycloak.{{.Values.dns.domain}}
+{{end}}
+{{end}}
