@@ -31,7 +31,7 @@ These services are required to make the other services work
   
 ### Services
 
-  1. [Eclipse Hono](eclipse-hono/README.md) enables the deployment of a messaging infrastructure
+  1. Eclipse Hono adds a messaging infrastructure to accept incoming messages over a number of protocols like MQTT or HTTP. 
   1. [Eclipse hawkBit](eclipse-hawkbit/README.md) enables the deployment of the corresponding software update
      components, in particular the update server
   1. [Kuksa Appstore](../kuksa-appstore/README.md) has to be
