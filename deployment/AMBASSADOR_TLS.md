@@ -1,36 +1,26 @@
-# Kubernetes-specific functionality
+<!--
+******************************************************************************
+Copyright (c) 2021 Bosch.IO GmbH.
+All rights reserved. This program and the accompanying materials
+are made available under the terms of the Eclipse Public License v2.0
+which accompanies this distribution, and is available at
+https://www.eclipse.org/org/documents/epl-2.0/index.php
+***************************************************************************** 
+-->
+# Ambassador and TLS
 
-## Deploy the Gateway service
 
-* Script:
-  * `deploy_ambassador.sh`
-* Purpose:
-  * Install and configure the [Ambassador gateway service](https://getambassador.io/) to perform TLS termination
-* Options:
-  * `CLUSTER_NAME`: Name of the AKS cluster - it is used to create domain names that 
-    contain the name of the cluster.
-  * `DNS_ZONE_NAME`: The name of the DNS zone to use for the dns01 challenge and for 
-    hosting the services. The name of the DNS zone is a domain name that is appended 
-    to the domain names used to configure Ambassador.
-  * `GATEWAY_IP_ADDRESS`: The static IP address to be used by the Ambassador gateway.
-* Stages:
-  * Customize Ambassador service configuration
-  * Install/update Ambassador (with a default service configuration)
-  * Install custom Ambassador service configuration
-* Troubleshooting:
-  * You can delete the ambassador release using `helm del --purge ambassador`.
-  * See also troubleshooting TLS termination below.
-
-## Troubleshooting TLS termination
-
-We use a set-up with the following components
+Among other options, you could use a setup with the following components
 * unencrypted services
 * a gateway that offers TLS-encrypted ports for the unencrypted services (TLS termination)
 * clients that accesses the TLS ports offered by the gateway 
 
+The current default configuration for the Eclipse Kuksa.Cloud (e.g., from the Helm chart) is to use an instance of Ambassador to do TLS termination.
+
+## Troubleshooting TLS termination
 If a client is not able to connect to the service via the gateway,
 it makes sense to analyze the issues from service to gateway to
-client to be able to be able to isolate the cause of the connection
+client to be able to isolate the cause of the connection
 error.
 
 1. Make sure the unencrypted service is serving requests.
@@ -42,7 +32,7 @@ error.
 1. Make sure the gateway serves TLS requests.
    When the unencrypted service is actually offered, the gateway might be
    misconfigured.
-   1. The ambassador pods (in the default namespace) output useful information when the 
+   1. The Ambassador pods (in the default namespace) output useful information when the 
       service configuration is updated.
    1. There is an [ambassador diagnostics service](https://www.getambassador.io/user-guide/getting-started#6-the-diagnostics-service-in-kubernetes)
       that provides further information when there is a misconfiguration.
