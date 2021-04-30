@@ -32,8 +32,7 @@ These services are required to make the other services work
 ### Services
 
   1. [Eclipse Hono](eclipse-hono/README.md) enables the deployment of a messaging infrastructure
-  1. [Eclipse hawkBit](eclipse-hawkbit/README.md) enables the deployment of the corresponding software update
-     components, in particular the update server
+  1. Eclipse hawkBit enables the deployment of the corresponding software update components. Within Eclipse Kuksa it acts as enabler for the Apptore.
   1. [Kuksa Appstore](../kuksa-appstore/README.md) has to be
      [built](eclipse-kuksa/utils/README.md#build-eclipse-kuksa-appstore) before is can be
      [deployed](eclipse-kuksa/utils/README.md#deploy-eclipse-kuksa-appstore)
