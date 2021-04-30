@@ -1,7 +1,15 @@
+<!--
+******************************************************************************
+Copyright (c) 2021 Bosch.IO GmbH [and others].
+All rights reserved. This program and the accompanying materials
+are made available under the terms of the Eclipse Public License v2.0
+which accompanies this distribution, and is available at
+https://www.eclipse.org/org/documents/epl-2.0/index.php
+***************************************************************************** 
+-->
 # Description
 
-With this part of kuksa.cloud project it is possible to deploy the required infrastructure for the Kuksa cloud to Azure. Please keep in mind that there is no claim to use this deployment
-in a productive setup. 
+With this part of the Eclipse Kuksa.Cloud project it is possible to deploy the required infrastructure for the Kuksa.Cloud to Azure. Please keep in mind that there is no claim to use this deployment in a productive setup. 
 
 ## Used Technologies  
 - Terraform
