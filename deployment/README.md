@@ -26,9 +26,6 @@ These services are required to make the other services work
 
   1. [Azure](azure/README.md) for Azure-specific configuration that provides the basis of Kubernetes. It includes
      cert-manager that obtains TLS certificates.
-  1. [Kubernetes](kubernetes/README.md) provides functions for the Kubernetes deployment of the Kuksa cloud. It also
-     covers the Ambassador gateway service that performs uniform TLS termination for all services.
-  
 ### Services
 
   1. [Eclipse Hono](eclipse-hono/README.md) enables the deployment of a messaging infrastructure
