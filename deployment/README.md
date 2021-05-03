@@ -26,9 +26,6 @@ These services are required to make the other services work
 
   1. [Azure](azure/README.md) for Azure-specific configuration that provides the basis of Kubernetes. It includes
      cert-manager that obtains TLS certificates.
-  1. [Kubernetes](kubernetes/README.md) provides functions for the Kubernetes deployment of the Kuksa cloud. It also
-     covers the Ambassador gateway service that performs uniform TLS termination for all services.
-  
 ### Services
 
   1. Eclipse Hono adds a messaging infrastructure to accept incoming messages over a number of protocols like MQTT or HTTP. 
@@ -40,4 +37,4 @@ These services are required to make the other services work
   1. [Hono-Influxdb-Connector](../utils/hono-influxdb-connector/README.md) sends Hono telemetry data and events to
      InfluxDB.
   1. [MIL example](../examples/malfunction-indicator-light/README.md) an exemplary malfunction-indicator-light use case
-  1. [Traccar](eclipse-kuksa/README.md#deploy-traccar-server) deploys a service for tracking cars
+
