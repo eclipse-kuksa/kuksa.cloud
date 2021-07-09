@@ -68,6 +68,6 @@ class HonoInfluxConnector implements ApplicationRunner {
     @Override
     public void run(final ApplicationArguments applicationArguments) {
         // start with the initial connect to Hono
-        connections.stream().forEach(HonoInfluxConnection::connectToHono);
+        connections.stream().forEach(HonoInfluxConnection::consumeData);
     }
 }

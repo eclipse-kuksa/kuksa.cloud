@@ -1,5 +1,5 @@
 /*********************************************************************
- * Copyright (c) 2019 Bosch Software Innovations GmbH [and others]
+ * Copyright (c) 2021 Bosch.IO GmbH [and others]
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -22,7 +22,7 @@ version = '0.2.0'
 mainClassName = 'org.eclipse.kuksa.honoConnector.HonoInfluxConnectorApplication'
 
 dependencies {
-    compile 'org.eclipse.hono:hono-client:1.2.2'
+    compile 'org.eclipse.hono:hono-client-application-amqp:1.8.0'
     compile 'org.springframework.boot:spring-boot-starter:2.1.3.RELEASE'
     compile 'org.influxdb:influxdb-java:2.14'
     testCompile 'junit:junit:4.12'

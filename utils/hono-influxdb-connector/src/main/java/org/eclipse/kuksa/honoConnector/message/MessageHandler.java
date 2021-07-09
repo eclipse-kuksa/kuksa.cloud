@@ -24,7 +24,22 @@ public interface MessageHandler {
      *
      * @param msg message dto to process
      */
+    @Deprecated
     void process(final MessageDTO msg);
+
+    /**
+     * Processes the incoming telemetry message dto received from Hono.
+     *
+     * @param msg message dto to process
+     */
+    void processTelemetry(final MessageDTO msg);
+
+    /**
+     * Processes the incoming event message dto received from Hono.
+     * @param msg
+     */
+    void processEvent(final MessageDTO msg);
+
 
     /**
      * Closes the message handler. Needs to be called before exit.
