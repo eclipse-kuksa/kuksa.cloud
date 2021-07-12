@@ -18,10 +18,13 @@ kind: Pod
 spec:
   containers:
   - name: gradle
-    image: gradle:jdk8
+    image: gradle:6.9-jdk11
     command:
     - cat
     tty: true
+    env:
+    - name: "GRADLE_USER_HOME"
+      value: "/home/jenkins/.gradle"
     resources:
       requests:
         memory: "2Gi"
@@ -29,6 +32,13 @@ spec:
       limits:
         memory: "2Gi"
         cpu: "1"
+    volumeMounts:
+    - mountPath: "/home/jenkins"
+      name: "jenkins-home"
+      readOnly: false
+  volumes:
+  - name: "jenkins-home"
+    emptyDir: {}
 """
     }
   }
