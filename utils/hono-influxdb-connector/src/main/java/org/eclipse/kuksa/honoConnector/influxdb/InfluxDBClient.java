@@ -1,6 +1,6 @@
 /*
  * ******************************************************************************
- * Copyright (c) 2017 Bosch Software Innovations GmbH.
+ * Copyright (c) 2021 Bosch.IO GmbH [and others]
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
@@ -10,6 +10,7 @@
  *  Contributors:
  *      Johannes Kristan (Bosch Software Innovations GmbH) - initial API and functionality
  *      Leon Graser (Bosch Software Innovations GmbH)
+ *      others
  * *****************************************************************************
  */
 
@@ -17,6 +18,7 @@ package org.eclipse.kuksa.honoConnector.influxdb;
 
 import org.eclipse.kuksa.honoConnector.message.MessageDTO;
 import org.eclipse.kuksa.honoConnector.message.MessageHandler;
+import org.eclipse.kuksa.honoConnector.message.MessageTypes;
 import org.influxdb.InfluxDB;
 import org.influxdb.InfluxDBException;
 import org.influxdb.InfluxDBFactory;
@@ -106,7 +108,22 @@ public class InfluxDBClient implements MessageHandler {
      * @param msg message dto to process
      */
     @Override
+    @Deprecated
     public void process(final MessageDTO msg) {
+        process(msg, MessageTypes.MISCELLANEOUS);
+    }
+
+    @Override
+    public void processTelemetry(MessageDTO msg) {
+        process(msg, MessageTypes.TELEMETRY);
+    }
+
+    @Override
+    public void processEvent(MessageDTO msg) {
+        process(msg, MessageTypes.EVENT);
+    }
+
+    private void process(final MessageDTO msg, MessageTypes messageType) {
         // check for empty messages and just drop them
         if (msg == null) {
             return;
@@ -127,8 +144,15 @@ public class InfluxDBClient implements MessageHandler {
             LOGGER.debug("Generated timestamp: {} for message with sender: {}", timestamp, msg.getDeviceID());
         }
 
-        final Point point = createPoint(timestamp, msg.getDeviceID(), entries);
-		writePoint(point);
+        String measurement = msg.getDeviceID();
+        if (messageType.equals(MessageTypes.TELEMETRY)) {
+            measurement += "_telemetry";
+        } else if (messageType.equals(MessageTypes.EVENT)) {
+            measurement += "_event";
+        }
+
+        final Point point = createPoint(timestamp, measurement, entries);
+        writePoint(point);
     }
 
     public static Point createPoint(long timestampMs, final String deviceID, final Map<String, Object> entries) {

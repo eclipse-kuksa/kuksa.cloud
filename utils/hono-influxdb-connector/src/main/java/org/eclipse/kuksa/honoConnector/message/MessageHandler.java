@@ -1,6 +1,6 @@
 /*
  * ******************************************************************************
- * Copyright (c) 2017 Bosch Software Innovations GmbH.
+ * Copyright (c) 2021 Bosch.IO GmbH [and others]
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v2.0
@@ -9,6 +9,7 @@
  *
  *  Contributors:
  *      Johannes Kristan (Bosch Software Innovations GmbH) - initial API and functionality
+ *      others
  * ******************************************************************************
  */
 
@@ -24,7 +25,22 @@ public interface MessageHandler {
      *
      * @param msg message dto to process
      */
+    @Deprecated
     void process(final MessageDTO msg);
+
+    /**
+     * Processes the incoming telemetry message dto received from Hono.
+     *
+     * @param msg message dto to process
+     */
+    void processTelemetry(final MessageDTO msg);
+
+    /**
+     * Processes the incoming event message dto received from Hono.
+     * @param msg
+     */
+    void processEvent(final MessageDTO msg);
+
 
     /**
      * Closes the message handler. Needs to be called before exit.
