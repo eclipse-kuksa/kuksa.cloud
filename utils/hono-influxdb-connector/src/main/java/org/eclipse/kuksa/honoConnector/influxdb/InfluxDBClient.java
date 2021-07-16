@@ -131,24 +131,33 @@ public class InfluxDBClient implements MessageHandler {
 		writePoint(point);
     }
 
-	public static Point createPoint(long timestampMs, final String deviceID, final Map<String, Object> entries) {
-		final Point.Builder pointBuilder = Point.measurement(deviceID)
+    public static Point createPoint(long timestampMs, final String deviceID, final Map<String, Object> entries) {
+        final Point.Builder pointBuilder = Point.measurement(deviceID)
                 .time(timestampMs, TimeUnit.MILLISECONDS);
-		entries.forEach(addFields(pointBuilder));
+        entries.forEach(addFields(pointBuilder));
         return pointBuilder.build();
-	}
+    }
 
-	private static BiConsumer<String, Object> addFields(final Point.Builder pointBuilder) {
-		return (key, value) -> {
-			if(value instanceof Boolean) {
-				pointBuilder.addField(key, (Boolean)value);
-			} else if(value instanceof Number) {
-				pointBuilder.addField(key, ((Number)value).doubleValue());
-			} else {
-				pointBuilder.addField(key, value.toString());
-			}
-		};
-	}
+    private static BiConsumer<String, Object> addFields(final Point.Builder pointBuilder) {
+        return (key, value) -> {
+            if(value instanceof Boolean) {
+                pointBuilder.addField(key, (Boolean)value);
+            } else if(value instanceof Number) {
+                pointBuilder.addField(key, ((Number) value).doubleValue());
+            } else if(value instanceof Map) {
+                ((Map) value).forEach(addFields(key, pointBuilder));
+            } else {
+                pointBuilder.addField(key, value.toString());
+            }
+        };
+    }
+
+    private static BiConsumer<String, Object> addFields(final String parentKey, final Point.Builder pointBuilder) {
+        return (key, value) -> {
+            String combinedKey = parentKey + "." + key;
+            addFields(pointBuilder).accept(combinedKey, value);
+        };
+    }
 
     /**
      * Writes a single measurement point to the influxDB.
