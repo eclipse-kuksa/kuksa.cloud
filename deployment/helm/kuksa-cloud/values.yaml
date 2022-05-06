@@ -117,12 +117,12 @@ ambassador:
       installCRDs: true
 
     #The cert manager is used to request certificates from Let's encrypt using ACME with a DNS-01 challeng. For more information visit https://cert-manager.io/docs/configuration/acme/dns01/ or consult the Readme file. For this Chart we assume that the Kuksa Cloud is hosted in an Azure environment. An introduction of the required information for the ACME challenge in Azure and how to obtain those values is available under: https://cert-manager.io/docs/configuration/acme/dns01/azuredns/. If you are using another environment for managing your DNS entries, you need to adapt the respective issuer in templates/cert-manager.
-    certificates:
-      productionCertificate: false
-      sslForTcpMappings: false
-      sslForHttpMappings: false
-      azureSubscriptionId: 
-      azureTenantId: 
-      azureResourceGroup: 
-      azureSpId: 
-      azureSpPassword: 
+certificates:
+  productionCertificate: false
+  sslForTcpMappings: false
+  sslForHttpMappings: false
+  azureSubscriptionId: 
+  azureTenantId: 
+  azureResourceGroup: 
+  azureSpId: 
+  azureSpPassword: 
