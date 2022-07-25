@@ -23,6 +23,9 @@ Contributors:
 * [AppStore](kuksa-appstore/README.md): A Spring-Boot application that connects a running Eclipse HawkBit instance and provides a GUI to manage vehicle (and eventually cloud) applications
 * [Deployment](deployment/README.md) instructions and scripts to setup the overall cloud architecture
 
+
+## Docker file update using MultiStage dockers concept
+
 More information on deployment / usage is given in each modules' subdirectories.
 
 ## License
