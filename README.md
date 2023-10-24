@@ -12,6 +12,9 @@ Contributors:
 *****************************************************************************
 -->
 
+# THIS REPOSITORY HAS BEEN ARCHIVED, see [issue 187](https://github.com/eclipse/kuksa.cloud/issues/187) for details.
+
+
 # Eclipse Kuksa-Cloud
 [![Eclipse Public License 2.0](https://img.shields.io/badge/license-EPL--2.0-green.svg "Eclipse Public License 2.0")](LICENSE)
 
